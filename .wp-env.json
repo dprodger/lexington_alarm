@@ -1,0 +1,45 @@
+{
+	"$schema": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/schemas/json/wp-env.json",
+
+	"core": null,
+	"phpVersion": "8.1",
+
+	"plugins": [
+		"./code/wp-content/plugins/la-custom",
+		"https://downloads.wordpress.org/plugin/woocommerce.zip",
+		"https://downloads.wordpress.org/plugin/mailchimp-for-wp.zip",
+		"https://downloads.wordpress.org/plugin/wpforms-lite.zip",
+		"https://downloads.wordpress.org/plugin/updraftplus.zip",
+		"https://downloads.wordpress.org/plugin/relevanssi.zip",
+		"https://downloads.wordpress.org/plugin/kadence-blocks.zip"
+	],
+
+	"themes": [
+		"./code/wp-content/themes/kadence-child",
+		"https://downloads.wordpress.org/theme/kadence.zip"
+	],
+
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": false,
+		"SCRIPT_DEBUG": true,
+		"WP_ENVIRONMENT_TYPE": "local",
+		"WP_DISABLE_FATAL_ERROR_HANDLER": true
+	},
+
+	"mappings": {
+		"wp-content/plugins/la-custom": "./code/wp-content/plugins/la-custom",
+		"wp-content/themes/kadence-child": "./code/wp-content/themes/kadence-child"
+	},
+
+	"env": {
+		"development": {
+			"port": 8888,
+			"testsPort": 8889
+		},
+		"tests": {
+			"port": 8889
+		}
+	}
+}

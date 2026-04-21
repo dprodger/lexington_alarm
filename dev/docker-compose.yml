@@ -1,0 +1,83 @@
+# ============================================================================
+# Docker Compose — alternative to wp-env
+# ============================================================================
+#
+# Use wp-env if possible (see ../DEV_SETUP.md). Use this instead if:
+#   - You prefer raw Docker Compose over Node-based wp-env tooling
+#   - You need fine-grained control over PHP/MySQL versions
+#   - You're not on a Node-friendly machine
+#
+# Start:  cd dev && docker compose up -d
+# Stop:   cd dev && docker compose down
+# Reset:  cd dev && docker compose down -v   (WARNING: deletes DB)
+#
+# Once running, WordPress setup wizard is at http://localhost:8888
+# PHPMyAdmin is at http://localhost:8081
+#
+# After WordPress setup:
+#   1. Install the Kadence parent theme (manual — premium license)
+#   2. Activate child theme "Lexington Alarm Kadence Child"
+#   3. Install premium plugins manually (WPCode Premium, WPForms Pro, etc.)
+#   4. Import UpdraftPlus backup via WP Admin → UpdraftPlus → Restore
+# ============================================================================
+
+services:
+  wordpress:
+    image: wordpress:latest
+    container_name: la_wordpress
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        define('SCRIPT_DEBUG', true);
+    volumes:
+      # Map your custom code into wp-content
+      - ../code/wp-content/plugins/la-custom:/var/www/html/wp-content/plugins/la-custom
+      - ../code/wp-content/themes/kadence-child:/var/www/html/wp-content/themes/kadence-child
+      # Persist the rest of wp-content (uploads, third-party plugins) across restarts
+      - la_wp_content:/var/www/html/wp-content
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: la_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: wordpress_root
+    volumes:
+      - la_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pwordpress_root"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: la_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: wordpress
+      PMA_PASSWORD: wordpress
+    depends_on:
+      - db
+
+volumes:
+  la_mysql_data:
+  la_wp_content:

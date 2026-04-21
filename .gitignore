@@ -52,6 +52,11 @@ vendor/
 bower_components/
 .local/
 
+# --- wp-env artifacts ---
+.wp-env.override.json
+wp-env-home/
+.npm/
+
 # --- Build output ---
 dist/
 build/
