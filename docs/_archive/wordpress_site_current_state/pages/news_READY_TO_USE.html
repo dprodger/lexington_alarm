@@ -1,0 +1,84 @@
+<!-- wp:html -->
+<div class="news-page-wrapper">
+    
+    <!-- FEATURED STORY -->
+    <div class="featured-story-section">
+        <h2 class="section-title">FEATURED STORY</h2>
+        [featured_story]
+    </div>
+    
+    <!-- SUBSCRIBE BANNER WITH MAILCHIMP FORM -->
+    <div class="subscribe-banner" style="background: linear-gradient(135deg, #044f9d 0%, #0367c7 100%); 
+         color: white; padding: 50px 30px; text-align: center; margin: 40px 0; 
+         border: 4px solid #c3202e; position: relative; overflow: hidden;">
+        
+        <!-- Decorative corners -->
+        <div style="position: absolute; top: 0; left: 0; width: 60px; height: 60px; 
+             border-top: 3px solid white; border-left: 3px solid white;"></div>
+        <div style="position: absolute; top: 0; right: 0; width: 60px; height: 60px; 
+             border-top: 3px solid white; border-right: 3px solid white;"></div>
+        <div style="position: absolute; bottom: 0; left: 0; width: 60px; height: 60px; 
+             border-bottom: 3px solid white; border-left: 3px solid white;"></div>
+        <div style="position: absolute; bottom: 0; right: 0; width: 60px; height: 60px; 
+             border-bottom: 3px solid white; border-right: 3px solid white;"></div>
+        
+        <div style="position: relative; z-index: 1; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: white; font-family: 'ArmaliteRifle', sans-serif; 
+                 font-size: 2.5em; text-transform: uppercase; margin-bottom: 15px; 
+                 text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                STAY INFORMED
+            </h2>
+            
+            <p style="font-size: 1.2em; margin-bottom: 30px; line-height: 1.6;">
+                Get updates on events, actions, and ways to defend democracy
+            </p>
+            
+            <!-- MAILCHIMP FORM - Replace with your form ID -->
+            <div class="mailchimp-form-wrapper" style="background: white; padding: 30px; 
+                 border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                
+                [mc4wp_form id="REPLACE_WITH_YOUR_FORM_ID"]
+                
+            </div>
+            
+            <p style="font-size: 0.85em; margin-top: 20px; opacity: 0.9;">
+                📧 Twice a month • Unsubscribe anytime • We never share your info
+            </p>
+        </div>
+    </div>
+    
+    <!-- RECENT POSTS -->
+    <div class="blog-posts-section">
+        <h2 class="section-title" style="color: #044f9d;">RECENT NEWS</h2>
+        [blog_posts_grid]
+    </div>
+    
+    <!-- NEWSLETTER ARCHIVE -->
+    <div class="newsletter-archive-section">
+        <h2 class="section-title">NEWSLETTER ARCHIVE</h2>
+        [newsletter_archive]
+    </div>
+    
+</div>
+
+<style>
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .subscribe-banner {
+        padding: 30px 15px !important;
+    }
+    
+    .subscribe-banner h2 {
+        font-size: 1.8em !important;
+    }
+    
+    .subscribe-banner p {
+        font-size: 1em !important;
+    }
+    
+    .mailchimp-form-wrapper {
+        padding: 20px 15px !important;
+    }
+}
+</style>
+<!-- /wp:html -->

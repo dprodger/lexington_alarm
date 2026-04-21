@@ -1,0 +1,1098 @@
+/* =====================================================
+   LEXINGTON ALARM - WORDPRESS THEME STYLES
+   Version: 1.0
+   Description: Complete stylesheet for WordPress/Kadence theme
+   Colors: Blue #034F9E, Red #C12036, White #FFFFFF
+   ===================================================== */
+
+/* ====================
+   Custom Properties / Variables
+   ==================== */
+:root {
+  /* Primary Colors - from original site */
+  --la-blue: #044f9d;  /* CORRECTED: Updated to exact SVG blue */
+  --la-blue-dark: #033c7a;
+  --la-blue-light: #0561b8;
+  --la-red: #c3202e;  /* CORRECTED: Updated to exact SVG red */
+  --la-white: #FFFFFF;
+  --la-black: #000000;
+  
+  /* Typography */
+  --la-font-display: 'ArmaliteRifle', 'Impact', sans-serif;
+  --la-font-body: 'UglyQua', 'Georgia', serif;
+  --la-font-body-italic: 'UglyQuaItalic', 'Georgia', serif;
+  --la-font-fallback: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Spacing */
+  --la-spacing-xs: 0.25rem;
+  --la-spacing-sm: 0.5rem;
+  --la-spacing-md: 1rem;
+  --la-spacing-lg: 1.5rem;
+  --la-spacing-xl: 2rem;
+  --la-spacing-xxl: 3rem;
+  
+  /* Borders */
+  --la-border-width: 2px;
+  --la-border-width-thick: 4px;
+  --la-border-width-extra: 6px;
+  --la-border-radius: 5px;
+  --la-border-radius-lg: 10px;
+  
+  /* Responsive Breakpoints */
+  --la-breakpoint-mobile: 768px;
+  --la-breakpoint-tablet: 1024px;
+  --la-breakpoint-desktop: 1200px;
+}
+
+/* ====================
+   Custom Font Definitions
+   ==================== */
+@font-face {
+  font-family: 'ArmaliteRifle';
+  src: url('/website_97a098b6/wp-content/themes/kadence/fonts/armalite_rifle.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UglyQua';
+  src: url('/website_97a098b6/wp-content/themes/kadence/fonts/UglyQua.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UglyQuaItalic';
+  src: url('/website_97a098b6/wp-content/themes/kadence/fonts/UglyQuaItalic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ====================
+   WordPress/Kadence Overrides
+   ==================== */
+body,
+.wp-site-blocks,
+p,
+.entry-content,
+.post-content,
+article {
+  font-family: 'Work Sans', sans-serif !important;  /* CORRECTED: Direct font specification */
+  color: var(--la-black);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+/* Use UglyQua for specific elements */
+.la-font-classic,
+h4, h5, h6,
+.wp-block-button__link,
+.kt-button,
+.la-button,
+button,
+input[type="submit"],
+blockquote,
+.testimonial,
+.pullquote,
+.menu-item a,
+.kt-menu-item-link {
+  font-family: var(--la-font-body) !important;
+}
+
+/* Keep italic version for emphasis */
+em, i {
+  font-family: 'Work Sans', sans-serif;
+  font-style: italic;
+}
+
+/* For when you specifically want UglyQua body text */
+.la-ugly-qua {
+  font-family: var(--la-font-body) !important;
+}
+
+/* Override Kadence header styles - REMOVED - handled below */
+
+/* ====================
+   Typography Styles
+   ==================== */
+h1, h2, h3, h4, h5, h6,
+.wp-block-heading,
+.kt-blocks-info-box-title {
+  font-family: var(--la-font-display) !important;
+  color: var(--la-red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+h1, .h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+h2, .h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+h3, .h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h4, .h4 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
+
+em, i {
+  font-family: var(--la-font-body-italic);
+}
+
+/* ====================
+   Header & Banner Styles
+   ==================== */
+/* Full-width header with exact SVG blue */
+#masthead,
+.site-header-wrap {
+    background-color: #044f9d !important;
+    width: 100vw !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;  /* ADDED: Prevent horizontal scroll */
+}
+
+/* Main header area - solid blue matching SVG */
+.site-main-header-wrap {
+    background: #044f9d !important;
+    border-bottom: 6px solid #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Red stripe accent */
+.site-main-header-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #c3202e;
+}
+
+/* CORRECTED: Allow full width for banner image container */
+.site-header-row-container-inner {
+    max-width: 100% !important;  /* Changed from 1200px */
+    margin: 0 !important;
+    padding: 0 !important;  /* Changed from 20px */
+}
+
+/* CORRECTED: Make banner image full width */
+.header-html-inner {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+}
+
+.header-html-inner img,
+.la-site-banner img,
+.la-banner-svg {
+    width: 100vw !important;  /* CORRECTED: Full viewport width */
+    max-width: none !important;  /* CORRECTED: Remove max-width constraint */
+    height: auto !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Remove any default backgrounds */
+#masthead .site-container {
+    background: transparent !important;
+    max-width: 100% !important;
+}
+
+/* ====================
+   Navigation Menu Styles
+   ==================== */
+.la-navigation,
+#kt-primary-navigation,
+.primary-menu-container {
+  background-color: var(--la-blue) !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.la-navigation a,
+.menu-item a,
+.kt-menu-item-link {
+  color: var(--la-white) !important;
+  padding: var(--la-spacing-md) var(--la-spacing-lg);
+  text-decoration: none;
+  font-family: var(--la-font-body);
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.la-navigation a:hover,
+.menu-item a:hover,
+.kt-menu-item-link:hover,
+.current-menu-item > a {
+  background-color: var(--la-blue-dark) !important;
+  color: var(--la-white) !important;
+}
+
+/* Social Navigation Icons */
+.la-social-nav {
+  display: flex;
+  gap: var(--la-spacing-sm);
+  align-items: center;
+}
+
+.la-social-nav a {
+  padding: var(--la-spacing-xs) !important;
+}
+
+.la-social-nav img {
+  width: 24px;
+  height: 24px;
+  transition: opacity 0.3s ease;
+}
+
+.la-social-nav a:hover img {
+  opacity: 0.8;
+}
+
+/* ====================
+   Button Styles
+   ==================== */
+.la-button,
+.wp-block-button__link,
+.kt-button,
+.la-button-primary {
+  display: inline-block;
+  padding: var(--la-spacing-md) var(--la-spacing-xl) !important;
+  background-color: var(--la-red) !important;
+  color: var(--la-white) !important;
+  font-family: var(--la-font-body) !important;
+  font-size: 1.25rem !important;
+  font-weight: bold;
+  border: var(--la-border-width) solid var(--la-white) !important;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+  text-transform: none !important;
+  border-radius: var(--la-border-radius);
+}
+
+.la-button:hover,
+.wp-block-button__link:hover,
+.kt-button:hover {
+  background-color: var(--la-blue) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Secondary Button Style */
+.la-button-secondary {
+  background-color: var(--la-blue) !important;
+}
+
+.la-button-secondary:hover {
+  background-color: var(--la-red) !important;
+}
+
+/* ====================
+   Content Box Styles
+   ==================== */
+.la-text-box,
+.la-content-box {
+  border: 1px solid var(--la-black);
+  background-color: var(--la-white);
+  padding: var(--la-spacing-xl);
+  margin: var(--la-spacing-xl) auto;
+  max-width: 800px;
+  box-sizing: border-box;
+}
+
+.la-highlight-box {
+  border: 8px solid var(--la-blue);
+  border-left: 16px solid var(--la-red);
+  padding: var(--la-spacing-lg);
+  margin: var(--la-spacing-md) auto;
+  background-color: var(--la-white);
+}
+
+/* ====================
+   Image Styles
+   ==================== */
+.la-images-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--la-spacing-md);
+  margin: var(--la-spacing-xl) 0;
+}
+
+.la-images-section img,
+.wp-block-image img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border: var(--la-border-width-thick) solid var(--la-white);
+  border-radius: var(--la-border-radius-lg);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.la-image-gallery img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: var(--la-border-width-thick) solid var(--la-blue);
+}
+
+/* ====================
+   Layout Components
+   ==================== */
+.la-two-column,
+.la-flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--la-spacing-xl);
+  justify-content: center;
+  margin: var(--la-spacing-xl) 0;
+}
+
+.la-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+.la-section {
+  padding: var(--la-spacing-xxl) var(--la-spacing-lg);
+  margin: 0 auto;
+  max-width: var(--la-breakpoint-desktop);
+}
+
+/* ====================
+   Footer Styles
+   ==================== */
+.site-footer,
+.la-footer {
+  background-color: var(--la-blue) !important;
+  color: var(--la-white) !important;
+  text-align: center;
+  padding: var(--la-spacing-xl) var(--la-spacing-md);
+  margin-top: var(--la-spacing-xxl);
+}
+
+.site-footer a,
+.la-footer a {
+  color: var(--la-white) !important;
+  text-decoration: underline;
+}
+
+.site-footer a:hover,
+.la-footer a:hover {
+  opacity: 0.8;
+}
+
+.la-footer-logo {
+  width: 250px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: var(--la-spacing-md);
+}
+
+/* ====================
+   Mobile Responsive Styles
+   ==================== */
+@media screen and (max-width: 768px) {
+  /* Navigation Mobile */
+  .la-navigation {
+    flex-direction: column;
+  }
+  
+  .menu-toggle-open {
+    display: block !important;
+    color: var(--la-white) !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  /* Mobile Menu Items */
+  .primary-menu-container .menu-item {
+    display: block;
+    width: 100%;
+  }
+  
+  .primary-menu-container .menu-item a {
+    display: block;
+    padding: var(--la-spacing-md);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  /* Typography Mobile */
+  h1, .h1 { font-size: 2rem; }
+  h2, .h2 { font-size: 1.75rem; }
+  h3, .h3 { font-size: 1.5rem; }
+  
+  /* Buttons Mobile */
+  .la-button,
+  .wp-block-button__link {
+    width: 100%;
+    max-width: 100%;
+    font-size: 1.1rem !important;
+    padding: var(--la-spacing-md) !important;
+  }
+  
+  /* Content Boxes Mobile */
+  .la-text-box,
+  .la-highlight-box {
+    padding: var(--la-spacing-md);
+    margin: var(--la-spacing-md);
+  }
+  
+  /* Images Mobile */
+  .la-images-section img {
+    max-width: 100%;
+  }
+  
+  /* Columns Mobile */
+  .la-column {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+  
+  /* REMOVED: Banner Mobile max-height restriction */
+}
+
+/* ====================
+   Utility Classes
+   ==================== */
+.la-text-center { text-align: center; }
+.la-text-left { text-align: left; }
+.la-text-right { text-align: right; }
+
+.la-mt-1 { margin-top: var(--la-spacing-md); }
+.la-mt-2 { margin-top: var(--la-spacing-lg); }
+.la-mt-3 { margin-top: var(--la-spacing-xl); }
+
+.la-mb-1 { margin-bottom: var(--la-spacing-md); }
+.la-mb-2 { margin-bottom: var(--la-spacing-lg); }
+.la-mb-3 { margin-bottom: var(--la-spacing-xl); }
+
+.la-p-1 { padding: var(--la-spacing-md); }
+.la-p-2 { padding: var(--la-spacing-lg); }
+.la-p-3 { padding: var(--la-spacing-xl); }
+
+.la-bg-blue { background-color: var(--la-blue); }
+.la-bg-red { background-color: var(--la-red); }
+.la-bg-white { background-color: var(--la-white); }
+
+.la-text-blue { color: var(--la-blue); }
+.la-text-red { color: var(--la-red); }
+.la-text-white { color: var(--la-white); }
+
+/* Hide/Show Mobile vs Desktop */
+.la-desktop-only {
+  display: block;
+}
+.la-mobile-only {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .la-desktop-only {
+    display: none;
+  }
+  .la-mobile-only {
+    display: block;
+  }
+}
+
+/* ====================
+   Mobile/Tablet Responsive Styles (Consolidated)
+   ==================== */
+
+/* All mobile/tablet devices up to 1024px */
+@media screen and (max-width: 1024px) {
+  /* Mobile header background */
+  #mobile-header,
+  .site-mobile-header-wrap {
+    background-color: #044f9d !important;
+    width: 100vw !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+  }
+  
+  /* Banner image base settings */
+  #mobile-header .header-html-inner img,
+  #mobile-header .custom-logo,
+  .mobile-site-branding img {
+    width: 100vw !important;
+    max-width: none !important;
+    height: auto !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    object-fit: contain !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+  }
+  
+  /* Hamburger menu styling */
+  .mobile-toggle-open-container {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 100 !important;
+  }
+  
+  .mobile-toggle-open-container .menu-toggle-open {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    padding: 10px !important;
+  }
+  
+  .mobile-toggle-open-container .menu-toggle-open .menu-toggle-icon {
+    color: #ffffff !important;
+  }
+  
+  /* Header layout */
+  #mobile-header .site-main-header-inner-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 20px !important;
+  }
+}
+
+/* Portrait Tablet (768px-1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  #mobile-header .header-html-inner img,
+  .mobile-site-branding img {
+    max-width: 500px !important;
+    width: 90% !important;
+  }
+  
+  #mobile-header .site-main-header-inner-wrap {
+    min-height: 100px !important;
+    padding: 15px 20px !important;
+  }
+}
+
+/* Landscape Tablet (use desktop view) */
+@media screen and (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+  #mobile-header {
+    display: none !important;
+  }
+  #masthead {
+    display: block !important;
+  }
+}
+
+/* Phone - all orientations base */
+@media screen and (max-width: 767px) {
+  #mobile-header .header-html-inner img {
+    max-width: 280px !important;
+    width: 80% !important;
+  }
+}
+
+/* Phone landscape specific */
+@media screen and (max-width: 767px) and (orientation: landscape) {
+  #mobile-header {
+    display: block !important;
+  }
+  #mobile-header .header-html-inner img {
+    max-width: 350px !important;
+    width: 70% !important;
+  }
+}
+  
+  /* Ensure mobile header background */
+  #mobile-header,
+  .site-mobile-header-wrap {
+    background-color: #044f9d !important;
+    width: 100vw !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+  }
+  
+  /* Hide menu toggle if it's covering banner */
+  .mobile-toggle-open-container {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+  }
+}
+
+/* Fix mobile hamburger menu visibility */
+@media screen and (max-width: 1024px) {
+  /* Make hamburger visible with white color on blue background */
+  .mobile-toggle-open-container .menu-toggle-open {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    position: relative !important;
+    z-index: 100 !important;
+    padding: 10px !important;
+  }
+  
+  /* Style the hamburger icon lines */
+  .mobile-toggle-open-container .menu-toggle-open .menu-toggle-icon {
+    color: #ffffff !important;
+  }
+  
+  /* Ensure proper mobile header layout */
+  #mobile-header .site-main-header-inner-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 20px !important;
+  }
+  
+  /* Position banner and menu side by side */
+  #mobile-header .site-header-section-left {
+    flex: 0 0 auto !important;
+  }
+  
+  #mobile-header .site-header-section-center {
+    flex: 1 1 auto !important;
+    text-align: center !important;
+  }
+  
+  #mobile-header .site-header-section-right {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* Vertical/Portrait Tablet Specific (iPad portrait, etc.) */
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  #mobile-header .header-html-inner img,
+  .mobile-site-branding img {
+    max-width: 500px !important;  /* Larger for vertical tablet */
+    width: 90% !important;
+  }
+  
+  /* Ensure header has enough space */
+  #mobile-header .site-main-header-inner-wrap {
+    min-height: 100px !important;
+    padding: 15px 20px !important;
+  }
+}
+
+/* Horizontal/Landscape Tablet ONLY - not phones */
+@media screen and (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+  /* Use desktop view for landscape tablets */
+  #mobile-header {
+    display: none !important;
+  }
+  #masthead {
+    display: block !important;
+  }
+}
+
+/* Phone sizes - both orientations */
+@media screen and (max-width: 767px) {
+  #mobile-header .header-html-inner img {
+    max-width: 280px !important;
+    width: 80% !important;
+  }
+}
+/* Nuclear option for page title */
+body.page-id-112 h1.entry-title,
+.page-id-112 .entry-title,
+#post-112 .entry-title {
+    font-family: 'Work Sans', sans-serif !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+}
+/* Hide the problematic title */
+.page-id-112 .entry-title {
+    display: none !important;
+}
+/* Remove page title completely on form page */
+.page-id-112 .entry-title {
+    display: none !important;
+}
+/* ====================
+   Events Page Styles
+   ==================== */
+
+/* Event section titles with brand colors/fonts */
+.section-title,
+.divider-text {
+    text-align: center !important;
+    display: block;
+    width: 100%;
+    color: #c3202e; /* Lexington red */
+    font-family: 'ArmaliteRifle', sans-serif;
+    text-transform: uppercase;
+    font-size: 2em;
+    margin: 20px 0;
+}
+/* ====================
+   Events Page Styles
+   ==================== */
+
+/* Event section titles with brand colors/fonts */
+.section-title,
+.divider-text {
+    text-align: center !important;
+    display: block;
+    width: 100%;
+    color: #c3202e; /* Lexington red */
+    font-family: 'ArmaliteRifle', sans-serif;
+    text-transform: uppercase;
+    font-size: 2em;
+    margin: 20px 0;
+}
+
+/* Events page wrapper */
+.events-page-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Featured events section */
+.featured-events-section {
+    margin-bottom: 40px;
+}
+
+/* Section divider */
+.section-divider {
+    margin: 40px 0;
+    padding: 20px 0;
+    border-top: 2px solid #044f9d;
+    border-bottom: 2px solid #044f9d;
+}
+
+/* Full calendar section */
+.full-calendar-section {
+    margin-top: 40px;
+}
+
+/* Center Tockify calendar titles */
+.tockify-calendar-title,
+.tockify-view-title,
+.tockify-header-title,
+.tockify h2,
+.tockify h3,
+[class*="tockify"] .title {
+    text-align: center !important;
+}
+
+.la-copyright-white {
+    color: #ffffff !important;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+/* Larger heading for About page */
+.la-heading-large {
+    font-size: 2.5rem !important;
+    font-size: 36px !important;
+    color: #044f9d;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .la-heading-large {
+        font-size: 1.8rem !important;
+        font-size: 28px !important;
+    }
+}
+
+/* Wider container for Vision/Mission section */
+.la-vision-container {
+    max-width: 1100px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 2rem !important;
+    padding: 2.5rem 3rem !important;
+    width: 95% !important;
+    background-color: #f8f9fa !important; /* Light gray background to distinguish */
+    border: 2px solid #044f9d !important; /* Blue border */
+}
+
+/* Vision and Mission headings - H3, Blue, ArmaliteRifle */
+.la-section-heading,
+.la-mission-heading {
+    color: #044f9d !important; /* Blue */
+    font-family: 'ArmaliteRifle', sans-serif !important; /* ArmaliteRifle font */
+    font-size: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    text-transform: uppercase !important; /* ArmaliteRifle looks best uppercase */
+    font-weight: normal !important; /* ArmaliteRifle doesn't need bold */
+}
+
+/* Vision heading specific - centered */
+.la-section-heading {
+    text-align: center !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Mission heading specific - left aligned */
+.la-mission-heading {
+    text-align: left !important;
+    margin-top: 2rem !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .la-section-heading,
+    .la-mission-heading {
+        font-size: 1.3rem !important;
+    }
+}
+/* Lexington Alarm Donation Product Styling */
+
+/* Main donation product wrapper */
+.product-type-variable.product-donate-to-lexington-alarm {
+    background: white;
+    border: 3px solid #044f9d;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+/* Variation selector styling */
+.variations_form .variations select {
+    border: 2px solid #044f9d;
+    padding: 10px 15px;
+    font-family: 'UglyQua', 'Work Sans', sans-serif;
+    font-size: 16px;
+    background: white;
+    width: 100%;
+    max-width: 300px;
+}
+
+.variations_form .variations select:focus {
+    outline: none;
+    border-color: #c3202e;
+    box-shadow: 0 0 5px rgba(195, 32, 46, 0.3);
+}
+/* Force 5 products per row on desktop */
+.woocommerce ul.products {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 20px;
+}
+
+.woocommerce ul.products li.product {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .woocommerce ul.products {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .woocommerce ul.products {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .woocommerce ul.products {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+}
+/* Center WP Forms input fields in centered container */
+#wpforms-325 .wpforms-field {
+    text-align: left; /* Keep labels left-aligned within field */
+    max-width: 500px;
+    margin: 0 auto 20px auto; /* Center the entire field block */
+}
+
+#wpforms-325 .wpforms-field-label {
+    text-align: left; /* Labels stay left-aligned */
+}
+
+#wpforms-325 .wpforms-field input[type="text"],
+#wpforms-325 .wpforms-field input[type="email"],
+#wpforms-325 .wpforms-field select,
+#wpforms-325 .wpforms-field textarea {
+    width: 100%;
+}
+
+#wpforms-325 .wpforms-submit-container {
+    text-align: center; /* Keep submit button centered */
+}
+/* Print-specific CSS for Letter */
+@media print {
+    /* Reset all margins and padding */
+    * {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Hide everything except the letter */
+    body * {
+        visibility: hidden;
+    }
+    
+    #letterContent, #letterContent * {
+        visibility: visible;
+    }
+    
+    #letterContent {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        border: none !important;
+        padding: 20px !important;
+        margin: 0 !important;
+    }
+    
+    /* Restore spacing for letter content only */
+    #letterContent p {
+        margin-bottom: 15px !important;
+    }
+    
+    /* Adjust image spacing */
+    #letterContent img {
+        margin-bottom: 20px !important;
+    }
+    
+    /* Hide buttons when printing */
+    .no-print {
+        display: none !important;
+    }
+    
+    /* Remove page margins if possible */
+    @page {
+        margin: 0.5in;
+    }
+}
+
+/* Button hover effects */
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+/* Hover for letter link */
+a[href="https://bpx.ela.mybluehost.me/website_97a098b6/letter_sept_19/"]:hover {
+    background: #044f9d !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+/* Dropdown Menu Styling for Lexington Alarm */
+.main-navigation .primary-menu-container .menu > li.menu-item-has-children > ul {
+    background-color: #044f9d; /* Primary blue background */
+    border: 2px solid #c3202e; /* Red border */
+    border-top: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.main-navigation .primary-menu-container .menu > li.menu-item-has-children > ul li a {
+    color: #ffffff !important; /* White text */
+    font-family: 'UglyQua', sans-serif;
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(195, 32, 46, 0.3); /* Subtle red divider */
+    transition: background-color 0.3s ease;
+}
+
+.main-navigation .primary-menu-container .menu > li.menu-item-has-children > ul li a:hover {
+    background-color: #c3202e; /* Red background on hover */
+    color: #ffffff !important;
+}
+
+/* Mobile dropdown styling */
+@media (max-width: 1024px) {
+    .mobile-toggle-open .main-navigation .primary-menu-container .menu ul li a {
+        color: #ffffff !important;
+        padding-left: 30px; /* Indent sub-menu items */
+    }
+}
+/* Force dropdown functionality */
+.main-navigation .primary-menu-container .menu li.menu-item-has-children {
+    position: relative;
+}
+
+.main-navigation .primary-menu-container .menu li.menu-item-has-children ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    min-width: 200px;
+    z-index: 9999;
+}
+
+.main-navigation .primary-menu-container .menu li.menu-item-has-children:hover ul {
+    display: block;
+}
+/* Hide title on History page */
+.page-id-449 .entry-title,
+.page-id-449 .page-title,
+.page-id-449 h1.entry-title {
+    display: none !important;
+}
+/* Menu Item Hover Effects - Text Only, No Background Change */
+
+/* Desktop Navigation - Default state (off-white) */
+#main-navigation .primary-menu-container > ul > li > a {
+    color: #f5f5f5; /* Off-white default */
+    transition: color 0.3s ease;
+    background: transparent !important; /* Force no background */
+}
+
+/* Desktop Navigation - Hover state (bright white, no background) */
+#main-navigation .primary-menu-container > ul > li > a:hover {
+    color: #ffffff; /* Bright white on hover */
+    background: transparent !important; /* Keep background transparent */
+}
+
+/* Remove background on active/focus states */
+#main-navigation .primary-menu-container > ul > li > a:focus,
+#main-navigation .primary-menu-container > ul > li > a:active {
+    background: transparent !important;
+}
+
+/* Mobile/Tablet Navigation - Default state (off-white) */
+.mobile-navigation .mobile-menu li a {
+    color: #f5f5f5; /* Off-white default */
+    transition: color 0.3s ease;
+    background: transparent !important;
+}
+
+/* Mobile/Tablet Navigation - Hover state (bright white, no background) */
+.mobile-navigation .mobile-menu li a:hover {
+    color: #ffffff; /* Bright white on hover */
+    background: transparent !important;
+}
+
+/* Active/Current Page - Bright white text, no background */
+#main-navigation .current-menu-item > a,
+.mobile-navigation .current-menu-item > a {
+    color: #ffffff !important;
+    background: transparent !important;
+}
+
+/* Remove any Kadence default hover backgrounds */
+#main-navigation .primary-menu-container > ul > li:hover > a {
+    background: transparent !important;
+}

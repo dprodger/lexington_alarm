@@ -1,0 +1,27 @@
+I need to understand better at how to keep your file access current. 
+
+for example, you now lack access to seafood knowledge rag, as I get message seafood-rag failed. 
+
+server is disconnected.. it was on an external drive.  so I will reconnect.   by running the script, is that correct?
+
+Arguments
+/Volumes/Seafood_Knowledge/rag_system/scripts/mcp_server.py
+
+second problem 
+
+file server disconnect   
+
+Arguments
+-y @modelcontextprotocol/server-filesystem /Volumes/Seafood_Knowledge /Users/jtsackton/Documents/2025-26 projects/2024-25 projects/2025 projects/New Brunswick/completed for translators /Users/jtsackton/Documents/2025-26 projects/Data Files /Users/jtsackton/Documents/2025-26 projects/FCC 2025 /Users/jtsackton/Documents/2025-26 projects/2024-25 projects/2025 projects/Newfoundland crab /Users/jtsackton/Desktop/LexingtonAlarm_Docs /Users/jtsackton/Local Sites/la-wordpress-local /Users/jtsackton/vault /Users/jtsackton/Documents/winding glass 40 years
+
+Error
+Server disconnected
+
+
+filesystem
+failed
+
+Command
+npx
+
+lets fix these problems and then you tell me the best way to add the python drive to allowed directories.   

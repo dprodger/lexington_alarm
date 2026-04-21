@@ -1,0 +1,136 @@
+═══════════════════════════════════════════════════════════════════════
+                    LEXINGTON ALARM SYNC SYSTEM
+                         Quick Reference Card
+═══════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🚀 QUICK START                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+  1. Make changes in WordPress Admin
+  2. Run: ./sync-wordpress-state.sh
+  3. Copy CSS, snippets, pages (see below)
+  4. Tell Claude: "I've synced current_state, help me with [task]"
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📂 DIRECTORY STRUCTURE                                              │
+└─────────────────────────────────────────────────────────────────────┘
+
+  current_state/
+  ├── css/kadence_custom.css          ⚠ MANUAL
+  ├── pages/
+  │   ├── news.html                   ⚠ MANUAL
+  │   ├── home.html                   ⚠ MANUAL
+  │   └── [other pages].html          ⚠ MANUAL
+  ├── snippets/
+  │   └── wpcode-export-[date].json   ⚠ MANUAL
+  ├── uploads/                        ✓ AUTO
+  └── database_exports/               ⚠ OPTIONAL
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ ⚠️  MANUAL SYNC STEPS                                               │
+└─────────────────────────────────────────────────────────────────────┘
+
+  CSS:
+  └─ WP Admin → Appearance → Customize → Additional CSS
+     Copy → Paste into current_state/css/kadence_custom.css
+
+  Snippets:
+  └─ WP Admin → WPCode → Tools → Export
+     Save to current_state/snippets/wpcode-export-YYYY-MM-DD.json
+
+  Pages:
+  └─ Edit page → ⋮ menu → Code editor
+     Copy HTML → Paste into current_state/pages/[pagename].html
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🎯 COMMON SCENARIOS                                                 │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Changed News page only:
+  └─ ./sync-wordpress-state.sh
+     Copy news.html only
+
+  Added new snippet:
+  └─ ./sync-wordpress-state.sh
+     Export snippets from WPCode
+
+  Tweaked CSS:
+  └─ ./sync-wordpress-state.sh
+     Copy CSS from Customizer
+
+  Major changes everywhere:
+  └─ ./sync-wordpress-state.sh
+     Copy CSS + snippets + all changed pages
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 💡 CLAUDE COLLABORATION                                             │
+└─────────────────────────────────────────────────────────────────────┘
+
+  After syncing, tell Claude:
+
+  "I've synced current_state. Please read:
+   - pages/news.html
+   - css/kadence_custom.css
+   - snippets/[latest export]
+   
+   Help me with [your specific task]"
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🔧 TROUBLESHOOTING                                                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Permission denied:
+  └─ chmod +x sync-wordpress-state.sh
+
+  WordPress path not found:
+  └─ Edit sync-wordpress-state.sh line 17
+     LOCAL_WP="/Users/jtsackton/Local Sites/la-wordpress-local/app/public"
+
+  Files not updating:
+  └─ Check SYNC_REPORT.md for errors
+     Verify source path is correct
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📚 DOCUMENTATION                                                    │
+└─────────────────────────────────────────────────────────────────────┘
+
+  SYNC_WORKFLOW_QUICKSTART.md      ← Start here
+  SETUP_COMPLETE.md                 ← Setup summary
+  current_state/README.md           ← Detailed guide
+  current_state/INDEX.md            ← File navigation
+  current_state/MANUAL_SYNC_CHECKLIST.md  ← Step-by-step
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ ⏱️  TIME ESTIMATES                                                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Run script:           30 seconds
+  Copy CSS:            30 seconds
+  Export snippets:     1 minute
+  Copy page HTML:      1 minute per page
+  ────────────────────────────────
+  Total for 1 page:    ~3 minutes
+  Total for full sync: ~5 minutes
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ ✓ CHECKLIST                                                         │
+└─────────────────────────────────────────────────────────────────────┘
+
+  One-time setup:
+  ☐ chmod +x sync-wordpress-state.sh
+  ☐ Test run: ./sync-wordpress-state.sh
+  ☐ Verify paths in script
+
+  Every session:
+  ☐ Make WordPress changes
+  ☐ Run sync script
+  ☐ Copy CSS (if changed)
+  ☐ Export snippets (if changed)
+  ☐ Copy page HTML (for modified pages)
+  ☐ Check SYNC_REPORT.md
+  ☐ Ready for Claude!
+
+═══════════════════════════════════════════════════════════════════════
+           Print this card or save for quick reference!
+═══════════════════════════════════════════════════════════════════════

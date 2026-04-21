@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexington Alarm - Font & Style Demo Template</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =====================================================
+           LEXINGTON ALARM - FONT DEMO & TEMPLATE
+           Brand Colors & Typography Reference
+           ===================================================== */
+        
+        /* Custom Fonts - Add paths if using local fonts */
+        @font-face {
+            font-family: 'UglyQua';
+            src: url('fonts/UglyQua.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'ArmaliteRifle';
+            src: url('fonts/armalite_rifle.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        /* Root Variables */
+        :root {
+            --la-blue: #044f9d;
+            --la-red: #c3202e;
+            --la-white: #ffffff;
+            --la-black: #000000;
+        }
+        
+        /* Base Styles */
+        body {
+            font-family: 'Work Sans', sans-serif;
+            color: #000000;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Typography Hierarchy */
+        h1 {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 2.5rem;
+            color: #000000;
+            margin: 1.5rem 0 1rem 0;
+            font-weight: 700;
+        }
+        
+        h2 {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 2rem;
+            color: #000000;
+            margin: 1.5rem 0 1rem 0;
+            font-weight: 700;
+        }
+        
+        h3 {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 1.5rem;
+            color: #000000;
+            margin: 1.25rem 0 0.75rem 0;
+            font-weight: 700;
+        }
+        
+        h4 {
+            font-family: 'UglyQua', Georgia, serif;
+            font-size: 1.25rem;
+            color: #000000;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        h5 {
+            font-family: 'UglyQua', Georgia, serif;
+            font-size: 1.1rem;
+            color: #000000;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        h6 {
+            font-family: 'UglyQua', Georgia, serif;
+            font-size: 1rem;
+            color: #000000;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        p {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1rem;
+            line-height: 1.8;
+            margin: 0 0 1rem 0;
+            color: #000000;
+        }
+        
+        /* Utility Classes for Color */
+        .text-red { color: var(--la-red) !important; }
+        .text-blue { color: var(--la-blue) !important; }
+        .text-white { color: var(--la-white) !important; }
+        
+        .bg-red { background-color: var(--la-red); }
+        .bg-blue { background-color: var(--la-blue); }
+        .bg-white { background-color: var(--la-white); }
+        
+        /* Utility Classes for Fonts */
+        .font-armalite {
+            font-family: 'ArmaliteRifle', Impact, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .font-uglyqua {
+            font-family: 'UglyQua', Georgia, serif;
+        }
+        
+        .font-worksans {
+            font-family: 'Work Sans', sans-serif;
+        }
+        
+        .font-libre {
+            font-family: 'Libre Baskerville', serif;
+        }
+        
+        /* Button Styles */
+        .la-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--la-red);
+            color: var(--la-white);
+            border: 2px solid var(--la-white);
+            font-family: 'UglyQua', Georgia, serif;
+            font-size: 16px;
+            text-decoration: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .la-button:hover {
+            background-color: #8a2a2e;
+            border-color: var(--la-white);
+        }
+        
+        .la-button-secondary {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--la-blue);
+            color: var(--la-white);
+            border: 2px solid var(--la-white);
+            font-family: 'UglyQua', Georgia, serif;
+            font-size: 16px;
+            text-decoration: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .la-button-secondary:hover {
+            background-color: #033c7a;
+        }
+        
+        /* Content Boxes */
+        .la-text-box {
+            border: 2px solid var(--la-blue);
+            padding: 20px;
+            margin: 20px 0;
+            background-color: #ffffff;
+        }
+        
+        .la-highlight-box {
+            border: 3px solid var(--la-blue);
+            border-left: 6px solid var(--la-red);
+            padding: 20px;
+            margin: 20px 0;
+            background-color: #f8f9fa;
+        }
+        
+        /* Demo Section Styles */
+        .demo-section {
+            margin: 40px 0;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+            background-color: #fafafa;
+        }
+        
+        .demo-section h2 {
+            color: var(--la-red);
+            border-bottom: 3px solid var(--la-blue);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .color-swatch {
+            display: inline-block;
+            width: 120px;
+            height: 120px;
+            margin: 10px;
+            border: 2px solid #333;
+            text-align: center;
+            vertical-align: top;
+        }
+        
+        .color-info {
+            background: white;
+            padding: 5px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        
+        .font-sample {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-left: 4px solid var(--la-blue);
+        }
+        
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- HEADER -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 class="font-armalite text-red">LEXINGTON ALARM!</h1>
+            <p style="font-size: 1.2rem; color: var(--la-blue);">Font & Style Template - 1775 ★ 2025</p>
+        </div>
+        
+        <!-- SECTION 1: BRAND COLORS -->
+        <div class="demo-section">
+            <h2>Brand Color Palette</h2>
+            <div style="text-align: center;">
+                <div class="color-swatch" style="background-color: #044f9d;">
+                    <div style="height: 90px;"></div>
+                    <div class="color-info">
+                        <strong>Primary Blue</strong><br>
+                        #044f9d
+                    </div>
+                </div>
+                <div class="color-swatch" style="background-color: #c3202e;">
+                    <div style="height: 90px;"></div>
+                    <div class="color-info">
+                        <strong>Primary Red</strong><br>
+                        #c3202e
+                    </div>
+                </div>
+                <div class="color-swatch" style="background-color: #ffffff; border: 3px solid #333;">
+                    <div style="height: 90px;"></div>
+                    <div class="color-info">
+                        <strong>White</strong><br>
+                        #ffffff
+                    </div>
+                </div>
+                <div class="color-swatch" style="background-color: #000000;">
+                    <div style="height: 90px;"></div>
+                    <div class="color-info" style="color: white; background: #333;">
+                        <strong>Black</strong><br>
+                        #000000
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 2: TYPOGRAPHY HIERARCHY -->
+        <div class="demo-section">
+            <h2>Typography Hierarchy</h2>
+            
+            <div class="font-sample">
+                <h1>H1: Main Page Heading (Libre Baskerville Bold)</h1>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    Default: Black | Can use .text-red or .text-blue classes
+                </p>
+            </div>
+            
+            <div class="font-sample">
+                <h2>H2: Section Heading (Libre Baskerville Bold)</h2>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    Default: Black | Can use .text-red or .text-blue classes
+                </p>
+            </div>
+            
+            <div class="font-sample">
+                <h3>H3: Subsection Heading (Libre Baskerville Bold)</h3>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    Default: Black | Can use .text-red or .text-blue classes
+                </p>
+            </div>
+            
+            <div class="font-sample">
+                <h4>H4: Minor Heading (UglyQua)</h4>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    Default: Black | Serif character font
+                </p>
+            </div>
+            
+            <div class="font-sample">
+                <h5>H5: Small Heading (UglyQua)</h5>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    Default: Black | Serif character font
+                </p>
+            </div>
+            
+            <div class="font-sample">
+                <h6>H6: Smallest Heading (UglyQua)</h6>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    Default: Black | Serif character font
+                </p>
+            </div>
+            
+            <div class="font-sample">
+                <p>Body Text: Regular paragraph text (Work Sans). This is the default font for all body content. It's highly readable and works well for longer passages of text. The British are coming! The British are coming!</p>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    Work Sans | 16px | Line height 1.8
+                </p>
+            </div>
+            
+            <div class="font-sample">
+                <p class="font-armalite text-red">ARMALITE RIFLE FONT (Used in Banner/Special Headers)</p>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">
+                    ArmaliteRifle | Uppercase | Red | Use sparingly for impact
+                </p>
+            </div>
+        </div>
+        
+        <!-- SECTION 3: COLOR VARIATIONS -->
+        <div class="demo-section">
+            <h2>Heading Color Variations</h2>
+            
+            <h1>Default H1 Heading (Black)</h1>
+            <h1 class="text-red">Red H1 Heading</h1>
+            <h1 class="text-blue">Blue H1 Heading</h1>
+            
+            <h2>Default H2 Heading (Black)</h2>
+            <h2 class="text-red">Red H2 Heading</h2>
+            <h2 class="text-blue">Blue H2 Heading</h2>
+            
+            <h3>Default H3 Heading (Black)</h3>
+            <h3 class="text-red">Red H3 Heading</h3>
+            <h3 class="text-blue">Blue H3 Heading</h3>
+        </div>
+        
+        <!-- SECTION 4: BUTTONS -->
+        <div class="demo-section">
+            <h2>Button Styles</h2>
+            <div style="text-align: center; padding: 20px;">
+                <a href="#" class="la-button">PRIMARY BUTTON (RED)</a>
+                <a href="#" class="la-button-secondary">SECONDARY BUTTON (BLUE)</a>
+            </div>
+            <p style="text-align: center; color: #666; margin-top: 20px;">
+                Buttons use UglyQua font | Uppercase | White text
+            </p>
+        </div>
+        
+        <!-- SECTION 5: CONTENT BOXES -->
+        <div class="demo-section">
+            <h2>Content Box Styles</h2>
+            
+            <div class="la-text-box">
+                <h3>Standard Text Box</h3>
+                <p>This is a standard text box with a blue border. Use this for regular callout content, announcements, or important information that needs visual separation from the main content.</p>
+            </div>
+            
+            <div class="la-highlight-box">
+                <h3>Highlight Box</h3>
+                <p>This is a highlight box with a blue border and red accent on the left. Use this for extra-important content, featured information, or calls-to-action that need more emphasis.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 6: TWO COLUMN LAYOUT -->
+        <div class="demo-section">
+            <h2>Two Column Layout Example</h2>
+            <div class="two-column">
+                <div>
+                    <h3>Column One</h3>
+                    <p>This is the first column. You can use two-column layouts for organizing content, creating side-by-side comparisons, or displaying related information.</p>
+                    <p>The layout automatically stacks to single column on mobile devices for better readability.</p>
+                </div>
+                <div>
+                    <h3>Column Two</h3>
+                    <p>This is the second column. The columns have equal width and are separated by a gap for visual clarity.</p>
+                    <p>This responsive design ensures your content looks good on all device sizes.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 7: FULL PAGE TEMPLATE EXAMPLE -->
+        <div class="demo-section">
+            <h2>Full Page Template Example</h2>
+            
+            <h1 class="text-red">Page Title Goes Here</h1>
+            
+            <p><strong>Introduction paragraph:</strong> This is where you'd put your opening content. The British are coming! Stand your ground. Don't fire unless fired upon, but if they mean to have a war, let it begin here!</p>
+            
+            <h2 class="text-blue">Main Section Heading</h2>
+            
+            <p>Regular paragraph text follows the heading. This demonstrates the proper spacing and typography hierarchy. Your content flows naturally from headings to body text.</p>
+            
+            <div class="la-highlight-box">
+                <h3>Important Callout</h3>
+                <p>Use highlight boxes for crucial information that readers should not miss. This could be event details, deadlines, or key announcements.</p>
+            </div>
+            
+            <h3>Subsection Heading</h3>
+            
+            <p>More detailed content goes here. You can mix headings, paragraphs, buttons, and boxes to create engaging page layouts.</p>
+            
+            <div class="two-column">
+                <div>
+                    <h4>Feature One</h4>
+                    <p>Description of the first feature or point you want to make.</p>
+                </div>
+                <div>
+                    <h4>Feature Two</h4>
+                    <p>Description of the second feature or point you want to make.</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="#" class="la-button">TAKE ACTION NOW</a>
+                <a href="#" class="la-button-secondary">LEARN MORE</a>
+            </div>
+        </div>
+        
+        <!-- SECTION 8: FONT REFERENCE CHART -->
+        <div class="demo-section">
+            <h2>Quick Font Reference</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="background-color: var(--la-blue); color: white;">
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Element</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Font Family</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Default Color</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Notes</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>H1, H2, H3</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Libre Baskerville</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Black</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Main headings, serif, elegant</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>H4, H5, H6</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">UglyQua</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Black</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Minor headings, character serif</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>Body Text</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Work Sans</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Black</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">All paragraphs and regular text</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>Buttons</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">UglyQua</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">White</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Uppercase, on red or blue background</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>Banner/Special</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">ArmaliteRifle</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Red</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">SVG banner only, use sparingly</td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- FOOTER -->
+        <div style="margin-top: 50px; padding-top: 20px; border-top: 3px solid var(--la-blue); text-align: center;">
+            <p class="font-armalite text-red" style="font-size: 1.5rem; margin-bottom: 10px;">LEXINGTON ALARM!</p>
+            <p style="color: #666;">Font & Style Template Reference | 1775-2025</p>
+        </div>
+        
+    </div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+# Newsletter Archive - Visual Step-by-Step
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  CURRENT PROBLEM                                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Your News Page shows:                                          │
+│  ┌──────────────────────────────────────────┐                  │
+│  │  NEWSLETTER ARCHIVE                      │                  │
+│  │  ─────────────────────────────────────   │                  │
+│  │  Newsletter archive coming soon.         │                  │
+│  └──────────────────────────────────────────┘                  │
+│                                                                 │
+│  Why? The shortcode looks for posts in                         │
+│  "archive" category, but there aren't any.                     │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  THE FIX (5 minutes)                                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  STEP 1: Open WPCode                                            │
+│  ├─ WordPress Admin → Snippets → All Snippets                  │
+│  ├─ Find: "News Shortcodes" (ID: 651)                          │
+│  └─ Click "Edit"                                                │
+│                                                                 │
+│  STEP 2: Find the Newsletter Function                           │
+│  ├─ Scroll to bottom of code                                    │
+│  └─ Look for: "// NEWSLETTER ARCHIVE SHORTCODE"                │
+│                                                                 │
+│  STEP 3: Replace the Function                                   │
+│  ├─ Find this:                                                  │
+│  │                                                              │
+│  │  function display_newsletter_archive() {                    │
+│  │      $args = array(                                          │
+│  │          'category_name' => 'archive',                       │
+│  │          ...                                                 │
+│  │      );                                                      │
+│  │      ... rest of code ...                                    │
+│  │  }                                                           │
+│  │                                                              │
+│  ├─ Replace with code from:                                     │
+│  │   NEWSLETTER_ARCHIVE_SHORTCODE_MANUAL.php                   │
+│  │                                                              │
+│  └─ Click "Update"                                              │
+│                                                                 │
+│  STEP 4: Check Your News Page                                   │
+│  └─ Should now display September newsletter!                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  WHAT YOU'LL SEE AFTER THE FIX                                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ╔═══════════════════════════════════════════════════════════╗ │
+│  ║                                                           ║ │
+│  ║             NEWSLETTER ARCHIVE                            ║ │
+│  ║                                                           ║ │
+│  ╚═══════════════════════════════════════════════════════════╝ │
+│                                                                 │
+│  📧  September 2025 Newsletter                                  │
+│      Published: September 26, 2025                              │
+│      View in Browser →                                          │
+│                                                                 │
+│  ─────────────────────────────────────────────────────          │
+│                                                                 │
+│  📧  August 2025 Newsletter (example - delete this)             │
+│      Published: August 15, 2025                                 │
+│      View in Browser →                                          │
+│                                                                 │
+│  ─────────────────────────────────────────────────────          │
+│                                                                 │
+│  📧  July 2025 Newsletter (example - delete this)               │
+│      Published: July 4, 2025                                    │
+│      View in Browser →                                          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  HOW TO ADD NEWSLETTERS (every 2 weeks)                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  When you send a new newsletter:                                │
+│                                                                 │
+│  1. Get "View in Browser" link from Mailchimp                   │
+│                                                                 │
+│  2. Edit the WPCode snippet                                     │
+│                                                                 │
+│  3. Find the $newsletters array (near top of function)          │
+│                                                                 │
+│  4. Add new entry at TOP:                                       │
+│                                                                 │
+│     $newsletters = array(                                       │
+│         array(                                                  │
+│             'title' => 'October 2025 Newsletter', ← NEW         │
+│             'date' => 'October 10, 2025',         ← NEW         │
+│             'url' => 'https://mailchi.mp/...'     ← NEW         │
+│         ),                                                      │
+│         array(                                                  │
+│             'title' => 'September 2025...',  ← OLD (keep)       │
+│             ...                                                 │
+│                                                                 │
+│  5. Click Update                                                │
+│                                                                 │
+│  ⏱️  Time: 60 seconds                                            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  TROUBLESHOOTING                                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Problem: Still shows "Newsletter archive coming soon"          │
+│  Solution:                                                      │
+│  ☑️  Clear browser cache (Ctrl+Shift+R)                         │
+│  ☑️  Check you edited the right snippet (ID: 651)               │
+│  ☑️  Verify at least one entry in $newsletters array            │
+│  ☑️  Make sure you clicked "Update" and it saved                │
+│                                                                 │
+│  Problem: Styling looks wrong                                   │
+│  Solution:                                                      │
+│  ☑️  Make sure you copied ALL the code including <style> tags   │
+│  ☑️  Clear WordPress cache if you use caching plugin            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  CODE LOCATION REFERENCE                                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Original shortcode code is in:                                 │
+│  📄 Snippet #651 "News Shortcodes"                              │
+│     └─ function display_newsletter_archive()                    │
+│                                                                 │
+│  Replacement code is in:                                        │
+│  📄 NEWSLETTER_ARCHIVE_SHORTCODE_MANUAL.php                     │
+│     └─ function display_newsletter_archive_manual()             │
+│                                                                 │
+│  This guide is in:                                              │
+│  📄 NEWSLETTER_ARCHIVE_FIX.md                                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```

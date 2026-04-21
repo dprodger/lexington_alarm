@@ -1,0 +1,534 @@
+/* =====================================================
+   LEXINGTON ALARM - WORDPRESS THEME STYLES
+   Version: 1.0
+   Description: Complete stylesheet for WordPress/Kadence theme
+   Colors: Blue #034F9E, Red #C12036, White #FFFFFF
+   ===================================================== */
+
+/* ====================
+   Custom Properties / Variables
+   ==================== */
+:root {
+  /* Primary Colors - from original site */
+  --la-blue: #034F9E;
+  --la-blue-dark: #012e6d;
+  --la-blue-light: #0A3E85;
+  --la-red: #C12036;
+  --la-white: #FFFFFF;
+  --la-black: #000000;
+  
+  /* Typography */
+  --la-font-display: 'ArmaliteRifle', 'Impact', sans-serif;
+  --la-font-body: 'UglyQua', 'Georgia', serif;
+  --la-font-body-italic: 'UglyQuaItalic', 'Georgia', serif;
+  --la-font-fallback: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Spacing */
+  --la-spacing-xs: 0.25rem;
+  --la-spacing-sm: 0.5rem;
+  --la-spacing-md: 1rem;
+  --la-spacing-lg: 1.5rem;
+  --la-spacing-xl: 2rem;
+  --la-spacing-xxl: 3rem;
+  
+  /* Borders */
+  --la-border-width: 2px;
+  --la-border-width-thick: 4px;
+  --la-border-width-extra: 6px;
+  --la-border-radius: 5px;
+  --la-border-radius-lg: 10px;
+  
+  /* Responsive Breakpoints */
+  --la-breakpoint-mobile: 768px;
+  --la-breakpoint-tablet: 1024px;
+  --la-breakpoint-desktop: 1200px;
+}
+
+/* ====================
+   Custom Font Definitions
+   ==================== */
+@font-face {
+  font-family: 'ArmaliteRifle';
+  src: url('/website_97a098b6/wp-content/themes/kadence/fonts/armalite_rifle.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UglyQua';
+  src: url('/website_97a098b6/wp-content/themes/kadence/fonts/UglyQua.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UglyQuaItalic';
+  src: url('/website_97a098b6/wp-content/themes/kadence/fonts/UglyQuaItalic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ====================
+   WordPress/Kadence Overrides
+   ==================== */
+body,
+.wp-site-blocks,
+p,
+.entry-content,
+.post-content,
+article {
+  font-family: var(--la-font-body-readable) !important;
+  color: var(--la-black);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+/* Use UglyQua for specific elements */
+.la-font-classic,
+h4, h5, h6,
+.wp-block-button__link,
+.kt-button,
+.la-button,
+button,
+input[type="submit"],
+blockquote,
+.testimonial,
+.pullquote,
+.menu-item a,
+.kt-menu-item-link {
+  font-family: var(--la-font-body) !important;
+}
+
+/* Keep italic version for emphasis */
+em, i {
+  font-family: 'Work Sans', var(--la-font-body-readable);
+  font-style: italic;
+}
+
+/* For when you specifically want UglyQua body text */
+.la-ugly-qua {
+  font-family: var(--la-font-body) !important;
+}
+
+/* Override Kadence header styles */
+.site-header-wrap {
+  background-color: var(--la-white) !important;
+  border-bottom: var(--la-border-width) solid var(--la-blue);
+}
+
+/* ====================
+   Typography Styles
+   ==================== */
+h1, h2, h3, h4, h5, h6,
+.wp-block-heading,
+.kt-blocks-info-box-title {
+  font-family: var(--la-font-display) !important;
+  color: var(--la-red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+h1, .h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+h2, .h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+h3, .h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h4, .h4 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
+
+em, i {
+  font-family: var(--la-font-body-italic);
+}
+
+/* ====================
+   Header & Banner Styles
+   ==================== */
+.la-site-banner {
+  width: 100%;
+  max-width: 100vw;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border-bottom: var(--la-border-width-extra) solid var(--la-white);
+}
+
+.la-site-banner img,
+.la-banner-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 120px;
+  object-fit: contain;
+}
+
+/* ====================
+   Navigation Menu Styles
+   ==================== */
+.la-navigation,
+#kt-primary-navigation,
+.primary-menu-container {
+  background-color: var(--la-blue) !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.la-navigation a,
+.menu-item a,
+.kt-menu-item-link {
+  color: var(--la-white) !important;
+  padding: var(--la-spacing-md) var(--la-spacing-lg);
+  text-decoration: none;
+  font-family: var(--la-font-body);
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.la-navigation a:hover,
+.menu-item a:hover,
+.kt-menu-item-link:hover,
+.current-menu-item > a {
+  background-color: var(--la-blue-dark) !important;
+  color: var(--la-white) !important;
+}
+
+/* Social Navigation Icons */
+.la-social-nav {
+  display: flex;
+  gap: var(--la-spacing-sm);
+  align-items: center;
+}
+
+.la-social-nav a {
+  padding: var(--la-spacing-xs) !important;
+}
+
+.la-social-nav img {
+  width: 24px;
+  height: 24px;
+  transition: opacity 0.3s ease;
+}
+
+.la-social-nav a:hover img {
+  opacity: 0.8;
+}
+
+/* ====================
+   Button Styles
+   ==================== */
+.la-button,
+.wp-block-button__link,
+.kt-button,
+.la-button-primary {
+  display: inline-block;
+  padding: var(--la-spacing-md) var(--la-spacing-xl) !important;
+  background-color: var(--la-red) !important;
+  color: var(--la-white) !important;
+  font-family: var(--la-font-body) !important;
+  font-size: 1.25rem !important;
+  font-weight: bold;
+  border: var(--la-border-width) solid var(--la-white) !important;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+  text-transform: none !important;
+  border-radius: var(--la-border-radius);
+}
+
+.la-button:hover,
+.wp-block-button__link:hover,
+.kt-button:hover {
+  background-color: var(--la-blue) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Secondary Button Style */
+.la-button-secondary {
+  background-color: var(--la-blue) !important;
+}
+
+.la-button-secondary:hover {
+  background-color: var(--la-red) !important;
+}
+
+/* ====================
+   Content Box Styles
+   ==================== */
+.la-text-box,
+.la-content-box {
+  border: 1px solid var(--la-black);
+  background-color: var(--la-white);
+  padding: var(--la-spacing-xl);
+  margin: var(--la-spacing-xl) auto;
+  max-width: 800px;
+  box-sizing: border-box;
+}
+
+.la-highlight-box {
+  border: 8px solid var(--la-blue);
+  border-left: 16px solid var(--la-red);
+  padding: var(--la-spacing-lg);
+  margin: var(--la-spacing-md) auto;
+  background-color: var(--la-white);
+}
+
+/* ====================
+   Image Styles
+   ==================== */
+.la-images-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--la-spacing-md);
+  margin: var(--la-spacing-xl) 0;
+}
+
+.la-images-section img,
+.wp-block-image img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border: var(--la-border-width-thick) solid var(--la-white);
+  border-radius: var(--la-border-radius-lg);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.la-image-gallery img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: var(--la-border-width-thick) solid var(--la-blue);
+}
+
+/* ====================
+   Layout Components
+   ==================== */
+.la-two-column,
+.la-flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--la-spacing-xl);
+  justify-content: center;
+  margin: var(--la-spacing-xl) 0;
+}
+
+.la-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+.la-section {
+  padding: var(--la-spacing-xxl) var(--la-spacing-lg);
+  margin: 0 auto;
+  max-width: var(--la-breakpoint-desktop);
+}
+
+/* ====================
+   Footer Styles
+   ==================== */
+.site-footer,
+.la-footer {
+  background-color: var(--la-blue) !important;
+  color: var(--la-white) !important;
+  text-align: center;
+  padding: var(--la-spacing-xl) var(--la-spacing-md);
+  margin-top: var(--la-spacing-xxl);
+}
+
+.site-footer a,
+.la-footer a {
+  color: var(--la-white) !important;
+  text-decoration: underline;
+}
+
+.site-footer a:hover,
+.la-footer a:hover {
+  opacity: 0.8;
+}
+
+.la-footer-logo {
+  width: 250px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: var(--la-spacing-md);
+}
+
+/* ====================
+   Mobile Responsive Styles
+   ==================== */
+@media screen and (max-width: 768px) {
+  /* Navigation Mobile */
+  .la-navigation {
+    flex-direction: column;
+  }
+  
+  .menu-toggle-open {
+    display: block !important;
+    color: var(--la-white) !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  /* Mobile Menu Items */
+  .primary-menu-container .menu-item {
+    display: block;
+    width: 100%;
+  }
+  
+  .primary-menu-container .menu-item a {
+    display: block;
+    padding: var(--la-spacing-md);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  /* Typography Mobile */
+  h1, .h1 { font-size: 2rem; }
+  h2, .h2 { font-size: 1.75rem; }
+  h3, .h3 { font-size: 1.5rem; }
+  
+  /* Buttons Mobile */
+  .la-button,
+  .wp-block-button__link {
+    width: 100%;
+    max-width: 100%;
+    font-size: 1.1rem !important;
+    padding: var(--la-spacing-md) !important;
+  }
+  
+  /* Content Boxes Mobile */
+  .la-text-box,
+  .la-highlight-box {
+    padding: var(--la-spacing-md);
+    margin: var(--la-spacing-md);
+  }
+  
+  /* Images Mobile */
+  .la-images-section img {
+    max-width: 100%;
+  }
+  
+  /* Columns Mobile */
+  .la-column {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+  
+  /* Banner Mobile */
+  .la-banner-svg {
+    max-height: 80px;
+  }
+}
+
+/* ====================
+   Utility Classes
+   ==================== */
+.la-text-center { text-align: center; }
+.la-text-left { text-align: left; }
+.la-text-right { text-align: right; }
+
+.la-mt-1 { margin-top: var(--la-spacing-md); }
+.la-mt-2 { margin-top: var(--la-spacing-lg); }
+.la-mt-3 { margin-top: var(--la-spacing-xl); }
+
+.la-mb-1 { margin-bottom: var(--la-spacing-md); }
+.la-mb-2 { margin-bottom: var(--la-spacing-lg); }
+.la-mb-3 { margin-bottom: var(--la-spacing-xl); }
+
+.la-p-1 { padding: var(--la-spacing-md); }
+.la-p-2 { padding: var(--la-spacing-lg); }
+.la-p-3 { padding: var(--la-spacing-xl); }
+
+.la-bg-blue { background-color: var(--la-blue); }
+.la-bg-red { background-color: var(--la-red); }
+.la-bg-white { background-color: var(--la-white); }
+
+.la-text-blue { color: var(--la-blue); }
+.la-text-red { color: var(--la-red); }
+.la-text-white { color: var(--la-white); }
+
+/* Hide/Show Mobile vs Desktop */
+.la-desktop-only {
+  display: block;
+}
+.la-mobile-only {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .la-desktop-only {
+    display: none;
+  }
+  .la-mobile-only {
+    display: block;
+  }
+}
+
+/* ====================
+   WordPress Specific Overrides
+   ==================== */
+/* Kadence Theme Specific */
+.kadence-theme .site-branding {
+  padding: 0 !important;
+}
+
+.kadence-theme .header-navigation {
+  background-color: var(--la-blue) !important;
+}
+
+/* Gutenberg Block Overrides */
+.wp-block-group.has-background {
+  padding: var(--la-spacing-xl);
+}
+
+.wp-block-separator {
+  border-color: var(--la-blue);
+  border-width: var(--la-border-width);
+}
+
+/* WooCommerce Overrides (if using shop) */
+.woocommerce-button,
+.woocommerce a.button,
+.woocommerce button.button {
+  background-color: var(--la-red) !important;
+  color: var(--la-white) !important;
+  font-family: var(--la-font-body) !important;
+  border: var(--la-border-width) solid var(--la-white) !important;
+}
+
+.woocommerce-button:hover,
+.woocommerce a.button:hover {
+  background-color: var(--la-blue) !important;
+}
+
+/* ====================
+   Animation Classes
+   ==================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.la-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* ====================
+   Print Styles
+   ==================== */
+@media print {
+  .la-navigation,
+  .site-header,
+  .site-footer,
+  .la-social-nav {
+    display: none !important;
+  }
+  
+  body {
+    color: black !important;
+    background: white !important;
+  }
+}

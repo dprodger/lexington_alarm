@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You! - Lexington Alarm</title>
+    <style>
+        /* Import Lexington Alarm Brand Fonts */
+        @font-face {
+            font-family: 'ArmaliteRifle';
+            src: url('../wp-content/themes/kadence/fonts/armalite_rifle.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'UglyQua';
+            src: url('../wp-content/themes/kadence/fonts/UglyQua.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* Brand Colors */
+        :root {
+            --la-blue: #044f9d;
+            --la-red: #c3202e;
+            --la-white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--la-white);
+            color: #000;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .thank-you-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--la-blue) 0%, #0667c4 100%);
+            border-radius: 8px;
+            color: var(--la-white);
+        }
+
+        .thank-you-header h1 {
+            font-family: 'ArmaliteRifle', serif;
+            font-size: 3em;
+            color: var(--la-white);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .thank-you-header .subtitle {
+            font-family: 'UglyQua', sans-serif;
+            font-size: 1.4em;
+            color: var(--la-white);
+            opacity: 0.95;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--la-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .success-icon::after {
+            content: '✓';
+            font-size: 48px;
+            color: var(--la-white);
+            font-weight: bold;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .content-box {
+            background-color: #f8f9fa;
+            border: 3px solid var(--la-blue);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .content-box h2 {
+            font-family: 'UglyQua', sans-serif;
+            color: var(--la-red);
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .content-box p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .volunteer-info {
+            background-color: var(--la-white);
+            border-left: 5px solid var(--la-red);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .volunteer-info strong {
+            color: var(--la-blue);
+            font-family: 'UglyQua', sans-serif;
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .volunteer-info #selectedOption {
+            font-size: 1.3em;
+            color: var(--la-red);
+            font-weight: bold;
+        }
+
+        .next-steps {
+            margin-top: 30px;
+        }
+
+        .next-steps h3 {
+            font-family: 'UglyQua', sans-serif;
+            color: var(--la-blue);
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .next-steps ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .next-steps li {
+            padding: 12px 0 12px 35px;
+            position: relative;
+            font-size: 1.05em;
+        }
+
+        .next-steps li::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            color: var(--la-red);
+            font-size: 1.2em;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px 0;
+        }
+
+        .la-button {
+            display: inline-block;
+            padding: 15px 40px;
+            font-family: 'UglyQua', sans-serif;
+            font-size: 1.2em;
+            text-decoration: none;
+            background-color: var(--la-red);
+            color: var(--la-white);
+            border: 3px solid var(--la-white);
+            border-radius: 5px;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .la-button:hover {
+            background-color: #a01a24;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .la-button-secondary {
+            background-color: var(--la-blue);
+            border-color: var(--la-white);
+        }
+
+        .la-button-secondary:hover {
+            background-color: #033d7d;
+        }
+
+        .social-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background-color: #f0f4f8;
+            border-radius: 8px;
+        }
+
+        .social-section h3 {
+            font-family: 'UglyQua', sans-serif;
+            color: var(--la-blue);
+            margin-bottom: 15px;
+        }
+
+        .social-icons {
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 0.95em;
+            color: var(--la-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--la-red);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .thank-you-header h1 {
+                font-size: 2em;
+            }
+            
+            .thank-you-header .subtitle {
+                font-size: 1.1em;
+            }
+
+            .content-box {
+                padding: 20px;
+            }
+
+            .la-button {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .thank-you-header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="thank-you-header">
+            <div class="success-icon"></div>
+            <h1>Thank You!</h1>
+            <p class="subtitle">Welcome to the Lexington Alarm Family</p>
+        </div>
+
+        <div class="content-box">
+            <h2>Your Response Has Been Received</h2>
+            <p>We're thrilled that you've chosen to get involved with Lexington Alarm! Your commitment to preserving our community's rich Revolutionary War heritage is invaluable.</p>
+            
+            <div class="volunteer-info" id="volunteerSelection">
+                <strong>You've signed up for:</strong>
+                <span id="selectedOption">Loading your selection...</span>
+            </div>
+
+            <p>A member of our team will reach out to you soon with more details about your selected role and how you can start making an impact.</p>
+        </div>
+
+        <div class="content-box next-steps">
+            <h3>What Happens Next?</h3>
+            <ul>
+                <li>You'll receive a confirmation email shortly with your signup details</li>
+                <li>A committee coordinator will contact you within 3-5 business days</li>
+                <li>You'll be invited to our next volunteer orientation or committee meeting</li>
+                <li>You'll receive access to our volunteer resources and community calendar</li>
+            </ul>
+        </div>
+
+        <div class="button-group">
+            <a href="../" class="la-button">Return Home</a>
+            <a href="../events" class="la-button la-button-secondary">View Events</a>
+        </div>
+
+        <div class="social-section">
+            <h3>Stay Connected</h3>
+            <p>Follow us on social media to stay up to date with events, news, and volunteer opportunities!</p>
+            <div class="social-icons">
+                <a href="#" target="_blank">Facebook</a>
+                <a href="#" target="_blank">Instagram</a>
+                <a href="#" target="_blank">Twitter</a>
+                <a href="#" target="_blank">Newsletter</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Lexington Alarm! | 1775★2025 | Preserving 250 Years of History</p>
+        </footer>
+    </div>
+
+    <script>
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Display the selected volunteer option
+        window.addEventListener('DOMContentLoaded', function() {
+            // Check for various possible parameter names WPForms might use
+            var selection = getUrlParameter('committee') || 
+                           getUrlParameter('volunteer_choice') || 
+                           getUrlParameter('selection') ||
+                           getUrlParameter('interest');
+            
+            var optionDisplay = document.getElementById('selectedOption');
+            var volunteerBox = document.getElementById('volunteerSelection');
+            
+            if (selection) {
+                // Clean up the selection text for display
+                var displayText = selection
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, l => l.toUpperCase());
+                
+                optionDisplay.textContent = displayText;
+                volunteerBox.style.display = 'block';
+            } else {
+                // If no parameter found, show general message
+                optionDisplay.textContent = 'General Volunteer Opportunities';
+            }
+
+            // Optional: Store submission in localStorage for follow-up
+            if (selection) {
+                try {
+                    var submissionData = {
+                        selection: selection,
+                        timestamp: new Date().toISOString()
+                    };
+                    // Note: Only stored locally, not sent to server
+                    localStorage.setItem('la_volunteer_signup', JSON.stringify(submissionData));
+                } catch(e) {
+                    // localStorage might not be available
+                    console.log('Could not store submission data');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

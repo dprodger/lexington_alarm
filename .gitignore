@@ -1,0 +1,103 @@
+# =============================================================================
+# Lexington Alarm — .gitignore
+# =============================================================================
+
+# --- System files ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# --- Editor state ---
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# --- Secrets and credentials (CRITICAL) ---
+.env
+.env.local
+.env.*
+*-credentials*
+*.key
+*.pem
+.htpasswd
+wp-config.php
+wp-config-local.php
+auth.json
+
+# --- WordPress runtime and dev artifacts ---
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backup-*/
+wp-content/debug.log
+wp-content/advanced-cache.php
+wp-content/object-cache.php
+wp-content/wflogs/
+
+# --- Database dumps (NEVER commit) ---
+*.sql
+*.sql.gz
+*.sqlite
+*.sqlite3
+database_exports/*.sql
+wpforms-export*.csv
+wpforms-backup*.csv
+
+# --- Dependency directories ---
+node_modules/
+vendor/
+bower_components/
+.local/
+
+# --- Build output ---
+dist/
+build/
+*.min.js.map
+*.min.css.map
+
+# --- Log files ---
+*.log
+logs/
+debug.log
+error_log
+
+# --- Large binary source files (keep in Proton Drive, not git) ---
+*.psd
+*.ai
+*.raw
+*.dng
+*.arw
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+*.egg-info/
+
+# --- OS trash ---
+._*
+.AppleDouble
+.LSOverride
+Spotlight-V100
+.Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+
+# --- Local sync artifacts ---
+la_wordpress_local
+sync_state.txt
+*.tmp
+*.new
+_write_test.*
+
+# --- Large uncompressed source assets to review ---
+# IMG_1642.png is 11MB; compress or move to Proton Drive before tracking
+# For now, tracking is allowed but flagged in MIGRATION_LOG.md

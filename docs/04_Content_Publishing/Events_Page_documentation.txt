@@ -1,0 +1,80 @@
+Lexington Alarm Events Page - Configuration Summary
+Final Implementation Status
+Page: Events
+Platform: WordPress with Kadence Theme
+Calendar System: Tockify
+Date Completed: September 2024
+
+Page Structure
+Two-tier event display system:
+
+Featured Events - Pinboard view filtered by "featured" tag
+All Upcoming Events - Full calendar with monthly default view
+
+
+Final HTML Code
+html<!-- Two-Tier Events Page: Featured + Full Calendar -->
+<div class="events-page-wrapper">
+    <!-- TIER 1: Featured Events Section -->
+    <div class="featured-events-section">
+        <h2 class="section-title">FEATURED EVENTS</h2>
+        <div class="featured-events-container">
+            <div data-tockify-component="pinboard" 
+                 data-tockify-calendar="lexingtonalarm"
+                 data-tockify-search="featured">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Visual Separator -->
+    <div class="section-divider">
+        <span class="divider-text">ALL UPCOMING EVENTS</span>
+    </div>
+    
+    <!-- TIER 2: Full Calendar Section -->
+    <div class="full-calendar-section">
+        <div data-tockify-component="calendar" 
+             data-tockify-calendar="lexingtonalarm"
+             data-tockify-view="monthly">
+        </div>
+    </div>
+</div>
+   
+<!-- Tockify Script (only need once) -->
+<script data-cfasync="false" data-tockify-script="embed" 
+        src="https://public.tockify.com/browser/embed.js"></script>
+
+CSS Additions (Added to main stylesheet)
+
+Centered section titles (FEATURED EVENTS, ALL UPCOMING EVENTS)
+Red ArmaliteRifle font for headings matching brand
+Blue border dividers between sections
+Responsive wrapper with 1200px max-width
+Tockify title centering overrides
+
+
+Tockify Configuration
+
+Calendar Name: lexingtonalarm
+Default View: Monthly calendar
+Featured Filter: Tags events with "featured" keyword
+No Events Message: Disabled in Tockify settings
+
+
+Key Decisions Made
+
+Removed duplicate "All Upcoming Events" heading
+Set monthly as default view (changed from agenda)
+Disabled "no more events" footer in Tockify settings
+Used divider styling to separate sections visually
+Maintained brand consistency with red/blue color scheme
+
+
+Testing Notes
+
+Mobile responsive verified
+Calendar switching between views functional
+Featured events filtering working with "featured" tag
+All styling consistent with main site branding
+
+Ready for Content: Event entries can now be added directly in Tockify dashboard

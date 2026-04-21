@@ -1,0 +1,103 @@
+<!-- Simple News Entry Form for Admin Use -->
+<!-- Create a new page called "Add News Story" and paste this HTML -->
+
+<div class="news-entry-form" style="max-width: 800px; margin: 0 auto;">
+    <h2 style="color: #c3202e;">Add News Story</h2>
+    
+    <!-- Using WPForms or create custom form -->
+    [wpforms id="XXX"]
+    
+    <!-- Or use this HTML form structure -->
+    <form method="post" enctype="multipart/form-data" action="">
+        <div style="margin-bottom: 20px;">
+            <label for="news-title" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                Story Title:
+            </label>
+            <input type="text" id="news-title" name="news_title" 
+                   style="width: 100%; padding: 10px; border: 2px solid #044f9d;" 
+                   required>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="news-date" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                Date:
+            </label>
+            <input type="date" id="news-date" name="news_date" 
+                   style="padding: 10px; border: 2px solid #044f9d;" 
+                   value="<?php echo date('Y-m-d'); ?>">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="news-image" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                Featured Image:
+            </label>
+            <input type="file" id="news-image" name="news_image" 
+                   accept="image/*"
+                   style="padding: 10px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="news-excerpt" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                Short Summary (for preview):
+            </label>
+            <textarea id="news-excerpt" name="news_excerpt" 
+                      rows="3" 
+                      style="width: 100%; padding: 10px; border: 2px solid #044f9d;"
+                      placeholder="Brief summary that appears on the News page..."></textarea>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="news-content" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                Full Story:
+            </label>
+            <textarea id="news-content" name="news_content" 
+                      rows="10" 
+                      style="width: 100%; padding: 10px; border: 2px solid #044f9d;"
+                      required></textarea>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">
+                Story Type:
+            </label>
+            <label style="margin-right: 20px;">
+                <input type="radio" name="story_type" value="featured" checked>
+                Featured Story (appears at top)
+            </label>
+            <label>
+                <input type="radio" name="story_type" value="regular">
+                Regular Story (archive only)
+            </label>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="newsletter-link" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                Associated Newsletter (optional):
+            </label>
+            <input type="text" id="newsletter-link" name="newsletter_link" 
+                   style="width: 100%; padding: 10px; border: 2px solid #044f9d;"
+                   placeholder="Link to newsletter or newsletter date">
+        </div>
+        
+        <button type="submit" 
+                style="background: #c3202e; color: white; padding: 15px 30px; 
+                       border: none; font-size: 1.1em; font-weight: bold; cursor: pointer;">
+            PUBLISH NEWS STORY
+        </button>
+    </form>
+</div>
+
+<script>
+// Preview image before upload
+document.getElementById('news-image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Could add preview here
+            console.log('Image selected:', file.name);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>

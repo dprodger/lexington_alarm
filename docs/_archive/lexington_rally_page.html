@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCT 18th No King! It Started Here Rally - Lexington Alarm</title>
+    <style>
+        /* Import your custom fonts */
+        @font-face {
+            font-family: 'ArmaliteRifle';
+            src: url('/wp-content/themes/kadence/fonts/armalite_rifle.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'UglyQua';
+            src: url('/wp-content/themes/kadence/fonts/UglyQua.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', Arial, sans-serif;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .rally-header {
+            background-color: #fff;
+            color: #000;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            border: 5px solid #044f9d;
+        }
+
+        .rally-header h1 {
+            font-family: 'ArmaliteRifle', sans-serif;
+            color: #c3202e;
+            text-transform: uppercase;
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .rally-header .date-location {
+            font-family: 'UglyQua', Georgia, serif;
+            color: #044f9d;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-family: 'ArmaliteRifle', sans-serif;
+            color: #c3202e;
+            text-transform: uppercase;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #044f9d;
+            padding-bottom: 10px;
+        }
+
+        /* Schedule */
+        .schedule-item {
+            background-color: #f5f5f5;
+            border-left: 5px solid #c3202e;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .schedule-item .time {
+            font-family: 'UglyQua', Georgia, serif;
+            color: #044f9d;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .schedule-item .activity {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .schedule-item .description {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Speakers */
+        .speakers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .speaker-card {
+            border: 2px solid #044f9d;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .speaker-photo {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border: 3px solid #c3202e;
+            margin-bottom: 15px;
+        }
+
+        .speaker-photo.placeholder {
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .speaker-name {
+            font-family: 'UglyQua', Georgia, serif;
+            color: #c3202e;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .speaker-title {
+            color: #044f9d;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .speaker-bio {
+            line-height: 1.5;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            background-color: #f5f5f5;
+            color: #000;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 3px solid #c3202e;
+        }
+
+        .info-box h3 {
+            font-family: 'UglyQua', Georgia, serif;
+            color: #c3202e;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .info-box ul {
+            list-style-position: inside;
+            margin-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 10px;
+        }
+
+        .info-box a {
+            color: #c3202e;
+            text-decoration: underline;
+        }
+
+        /* Buttons */
+        .button-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .la-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: #c3202e;
+            color: white;
+            text-decoration: none;
+            border: 2px solid white;
+            font-family: 'UglyQua', Georgia, serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .la-button:hover {
+            background-color: #fff;
+            color: #c3202e;
+            border-color: #c3202e;
+        }
+
+        .la-button-secondary {
+            background-color: #044f9d;
+            border-color: white;
+        }
+
+        .la-button-secondary:hover {
+            background-color: #fff;
+            color: #044f9d;
+            border-color: #044f9d;
+        }
+
+        /* Update Banner */
+        .update-banner {
+            background-color: #fff3cd;
+            border: 2px solid #c3202e;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .update-banner strong {
+            color: #c3202e;
+            font-size: 1.2em;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .rally-header h1 {
+                font-size: 2em;
+            }
+
+            .section-title {
+                font-size: 1.8em;
+            }
+
+            .speakers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .la-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="rally-header">
+        <h1>No King! It Started Here</h1>
+        <div class="date-location">
+            <img src="/Users/jtsackton/screenshots_current/nokingposter_img.png" 
+            alt="No King Rally Poster" 
+            style="width: 100%; height: auto; max-width: 800px; display: block; margin: 0 auto 30px auto; border: 3px solid #c3202e;"/>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Call to Action Buttons -->
+        <div class="button-container">
+            <a href="https://www.mobilize.us/lexingtonalarm/event/853527/" class="la-button" target="_blank">REGISTER AND RSVP</a>
+            <a href="#volunteer" class="la-button-secondary">VOLUNTEER</a>
+            <a href="#donate" class="la-button-secondary">DONATE</a>
+            <a href="#share" class="la-button-secondary">SHARE ON SOCIAL MEDIA</a>
+        </div>
+
+        <!-- Rally Schedule -->
+        <section class="section">
+            <h2 class="section-title">Rally Schedule</h2>
+            
+            <div class="schedule-item">
+                <div class="time">10:00 AM - Registration Opens</div>
+                <div class="activity">Check-in and Welcome</div>
+                <div class="description">Arrive early to get your rally materials and meet fellow patriots</div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="time">11:00 AM - Opening Remarks</div>
+                <div class="activity">Rally Begins</div>
+                <div class="description">Welcome address and overview of the day's events</div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="time">11:30 AM - 1:30 PM - Featured Speakers</div>
+                <div class="activity">Main Program</div>
+                <div class="description">Hear from patriots defending democracy and the rule of law</div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="time">1:30 PM - 2:00 PM - Community Action</div>
+                <div class="activity">Next Steps & Closing</div>
+                <div class="description">How you can stay involved and make a difference</div>
+            </div>
+        </section>
+
+        <!-- Speakers -->
+        <section class="section">
+            <h2 class="section-title">Featured Speakers</h2>
+            <p style="font-style: italic; margin-bottom: 30px; font-size: 1.1em;">Speaker lineup being finalized - check back for updates!</p>
+            
+            <div class="speakers-grid">
+                <!-- Speaker 1 - Template -->
+                <div class="speaker-card">
+                    <div class="speaker-photo placeholder">Photo Coming Soon</div>
+                    <h3 class="speaker-name">[Speaker Name]</h3>
+                    <div class="speaker-title">[Title/Organization]</div>
+                    <p class="speaker-bio">
+                        [Speaker bio will be added here. This will include their background, expertise, and why they're passionate about defending democracy and the rule of law.]
+                    </p>
+                </div>
+
+                <!-- Speaker 2 - Template -->
+                <div class="speaker-card">
+                    <div class="speaker-photo placeholder">Photo Coming Soon</div>
+                    <h3 class="speaker-name">[Speaker Name]</h3>
+                    <div class="speaker-title">[Title/Organization]</div>
+                    <p class="speaker-bio">
+                        [Speaker bio will be added here.]
+                    </p>
+                </div>
+
+                <!-- Speaker 3 - Template -->
+                <div class="speaker-card">
+                    <div class="speaker-photo placeholder">Photo Coming Soon</div>
+                    <h3 class="speaker-name">[Speaker Name]</h3>
+                    <div class="speaker-title">[Title/Organization]</div>
+                    <p class="speaker-bio">
+                        [Speaker bio will be added here.]
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rally Information -->
+        <section class="section">
+            <h2 class="section-title">Rally Information</h2>
+            
+            <div class="info-box">
+                <h3>📚 Literature Tables</h3>
+                <p>Visit our information tables to:</p>
+                <ul>
+                    <li>Learn more about defending democracy and the rule of law</li>
+                    <li>Get informational materials to share with your community</li>
+                    <li>Connect with local organizations working on these issues</li>
+                    <li>Sign up for future actions and events</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>👮 Rally Marshals</h3>
+                <p>Our trained rally marshals will be present to:</p>
+                <ul>
+                    <li>Ensure everyone's safety and comfort</li>
+                    <li>Provide directions and answer questions</li>
+                    <li>Maintain a peaceful, respectful atmosphere</li>
+                    <li>Coordinate with local authorities</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Look for volunteers wearing [MARSHAL IDENTIFICATION - TO BE ADDED]</strong></p>
+            </div>
+
+            <div class="info-box">
+                <h3>ℹ️ Important Information</h3>
+                <ul>
+                    <li><strong>Location:</strong> Lexington Battle Green, Lexington, MA</li>
+                    <li><strong>Parking:</strong> [Parking information to be added]</li>
+                    <li><strong>Accessibility:</strong> [Accessibility information to be added]</li>
+                    <li><strong>What to Bring:</strong> Water, comfortable shoes, weather-appropriate clothing</li>
+                    <li><strong>Weather Policy:</strong> Rally will proceed rain or shine unless severe weather</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Volunteer Section -->
+        <section class="section" id="volunteer">
+            <h2 class="section-title">Volunteer with Us</h2>
+            <div class="info-box">
+                <h3>🤝 We Need Your Help!</h3>
+                <p>Make this rally a success by volunteering. Opportunities include:</p>
+                <ul>
+                    <li>Rally marshals and crowd coordination</li>
+                    <li>Literature table staffing</li>
+                    <li>Setup and breakdown crews</li>
+                    <li>Registration and check-in</li>
+                    <li>Photography and social media</li>
+                </ul>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="[VOLUNTEER SIGNUP LINK]" class="la-button" target="_blank">SIGN UP TO VOLUNTEER</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Donate Section -->
+        <section class="section" id="donate">
+            <h2 class="section-title">Support the Rally</h2>
+            <div class="info-box">
+                <h3>💰 Help Cover Rally Expenses</h3>
+                <p>Your donation helps cover:</p>
+                <ul>
+                    <li>Sound system and equipment rental</li>
+                    <li>Printing of signs and materials</li>
+                    <li>Permits and insurance</li>
+                    <li>Promotional materials</li>
+                    <li>Volunteer coordination costs</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Every contribution, large or small, makes a difference!</strong></p>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="[DONATION LINK]" class="la-button" target="_blank">DONATE NOW</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact/Questions -->
+        <section class="section">
+            <h2 class="section-title">Questions?</h2>
+            <div class="info-box">
+                <h3>📧 Get in Touch</h3>
+                <p>Have questions about the rally? Need special accommodations?</p>
+                <p style="margin-top: 15px;">
+                    <strong>Email:</strong> <a href="mailto:info@lexingtonalarm.org">info@lexingtonalarm.org</a>
+                </p>
+                <p style="margin-top: 10px;">
+                    <strong>Website:</strong> <a href="https://lexingtonalarm.org">lexingtonalarm.org</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Share on Social Media -->
+        <section class="section" id="share">
+            <h2 class="section-title">Share This Rally</h2>
+            <div class="info-box">
+                <h3>📱 Spread the Word!</h3>
+                <p style="margin-bottom: 20px;">Help us reach more people - share this rally on social media:</p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://new.lexingtonalarm.org/oct18rally" target="_blank" class="la-button-secondary" style="display: inline-block;">Share on Facebook</a>
+                    <a href="mailto:?subject=Join%20the%20Oct%2018th%20Rally&body=Join%20us%20for%20the%20No%20King!%20It%20Started%20Here%20Rally%20on%20October%2018th.%20Details:%20https://new.lexingtonalarm.org/oct18rally" class="la-button-secondary" style="display: inline-block;">Share via Email</a>
+                </div>
+                <p style="margin-top: 20px; font-style: italic; font-size: 0.9em;">
+                    For TikTok and Instagram: Copy this link and share in your stories or posts: <strong>https://new.lexingtonalarm.org/oct18rally</strong>
+                </p>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <div class="button-container">
+            <a href="https://www.mobilize.us/lexingtonalarm/event/853527/" class="la-button" target="_blank">REGISTER AND RSVP NOW</a>
+        </div>
+
+        <!-- Update Banner - Moved to Bottom -->
+        <div class="update-banner">
+            <strong>📢 Check back regularly for updates!</strong><br>
+            This page will be updated with the latest information about speakers, schedule, and rally details.
+            <p style="margin-top: 10px; font-style: italic;">Last updated: October 13, 2025</p>
+        </div>
+    </div>
+</body>
+</html>

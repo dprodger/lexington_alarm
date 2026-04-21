@@ -1,0 +1,139 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃           WORDPRESS PAGE EXPORT BOOKMARKLET                      ┃
+┃                    One-Click Setup                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+📌 WHAT THIS DOES:
+   Adds a bookmark to your browser that instantly exports any 
+   WordPress page as HTML with one click.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 SETUP (One Time - 2 Minutes):
+
+   1. SHOW YOUR BOOKMARKS BAR
+      Chrome/Edge: Ctrl+Shift+B (Windows) or Cmd+Shift+B (Mac)
+      Firefox: Ctrl+Shift+B or Cmd+Shift+B
+      Safari: Cmd+Shift+B
+
+   2. RIGHT-CLICK on your bookmarks bar
+      → Select "Add page" or "Add bookmark"
+
+   3. ENTER THESE DETAILS:
+      
+      Name: 
+      ┌────────────────────────────────────┐
+      │ Export WP Page                     │
+      └────────────────────────────────────┘
+
+      URL/Location: 
+      ┌────────────────────────────────────────────────────────────┐
+      │ [Copy the JavaScript code from BOOKMARKLET CODE section]   │
+      └────────────────────────────────────────────────────────────┘
+
+   4. SAVE the bookmark
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 BOOKMARKLET CODE:
+
+Copy everything below (yes, it starts with "javascript:"):
+
+javascript:(function(){if(typeof wp!=='undefined'&&wp.data){const content=wp.data.select('core/editor').getEditedPostContent();const title=wp.data.select('core/editor').getEditedPostAttribute('title');const filename=(title||'page').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.html';const blob=new Blob([content],{type:'text/html'});const url=window.URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);window.URL.revokeObjectURL(url);alert('Downloaded: '+filename+'\n\nMove to:\ncurrent_state/pages/');}else{alert('Please use this on a WordPress page editor');}})();
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ HOW TO USE:
+
+   1. Open ANY page in WordPress editor
+   
+   2. Click your "Export WP Page" bookmark
+   
+   3. A file downloads automatically (e.g., "news.html")
+   
+   4. Move the file to: 
+      /current_state/pages/
+
+   That's it! Takes 5 seconds per page.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 EXAMPLE WORKFLOW:
+
+   Session 1: Edit News and About pages
+   ┌──────────────────────────────────────────────────┐
+   │ 1. Edit News page in WordPress → Save            │
+   │ 2. Click "Export WP Page" bookmark               │
+   │ 3. news.html downloads ✓                         │
+   │                                                   │
+   │ 4. Edit About page in WordPress → Save           │
+   │ 5. Click "Export WP Page" bookmark               │
+   │ 6. about.html downloads ✓                        │
+   │                                                   │
+   │ 7. Move both files to current_state/pages/       │
+   │                                                   │
+   │ Time: ~30 seconds total                          │
+   └──────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 WHAT GETS EXPORTED:
+
+   ✓ All page content (HTML)
+   ✓ WordPress block markup
+   ✓ Shortcodes
+   ✓ Custom HTML blocks
+   ✓ Headings, paragraphs, images, etc.
+
+   ✗ NOT included (export separately):
+     - Custom CSS (from Customizer)
+     - PHP snippets (from WPCode)
+     - Dynamic content (database)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ TROUBLESHOOTING:
+
+   Problem: "Nothing happens when I click"
+   Solution: Make sure you're on a page EDITOR screen,
+            not the page list or preview
+
+   Problem: "Wrong content exported"
+   Solution: Save your page first, then click bookmarklet
+
+   Problem: "Can't create bookmark"
+   Solution: Use the manual Code Editor method instead
+            (See EXPORT_PAGE_METHODS.md)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 ALTERNATIVE: Manual Code Editor Method
+
+   If you prefer not to use a bookmarklet:
+
+   1. Edit page in WordPress
+   2. Click ⋮ menu → "Code editor"
+   3. Ctrl/Cmd + A (Select All)
+   4. Ctrl/Cmd + C (Copy)
+   5. Paste into current_state/pages/[pagename].html
+
+   Time: ~30 seconds per page
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ BONUS: Export All Pages Quickly
+
+   With bookmarklet:
+   - Open each page in new tab
+   - Click through tabs, hitting bookmarklet in each
+   - All files download in sequence
+   - Move all to current_state/pages/ at once
+
+   Export 6 pages in under 60 seconds! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ready to export? Set up the bookmarklet now, then tell Claude:
+"I've set up the export bookmarklet and synced my pages!"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

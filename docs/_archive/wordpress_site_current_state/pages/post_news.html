@@ -1,0 +1,19 @@
+<!-- wp:html -->
+<div class="news-entry-wrapper" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <h1 style="text-align: center; color: #c3202e; font-family: ArmaliteRifle, sans-serif; text-transform: uppercase;">
+        News Team Portal
+    </h1>
+    
+    <p style="text-align: center; color: #044f9d; font-size: 1.1em; margin-bottom: 30px;">
+        Authorized members can submit news stories and updates here
+    </p>
+    
+    [la_news_login]
+    
+    <?php if (isset($_GET['news_submitted']) && $_GET['news_submitted'] == 'success') : ?>
+        <div style="background: #d4edda; border: 2px solid #28a745; color: #155724; padding: 15px; margin: 20px 0; text-align: center;">
+            <strong>Success!</strong> Your news story has been submitted.
+        </div>
+    <?php endif; ?>
+</div>
+<!-- /wp:html -->

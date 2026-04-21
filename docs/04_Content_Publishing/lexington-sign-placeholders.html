@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexington Alarm Sign Placeholders</title>
+    <style>
+        @font-face {
+            font-family: 'UglyQua';
+            src: url('/website_97a098b6/wp-content/themes/kadence/fonts/UglyQua.ttf') format('truetype');
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #c3202e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .image-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .placeholder-canvas {
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            display: block;
+        }
+        
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #044f9d;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .download-btn:hover {
+            background: #033a75;
+        }
+        
+        .instructions {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .instructions h2 {
+            color: #044f9d;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lexington Alarm Product Placeholder Images</h1>
+        
+        <div class="instructions">
+            <h2>How to Use These Images:</h2>
+            <ol>
+                <li>Right-click on each image and select "Save Image As..." to download</li>
+                <li>Or click the "Download" button below each image</li>
+                <li>Upload to WordPress Media Library (Media → Add New)</li>
+                <li>Add to your product in WooCommerce</li>
+            </ol>
+        </div>
+        
+        <div class="images-grid">
+            <!-- Main Product Image -->
+            <div class="image-card">
+                <div class="image-label">1. Main Product Image (Front Side)</div>
+                <canvas id="mainProduct" class="placeholder-canvas" width="1200" height="1200"></canvas>
+                <button class="download-btn" onclick="downloadCanvas('mainProduct', 'lex-yard-sign-18x24-main.jpg')">Download Main Image</button>
+            </div>
+            
+            <!-- Back Side Image -->
+            <div class="image-card">
+                <div class="image-label">2. Back Side (Thomas Paine Quote)</div>
+                <canvas id="backSide" class="placeholder-canvas" width="1200" height="1200"></canvas>
+                <button class="download-btn" onclick="downloadCanvas('backSide', 'lex-yard-sign-18x24-back.jpg')">Download Back Image</button>
+            </div>
+            
+            <!-- In Use Image -->
+            <div class="image-card">
+                <div class="image-label">3. In-Use Display</div>
+                <canvas id="inUse" class="placeholder-canvas" width="1200" height="1200"></canvas>
+                <button class="download-btn" onclick="downloadCanvas('inUse', 'lex-yard-sign-18x24-yard.jpg')">Download In-Use Image</button>
+            </div>
+            
+            <!-- Size Reference Image -->
+            <div class="image-card">
+                <div class="image-label">4. Size Reference with Stake</div>
+                <canvas id="sizeRef" class="placeholder-canvas" width="1200" height="1200"></canvas>
+                <button class="download-btn" onclick="downloadCanvas('sizeRef', 'lex-yard-sign-18x24-size.jpg')">Download Size Image</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Draw Main Product Image (Front)
+        function drawMainProduct() {
+            const canvas = document.getElementById('mainProduct');
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#f8f8f8';
+            ctx.fillRect(0, 0, 1200, 1200);
+            
+            // Sign background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(200, 250, 800, 600);
+            
+            // Blue border/frame
+            ctx.strokeStyle = '#044f9d';
+            ctx.lineWidth = 20;
+            ctx.strokeRect(200, 250, 800, 600);
+            
+            // Top text - LEXINGTON ALARM!
+            ctx.fillStyle = '#044f9d';
+            ctx.font = 'bold 80px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('LEXINGTON', 600, 380);
+            ctx.fillText('ALARM!', 600, 470);
+            
+            // Red bar with years
+            ctx.fillStyle = '#c3202e';
+            ctx.fillRect(250, 500, 700, 100);
+            
+            // White text in red bar
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 60px Arial';
+            ctx.fillText('1775 ★ 2025', 600, 565);
+            
+            // Bottom text
+            ctx.fillStyle = '#044f9d';
+            ctx.font = 'bold 50px Arial';
+            ctx.fillText('NO KING!', 600, 680);
+            ctx.fillText('NO TYRANNY!', 600, 750);
+            
+            // Dimension label
+            ctx.fillStyle = '#666666';
+            ctx.font = '24px Arial';
+            ctx.fillText('18" × 24" Double-Sided', 600, 950);
+        }
+        
+        // Draw Back Side Image
+        function drawBackSide() {
+            const canvas = document.getElementById('backSide');
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#f8f8f8';
+            ctx.fillRect(0, 0, 1200, 1200);
+            
+            // Sign background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(200, 250, 800, 600);
+            
+            // Blue border
+            ctx.strokeStyle = '#044f9d';
+            ctx.lineWidth = 20;
+            ctx.strokeRect(200, 250, 800, 600);
+            
+            // Quote text
+            ctx.fillStyle = '#044f9d';
+            ctx.font = 'bold 70px Arial';
+            ctx.textAlign = 'center';
+            
+            ctx.fillText('IN AMERICA', 600, 420);
+            ctx.fillText('THE LAW', 600, 510);
+            ctx.fillText('IS KING', 600, 600);
+            
+            // Attribution
+            ctx.font = 'italic 40px Arial';
+            ctx.fillStyle = '#c3202e';
+            ctx.fillText('- Thomas Paine', 600, 700);
+            
+            // Label
+            ctx.fillStyle = '#666666';
+            ctx.font = '24px Arial';
+            ctx.fillText('Back Side View', 600, 950);
+        }
+        
+        // Draw In-Use Image
+        function drawInUse() {
+            const canvas = document.getElementById('inUse');
+            const ctx = canvas.getContext('2d');
+            
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 600);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#ffffff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1200, 600);
+            
+            // Grass
+            ctx.fillStyle = '#90EE90';
+            ctx.fillRect(0, 600, 1200, 600);
+            
+            // House silhouette
+            ctx.fillStyle = '#cccccc';
+            ctx.fillRect(100, 300, 400, 300);
+            // Roof
+            ctx.beginPath();
+            ctx.moveTo(50, 300);
+            ctx.lineTo(300, 150);
+            ctx.lineTo(550, 300);
+            ctx.closePath();
+            ctx.fillStyle = '#999999';
+            ctx.fill();
+            
+            // Sign in yard
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(650, 400, 300, 225);
+            
+            ctx.strokeStyle = '#044f9d';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(650, 400, 300, 225);
+            
+            // Sign text (simplified)
+            ctx.fillStyle = '#044f9d';
+            ctx.font = 'bold 30px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('LEXINGTON', 800, 460);
+            ctx.fillText('ALARM!', 800, 500);
+            
+            ctx.fillStyle = '#c3202e';
+            ctx.fillRect(680, 510, 240, 35);
+            
+            // Stake
+            ctx.fillStyle = '#666666';
+            ctx.fillRect(790, 625, 20, 250);
+            
+            // Label
+            ctx.fillStyle = '#333333';
+            ctx.font = '24px Arial';
+            ctx.fillText('Display in Your Yard', 600, 1100);
+        }
+        
+        // Draw Size Reference
+        function drawSizeRef() {
+            const canvas = document.getElementById('sizeRef');
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#f8f8f8';
+            ctx.fillRect(0, 0, 1200, 1200);
+            
+            // Sign
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(300, 200, 600, 450);
+            
+            ctx.strokeStyle = '#044f9d';
+            ctx.lineWidth = 15;
+            ctx.strokeRect(300, 200, 600, 450);
+            
+            // Simplified sign design
+            ctx.fillStyle = '#044f9d';
+            ctx.font = 'bold 60px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('LEXINGTON', 600, 320);
+            ctx.fillText('ALARM!', 600, 400);
+            
+            ctx.fillStyle = '#c3202e';
+            ctx.fillRect(350, 420, 500, 80);
+            
+            ctx.fillStyle = '#044f9d';
+            ctx.font = 'bold 40px Arial';
+            ctx.fillText('NO TYRANNY!', 600, 580);
+            
+            // H-Stake
+            ctx.strokeStyle = '#666666';
+            ctx.lineWidth = 10;
+            // Vertical posts
+            ctx.beginPath();
+            ctx.moveTo(500, 650);
+            ctx.lineTo(500, 1000);
+            ctx.moveTo(700, 650);
+            ctx.lineTo(700, 1000);
+            // Crossbar
+            ctx.moveTo(500, 750);
+            ctx.lineTo(700, 750);
+            ctx.stroke();
+            
+            // Dimension arrows and labels
+            ctx.strokeStyle = '#c3202e';
+            ctx.lineWidth = 2;
+            
+            // Width arrow
+            ctx.beginPath();
+            ctx.moveTo(300, 150);
+            ctx.lineTo(900, 150);
+            // Arrow heads
+            ctx.moveTo(300, 150);
+            ctx.lineTo(320, 140);
+            ctx.moveTo(300, 150);
+            ctx.lineTo(320, 160);
+            ctx.moveTo(900, 150);
+            ctx.lineTo(880, 140);
+            ctx.moveTo(900, 150);
+            ctx.lineTo(880, 160);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#c3202e';
+            ctx.font = '30px Arial';
+            ctx.fillText('18 inches', 600, 130);
+            
+            // Height arrow
+            ctx.beginPath();
+            ctx.moveTo(250, 200);
+            ctx.lineTo(250, 650);
+            // Arrow heads
+            ctx.moveTo(250, 200);
+            ctx.lineTo(240, 220);
+            ctx.moveTo(250, 200);
+            ctx.lineTo(260, 220);
+            ctx.moveTo(250, 650);
+            ctx.lineTo(240, 630);
+            ctx.moveTo(250, 650);
+            ctx.lineTo(260, 630);
+            ctx.stroke();
+            
+            ctx.save();
+            ctx.translate(230, 425);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('24 inches', 0, 0);
+            ctx.restore();
+            
+            // Stake label
+            ctx.fillStyle = '#666666';
+            ctx.font = '24px Arial';
+            ctx.fillText('10" × 30" Metal H-Stake Included', 600, 1100);
+        }
+        
+        // Download function
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            link.click();
+        }
+        
+        // Draw all canvases on load
+        window.onload = function() {
+            drawMainProduct();
+            drawBackSide();
+            drawInUse();
+            drawSizeRef();
+        }
+    </script>
+</body>
+</html>

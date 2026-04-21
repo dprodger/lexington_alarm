@@ -1,0 +1,227 @@
+<style>
+.nd-letter-wrapper {
+    font-family: 'Georgia', serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f5f5;
+    color: #333;
+}
+
+.nd-letter-wrapper .page-header {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-bottom: 3px solid #044f9d;
+}
+
+.nd-letter-wrapper .page-header h1 {
+    color: #044f9d;
+    font-family: 'Georgia', serif;
+    font-size: 2rem;
+    margin: 0 0 15px 0;
+    text-transform: none;
+}
+
+.nd-letter-wrapper .page-header p {
+    color: #044f9d;
+    font-family: 'Georgia', serif;
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.nd-letter-wrapper .instructions {
+    background: #e8f4fc;
+    border-left: 4px solid #044f9d;
+    padding: 20px 25px;
+    margin-bottom: 25px;
+}
+
+.nd-letter-wrapper .instructions h3 {
+    color: #044f9d;
+    font-family: 'Georgia', serif;
+    margin: 0 0 15px 0;
+    font-size: 1.6rem;
+    text-transform: none;
+}
+
+.nd-letter-wrapper .instructions ol {
+    margin: 0;
+    padding-left: 25px;
+    font-size: 1.1rem;
+}
+
+.nd-letter-wrapper .instructions li {
+    margin-bottom: 8px;
+    font-family: 'Georgia', serif;
+    color: #333;
+}
+
+.nd-letter-wrapper .action-buttons {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.nd-letter-wrapper .btn {
+    display: inline-block;
+    padding: 15px 40px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-decoration: none;
+    border: 2px solid #044f9d;
+    cursor: pointer;
+    background: #044f9d;
+    color: #ffffff;
+}
+
+.nd-letter-wrapper .btn:hover {
+    background: #033d7a;
+    border-color: #033d7a;
+}
+
+.nd-letter-wrapper .letter-container {
+    background: white;
+    padding: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+}
+
+.nd-letter-wrapper .letter-recipient p {
+    margin: 0;
+    line-height: 1.3;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    color: #333;
+}
+
+.nd-letter-wrapper .letter-subject {
+    margin: 25px 0;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+}
+
+.nd-letter-wrapper .letter-salutation {
+    margin-bottom: 25px;
+    font-family: 'Georgia', serif;
+}
+
+.nd-letter-wrapper .letter-body p {
+    margin-bottom: 15px;
+    text-align: justify;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.nd-letter-wrapper .letter-body ul {
+    margin: 15px 0 15px 20px;
+    padding-left: 20px;
+}
+
+.nd-letter-wrapper .letter-body li {
+    margin-bottom: 10px;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.nd-letter-wrapper .letter-closing p {
+    font-family: 'Georgia', serif;
+}
+
+.nd-letter-wrapper .signature-line {
+    margin-top: 50px;
+    border-top: 1px solid #333;
+    width: 250px;
+    padding-top: 5px;
+    font-family: 'Georgia', serif;
+}
+
+/* Print Styles */
+@media print {
+    .nd-letter-wrapper {
+        background: white;
+        padding: 0;
+        max-width: none;
+    }
+    
+    .nd-letter-wrapper .page-header,
+    .nd-letter-wrapper .action-buttons,
+    .nd-letter-wrapper .instructions {
+        display: none;
+    }
+    
+    .nd-letter-wrapper .letter-container {
+        box-shadow: none;
+        border: none;
+        padding: 40px;
+    }
+}
+</style>
+
+<div class="nd-letter-wrapper">
+    <div class="page-header">
+        <h1>Take Action: Letter to National Development</h1>
+        <p>Stand Against Selective Enforcement Targeting Peaceful Protesters</p>
+    </div>
+    
+    <div class="instructions">
+        <h3>How to Send This Letter</h3>
+        <ol>
+            <li>Click "Print Letter" to print or save as PDF</li>
+            <li>Sign your name at the bottom</li>
+            <li>Mail to the address shown, or email to National Development</li>
+        </ol>
+    </div>
+    
+    <div class="action-buttons">
+        <button class="btn" onclick="window.print()">Print Letter</button>
+    </div>
+    
+    <div class="letter-container">
+        <div class="letter-recipient">
+            <p>Charlie Rollins</p>
+            <p>Principal and Chief Operating Officer</p>
+            <p>National Development</p>
+            <p>2310 Washington Street, Suite 200</p>
+            <p>Newton Lower Falls, MA 02462</p>
+        </div>
+        
+        <div class="letter-subject">
+            RE: Selective Parking Enforcement and Community Impact at District Ave
+        </div>
+        
+        <div class="letter-salutation">
+            Dear Mr. Rollins,
+        </div>
+        
+        <div class="letter-body">
+            <p>We are writing to you today as members of the Greater Boston community to express our deep concern regarding the recent shift in parking enforcement policies at The District Burlington.</p>
+            
+            <p>National Development has long marketed itself as a firm that prioritizes "Social Impact" and "Community Partnership." Your official corporate responsibility materials highlight a commitment to building "socially connected" neighborhoods and fostering "diversity, equity, and inclusion." Furthermore, the late Tom Alperin's legacy of supporting organizations like Project Bread and Heading Home has solidified the firm's reputation as a civic leader in Massachusetts.</p>
+            
+            <p>However, the recent decision to begin towing vehicles belonging to peaceful protesters at District Ave represents a stark departure from these values. These protests, led by groups such as Bearing Witness @ ICE and Justice 4 All Thursdays, are comprised of the very faith leaders, nonprofit organizers, and community members that National Development claims to partner with.</p>
+            
+            <p>By allowing selective enforcement against those standing in opposition to the conditions at the ICE Field Office, while allowing ICE vehicles (not one of your tenants) to park on your property, National Development is effectively choosing a side in a humanitarian crisis. This action puts at risk the firm's standing with its many institutional and community partners, including:</p>
+            
+            <ul>
+                <li>The nearly 60 local nonprofits your firm supports, many of whom serve the immigrant populations directly impacted by ICE activities.</li>
+                <li>Local faith leaders from Burlington and Lexington who have participated in these vigils for years without incident.</li>
+                <li>Civic organizations like the League of Women Voters, who have recently joined these demonstrations to protect due process.</li>
+            </ul>
+            
+            <p>The "abysmal" and "deplorable" conditions reported inside the 1000 District Ave facility are a matter of public record and local concern. We urge you to restore the previous status quo of allowing peaceful assembly and to cease the towing of vehicles in lots that have historically been available to the public.</p>
+            
+            <p>National Development has the power to facilitate civic engagement rather than suppress it. We look forward to seeing the firm return to its stated mission of strengthening the communities it calls home.</p>
+        </div>
+        
+        <div class="letter-closing">
+            <p>Sincerely,</p>
+            <div class="signature-line">
+                Your Name
+            </div>
+        </div>
+    </div>
+</div>
