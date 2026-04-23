@@ -75,7 +75,7 @@ For the project's history and current priorities, start with:
 
 ## License and contributions
 
-See `CONTRIBUTING.md` for how to propose changes. Currently active contributors: @tobysackton.
+See `CONTRIBUTING.md` for how to propose changes. Currently active contributors: @tobysackton, @dprodger
 
 ---
 
