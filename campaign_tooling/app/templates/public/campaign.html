@@ -39,5 +39,31 @@
   </div>
   <p class="muted">Your information is only used to fill in your letters. We don't store it on the server.</p>
   <p><button type="submit">Continue &rarr;</button></p>
+
+  {# DEV-ONLY test helper. Delete this block (and the matching script below) before launch. #}
+  <p class="muted" style="border-top: 1px dashed #ccc; padding-top: 0.75rem;">
+    <a href="#" id="dev-fill-test">Fill test data (dev only)</a>
+  </p>
 </form>
+
+{# DEV-ONLY: remove with the link above #}
+<script>
+  document.getElementById("dev-fill-test")?.addEventListener("click", function (e) {
+    e.preventDefault();
+    const fields = {
+      name: "Test Writer",
+      email: "test@example.com",
+      organization: "",
+      street1: "123 Main Street",
+      street2: "",
+      city: "Hartford",
+      state: "CT",
+      postal_code: "06106",
+    };
+    for (const [name, value] of Object.entries(fields)) {
+      const el = document.querySelector(`input[name="${name}"]`);
+      if (el) el.value = value;
+    }
+  });
+</script>
 {% endblock %}
