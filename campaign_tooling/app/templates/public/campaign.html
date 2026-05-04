@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% block title %}{{ campaign.name }}{% endblock %}
+{% extends "base_public.html" %}
+{% block title %}{{ campaign.name }} · Lexington Alarm{% endblock %}
 {% block content %}
 <p><a href="{{ url_for('public.index') }}">&larr; All campaigns</a></p>
 <h1>{{ campaign.name }}</h1>
@@ -8,7 +8,7 @@
 {% endif %}
 
 {% if campaign.body_md %}
-  <div class="card">
+  <div class="la-highlight-box">
     <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ campaign.body_md }}</pre>
   </div>
 {% endif %}
@@ -16,7 +16,7 @@
 <h2>Take action</h2>
 <p>Fill in your contact info to generate personalized letters and emails.</p>
 
-<form method="post" class="card">
+<form method="post" class="la-highlight-box">
   <label>Your name *
     <input type="text" name="name" value="{{ writer.name }}" required>
   </label>
@@ -38,7 +38,7 @@
     <label>Postal code <input type="text" name="postal_code" value="{{ writer.postal_code }}"></label>
   </div>
   <p class="muted">Your information is only used to fill in your letters. We don't store it on the server.</p>
-  <p><button type="submit">Continue &rarr;</button></p>
+  <p><button type="submit" class="la-button">Continue &rarr;</button></p>
 
   {# DEV-ONLY test helper. Delete this block (and the matching script below) before launch. #}
   <p class="muted" style="border-top: 1px dashed #ccc; padding-top: 0.75rem;">

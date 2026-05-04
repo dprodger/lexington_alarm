@@ -4,20 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Campaign Tooling{% endblock %}</title>
+  {% block head_extra %}{% endblock %}
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="{{ url_for('public.index') }}">Campaigns</a>
-    <nav>
-      {% if session.get('is_admin') %}
-        <a href="{{ url_for('admin.index') }}">Admin</a>
-        <form method="post" action="{{ url_for('admin.logout') }}" class="inline">
-          <button type="submit" class="link-button">Log out</button>
-        </form>
-      {% endif %}
-    </nav>
-  </header>
+<body class="{% block body_class %}{% endblock %}">
+  {% block header %}
+    <header class="site-header">
+      <a class="brand" href="{{ url_for('public.index') }}">Campaigns</a>
+      <nav>
+        {% if session.get('is_admin') %}
+          <a href="{{ url_for('admin.index') }}">Admin</a>
+          <form method="post" action="{{ url_for('admin.logout') }}" class="inline">
+            <button type="submit" class="link-button">Log out</button>
+          </form>
+        {% endif %}
+      </nav>
+    </header>
+  {% endblock %}
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -32,6 +35,8 @@
   <main>
     {% block content %}{% endblock %}
   </main>
+
+  {% block footer %}{% endblock %}
 
   {# Site-wide toast notification, hidden until showToast() is called. #}
   <div id="toast" role="status" aria-live="polite" hidden></div>

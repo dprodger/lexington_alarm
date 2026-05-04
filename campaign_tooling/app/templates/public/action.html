@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% block title %}Send · {{ campaign.name }}{% endblock %}
+{% extends "base_public.html" %}
+{% block title %}Send · {{ campaign.name }} · Lexington Alarm{% endblock %}
 {% block content %}
 <p><a href="{{ url_for('public.campaign', slug=campaign.slug) }}?{{ writer_query|urlencode }}">&larr; Edit my info</a></p>
 
@@ -22,7 +22,7 @@
 </script>
 
 {% for row in rows %}
-  <div class="card">
+  <div class="la-highlight-box">
     <h2>{{ row.target.formal_name }}</h2>
     {% if row.target.title %}<p class="muted">{{ row.target.title }}{% if row.target.organization %}, {{ row.target.organization }}{% endif %}</p>{% endif %}
 
@@ -41,15 +41,15 @@
              textarea preserves newlines reliably. #}
           <textarea hidden class="plaintext-body">{{ item.body }}</textarea>
           <p>
-            <a class="button" href="{{ item.mailto }}">Open in email client &rarr;</a>
-            <button type="button" class="secondary" onclick="copyArtifactBody(this)">
+            <a class="la-button" href="{{ item.mailto }}">Open in email client &rarr;</a>
+            <button type="button" class="la-button la-button-secondary" onclick="copyArtifactBody(this)">
               Copy body
             </button>
           </p>
         {% else %}
           <pre class="letter">{{ item.body_html|safe }}</pre>
           <p>
-            <a class="button" target="_blank"
+            <a class="la-button" target="_blank"
                href="{{ url_for('public.print_letter',
                                 slug=campaign.slug,
                                 target_id=row.target.id,
