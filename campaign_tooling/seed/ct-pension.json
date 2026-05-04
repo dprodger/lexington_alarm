@@ -1,0 +1,56 @@
+{
+  "campaign": {
+    "id": 1,
+    "slug": "ct-pension",
+    "name": "Connecticut Pension Fund — Letter Campaign",
+    "subhead": "",
+    "description": "Tell Connecticut state officials to protect public pensions and refuse risky private-equity exposure.",
+    "body_md": "Public pensions in Connecticut affect tens of thousands of retirees, teachers, and state workers. Send a personalized letter — by email or post — to the officials who set state investment policy.",
+    "active": true,
+    "sort_order": 0
+  },
+  "targets": [
+    {
+      "id": 1,
+      "name": "State Treasurer",
+      "description": "Connecticut's Treasurer is the sole fiduciary of the state pension fund.",
+      "sort_order": 1,
+      "recipients": [
+        {
+          "id": 1,
+          "formal_name": "Treasurer Erick Russell",
+          "first_name": "Erick",
+          "last_name": "Russell",
+          "salutation": "Treasurer Russell",
+          "title": "State Treasurer",
+          "organization": "State of Connecticut",
+          "email": "treasurer.russell@ct.gov",
+          "street1": "165 Capitol Avenue",
+          "street2": "",
+          "city": "Hartford",
+          "state": "CT",
+          "postal_code": "06106",
+          "sort_order": 1
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 1,
+          "name": "Short email",
+          "kind": "email",
+          "subject": "Protect Connecticut public pensions",
+          "body": "Dear {{ recipient.salutation }},\n\nI am writing as a Connecticut resident to ask that you protect the state's public pension fund from inappropriate exposure to private-equity and other high-risk strategies.\n\nPlease make decisions about pension fund allocation transparent to the people whose retirements depend on it.\n\nSincerely,\n{{ writer.name }}\n{{ writer.city }}{% if writer.state %}, {{ writer.state }}{% endif %}\n",
+          "sort_order": 1
+        },
+        {
+          "id": 2,
+          "name": "Postal letter",
+          "kind": "letter",
+          "subject": "",
+          "body": "{{ writer.address_block }}\n\n{{ date_long }}\n\n{{ recipient.formal_name }}\n{{ recipient.street1 }}\n{{ recipient.city }}, {{ recipient.state }} {{ recipient.postal_code }}\n\nDear {{ recipient.salutation }},\n\nI am writing as a Connecticut resident to ask that you protect the state's public pension fund from inappropriate exposure to private-equity and other high-risk strategies. The retirements of teachers, state workers, and many of my neighbors depend on the prudent stewardship of this fund.\n\nSpecifically, I ask that you publish quarterly disclosures of all alternative-investment holdings, including fees paid, and that you establish a clear ceiling on illiquid allocations.\n\nThank you for your attention to this matter.\n\nSincerely,\n\n\n{{ writer.name }}\n",
+          "sort_order": 2
+        }
+      ]
+    }
+  ]
+}

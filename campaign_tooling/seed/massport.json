@@ -1,0 +1,156 @@
+{
+  "campaign": {
+    "id": 2,
+    "slug": "massport",
+    "name": "Stop ICE at Massport",
+    "subhead": "Stop ICE at Massport",
+    "description": "Blurb",
+    "body_md": "longer blurb",
+    "active": true,
+    "sort_order": 0
+  },
+  "targets": [
+    {
+      "id": 3,
+      "name": "Mass Governor",
+      "description": "Governor of Massachusetts",
+      "sort_order": 0,
+      "recipients": [
+        {
+          "id": 5,
+          "formal_name": "Governor Maura Healey",
+          "first_name": "Maura",
+          "last_name": "Healey",
+          "salutation": "Governor Healey",
+          "title": "Governor",
+          "organization": "",
+          "email": "mhealy@mass.us.gov",
+          "street1": "Office of The Governor",
+          "street2": "Massachusetts State House, Room 280",
+          "city": "Boston",
+          "state": "MA",
+          "postal_code": "02133",
+          "sort_order": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 6,
+          "name": "letter to governor",
+          "kind": "letter",
+          "subject": "",
+          "body": "Dear {{ recipient.salutation }},\r\n\r\nThank you. On behalf of the over 2000 Massachusetts residents who have written to you about ICE flights at Hanscom Field, we want to acknowledge your leadership. Your December 12, 2025 letter to DHS Secretary Noem and Acting ICE Director Lyons named what is happening plainly and courageously: \"Flying these residents out of state and away from their support systems and legal counsel — often within hours of arrest — is intentionally cruel and purposely obstructs the due process and legal representation they are owed.\" Your subsequent letters demanding that GlobalX and Eastern Air Express stop contracting with ICE, and your signing of Executive Order No. 650 on January 29, 2026, demonstrate exactly the kind of leadership Massachusetts\r\nneeds right now.\r\n\r\nWe are writing because we believe the next step is clear — and it is within your direct authority. Executive Order No. 650 prohibits state facilities and property owned or controlled by the Executive Department\r\nfrom being used by federal immigration officers \"as a staging area, processing location, or operations base for civil immigration enforcement efforts.\" Massport is not a private entity. It is a public instrumentality of the Commonwealth, established by the Legislature under Chapter 465 of the Acts of 1956, with five of its seven\r\nboard members appointed by you. It owns and controls Hanscom Field outright as state property. Your order already covers Hanscom. Massport's continued facilitation of ICE transfer operations is noncompliance with your own Executive Order. You must make full compliance with Executive Order No. 650 a prerequisite for any\r\nappointments to the Massport Board.\r\n\r\nThe constitutional stakes make inaction unconscionable. The Massachusetts Constitution of 1780 guarantees that the right of habeas corpus \"shall be enjoyed in this Commonwealth in the most free, easy, cheap, expeditious and ample manner\" (Chapter VI, Article VII). The Legislature has not suspended this right. Every detainee involuntarily flown out of Hanscom — often within hours of arrest, before their family or lawyer knows they are gone — is being denied a constitutional protection they are guaranteed under Massachusetts law. This is\r\nnot a federal question. It is a Massachusetts question, and it is happening on Massachusetts-controlled property.\r\n\r\nMassport is also in direct violation of its own regulations. ICE charter operations at Hanscom use aircraft with 150–180 seat capacity, in direct violation of 740 CMR 25.03, which prohibits commercial air passenger service using aircraft with more than 60 seats without a waiver from the Executive Director. The FAA defines Section 121 charters — such as those operated by GlobalX and Eastern Air Express — as commercial air passenger service. The regulation expressly prohibits waivers for regular and recurring flights. The Massport Board has enforced compliance on lessees and contractors before, as with its 2014 and 2019 living wage resolutions. The authority and obligation are identical here.\r\n\r\nWe are grateful for everything you have done. We are asking you to go further. We ask that you direct your appointees on the Massport Board to enforce Executive Order No. 650 and 740 CMR 25.03 immediately, and publicly call on CEO Richard Davey to act. The outcome we seek is straightforward: all involuntary detainee flights from Hanscom Field must either be halted entirely, or a state-supervised due process screening program must be in place guaranteeing that every person boarded onto such a flight has had their habeas and due process rights fully respected under Massachusetts law before departure.\r\n\r\nYou have the authority. You have already said this must stop. We are asking you to use one to enforce the other.\r\n\r\nSincerely,\r\n\r\n{{ writer.address_block }}",
+          "sort_order": 0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Massport Public Comment email",
+      "description": "Public comment email address for all feedback",
+      "sort_order": 0,
+      "recipients": [
+        {
+          "id": 2,
+          "formal_name": "Massport Public Comment",
+          "first_name": "",
+          "last_name": "",
+          "salutation": "",
+          "title": "",
+          "organization": "",
+          "email": "WrittenPublicComments@massport.com",
+          "street1": "",
+          "street2": "",
+          "city": "",
+          "state": "",
+          "postal_code": "",
+          "sort_order": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 3,
+          "name": "Short Email",
+          "kind": "email",
+          "subject": "3rd Request: Stop Violating the Massachusetts Constitution at Hanscom Field",
+          "body": "Dear Chief Executive Officer Davey, Board Chair Jacobs, and Vice Chair O'Brien,\r\n\r\nYou and Governor Healey have received over 2000 letters from Massachusetts residents requesting you take seriously your responsibility to \"comply with all applicable laws, regulations, and constitutional guarantees\" as demanded in a unanimously approved letter from HFAC. You already are directly violating your own regulation at 740 CMR 25.03 by not limiting or granting waivers to large jet charter flights at Hanscom that have more than 60 seats, and fully meet the definition of \"commercial air passenger service\" as defined by the FAA. You are also facilitating a serious violation of the due process rights of Massachusetts residents as guaranteed in our state constitution.\r\n\r\n• The 10th amendment to the US constitution protects State Sovereignty by providing to states all powers not assigned to the federal government. Traditionally this has included police powers.\r\n• The Federal guarantee of due process says no person shall be \"deprived of life, liberty, or property without due process of law.\"\r\n• The oldest part of Common law is the right of habeas corpus.\r\n• The Massachusetts Constitution, written in 1780 says \"The privilege and benefit of the writ of habeas corpus shall be enjoyed in this Commonwealth in the most free, easy, cheap, expeditious and ample manner, and shall not be suspended by the Legislature, except upon the most urgent and pressing occasions, and for a limited time not exceeding twelve months\" (Chapter VI, Article VII).\r\n• As the legislature has not suspended this ample right, detainees involuntarily flown out of Hanscom field are being denied the due process rights they enjoy in Massachusetts.\r\n\r\nWe demand you immediately implement a screening program for all involuntary transfers boarded onto flights at Hanscom Field, and that such a screening process guarantee us, the citizens of the Commonwealth, that due process rights of each person flown involuntarily out of Hanscom have been fully respected. In addition, we demand you halt all large charter operations at Hanscom Field unless they have received a waiver from the Massport Executive Director in compliance with 740 CMR 25.00.\r\n\r\nSincerely,\r\n{{ writer.address_block }}",
+          "sort_order": 1
+        },
+        {
+          "id": 4,
+          "name": "Long Email",
+          "kind": "email",
+          "subject": "3rd Request: Stop Violating the Massachusetts Constitution at Hanscom Field",
+          "body": "Dear Chief Executive Officer Davey, Board Chair Jacobs, and Vice Chair O'Brien,\r\n\r\nYou have received over 2000 individual letters and emails asking you to take action to stop ICE flights from operating at Hanscom Field. I am writing again because the continuation of these flights is illegal under your own rules, under the Governor's Executive Order, and under the Massachusetts Constitution itself.\r\n\r\nIn her December 12, 2025 letter to DHS Secretary Noem and Acting ICE Director Lyons, Governor Healey wrote: \"Flying these residents out of state and away from their support systems and legal counsel — often within hours of arrest — is intentionally cruel and purposely obstructs the due process and legal representation they are owed.\"\r\n\r\nOn January 29, 2026, Governor Healey reinforced this position by signing Executive Order No. 650, which explicitly prohibits state facilities and property owned or controlled by the Executive Department from being used by federal immigration officers \"as a staging area, processing location, or operations base for civil immigration enforcement efforts.\" Although Massport describes itself as independent, it is a creature of state legislation — established by the Massachusetts Legislature as \"a body politic and corporate and a public instrumentality of The Commonwealth of Massachusetts\" under Chapter 465 of the Acts of 1956 — with five of its seven board members appointed by the Governor, and it owns and controls Hanscom Field outright as state property. Therefore Executive Order No. 650 applies to operations of Massport and its FBO tenants at Hanscom.\r\n\r\nThe constitutional stakes could not be higher. The Federal guarantee of due process says no person shall be \"deprived of life, liberty, or property without due process of law.\" The Massachusetts Constitution of 1780 goes further, guaranteeing that the right of habeas corpus \"shall be enjoyed in this Commonwealth in the most free, easy, cheap, expeditious and ample manner\" (Chapter VI, Article VII). The Legislature has not suspended this right. Detainees involuntarily flown out of Hanscom are being denied constitutional protections they are guaranteed under Massachusetts law — often before their families or lawyers even know they are gone.\r\n\r\nYou are also in direct violation of your own regulations. ICE charter operations at Hanscom use aircraft with 150–180 seat capacity, in direct violation of 740 CMR 25.03, which prohibits commercial air passenger service using aircraft with more than 60 seats without a waiver from the Executive Director. The FAA defines Section 121 charters — such as those operated by GlobalX and Eastern Air Express — as commercial air passenger service. The regulation expressly prohibits waivers for regular and recurring flights. The Board has enforced compliance on lessees and contractors before, as with its 2014 and 2019 living wage resolutions. The authority and the obligation to act here are identical.\r\n\r\nWe demand you immediately implement a screening program for all involuntary transfers boarded onto flights at Hanscom Field that guarantees the due process and habeas rights of each person have been fully respected before departure. We demand you halt all large charter operations at Hanscom Field unless they have received a waiver from the Massport Executive Director in compliance with 740 CMR 25.00. And we demand you honor Governor Healey's Executive Order No. 650 by ending Massport's role as a staging ground for federal civil immigration enforcement.\r\n\r\nYou cannot defy Governor Healey's explicit order by not taking any action. The Massachusetts Constitution demands action. Our Governor has demanded action. Over two thousand Massachusetts residents have demanded action. Make these changes now.\r\n\r\nSincerely,\r\n{{ writer.address_block }}",
+          "sort_order": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Massport Board",
+      "description": "Members of the board of directors of Massport",
+      "sort_order": 0,
+      "recipients": [
+        {
+          "id": 3,
+          "formal_name": "Chair, Board of Directors Massachusetts PortAuthority",
+          "first_name": "Patricia",
+          "last_name": "Jacobs",
+          "salutation": "Ms. Jacobs",
+          "title": "Chair, Board of Directors Massachusetts PortAuthority",
+          "organization": "Massachusetts Port Authority",
+          "email": "",
+          "street1": "One Harborside Dr.",
+          "street2": "Suite 200S",
+          "city": "Boston",
+          "state": "MA",
+          "postal_code": "02128",
+          "sort_order": 0
+        },
+        {
+          "id": 4,
+          "formal_name": "Vice Chair, Board of Directors",
+          "first_name": "Sean",
+          "last_name": "O'Brien",
+          "salutation": "Mr. O'Brien",
+          "title": "Vice Chair, Board of Directors",
+          "organization": "Massachusetts Port of Authority",
+          "email": "",
+          "street1": "One Harborside Drive",
+          "street2": "Suite 200S",
+          "city": "East Boston",
+          "state": "MA",
+          "postal_code": "02128",
+          "sort_order": 0
+        },
+        {
+          "id": 6,
+          "formal_name": "Board Member John Nucci",
+          "first_name": "John",
+          "last_name": "Nucci",
+          "salutation": "Mr. Nucci",
+          "title": "Board Member",
+          "organization": "",
+          "email": "",
+          "street1": "Massachusetts Port Authority",
+          "street2": "One Harborside Drive, Suite 200S",
+          "city": "East Boston",
+          "state": "MA",
+          "postal_code": "02128",
+          "sort_order": 0
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 5,
+          "name": "Board Member Letter",
+          "kind": "letter",
+          "subject": "",
+          "body": "{{ writer.address_block }}\r\n\r\n{{ date_long }}\r\n\r\n{{ recipient.formal_name }}\r\n{{ recipient.address_block }}\r\n\r\nDear {{ recipient.salutation }},\r\n\r\n3rd Request: Stop Violating the Massachusetts Constitution at Hanscom Field\r\n\r\nYou have received over 2000 individual letters and emails asking you to take action to stop ICE flights from operating at Hanscom Field. I am writing again because the continuation of these flights is illegal under your own rules, under the Governor's Executive Order, and under the Massachusetts Constitution itself.\r\n\r\nIn her December 12, 2025 letter to DHS Secretary Noem and Acting ICE Director Lyons, Governor Healey wrote: \"Flying these residents out of state and away from their support systems and legal counsel — often within hours of arrest — is intentionally cruel and purposely obstructs the due process and legal representation they are owed.\"\r\n\r\nOn January 29, 2026, Governor Healey reinforced this position by signing Executive Order No. 650, which explicitly prohibits state facilities and property owned or controlled by the Executive Department from being used\r\nby federal immigration officers \"as a staging area, processing location, or operations base for civil immigration enforcement efforts.\" Although Massport describes itself as independent, it is a creature of state legislation — established by the Massachusetts Legislature as \"a body politic and corporate and a public instrumentality of The Commonwealth of Massachusetts\" under Chapter 465 of the Acts of 1956 — with five of its seven board members appointed by the Governor, and it owns and controls Hanscom Field outright as state property. Therefore Executive Order No. 650 applies to operations of Massport and its FBO tenants at Hanscom.\r\n\r\nThe constitutional stakes could not be higher. The Federal guarantee of due process says no person shall be \"deprived of life, liberty, or property without due process of law.\" The Massachusetts Constitution of 1780 goes further, guaranteeing that the right of habeas corpus \"shall be enjoyed in this Commonwealth in the most free, easy, cheap, expeditious and ample manner\" (Chapter VI, Article VII). The Legislature has not suspended this right. Detainees involuntarily flown out of Hanscom are being denied constitutional protections they are\r\nguaranteed under Massachusetts law — often before their families or lawyers even know they are gone.\r\n\r\nYou are also in direct violation of your own regulations. ICE charter operations at Hanscom use aircraft with 150–180 seat capacity, in direct violation of 740 CMR 25.03, which prohibits commercial air passenger service using aircraft with more than 60 seats without a waiver from the Executive Director. The FAA defines Section 121 charters — such as those operated by GlobalX and Eastern Air Express — as commercial air passenger service. This 1980 regulation is protected from federal preemption under the Airport Noise and Capacity Act's grandfather clause. The regulation expressly prohibits waivers for regular and recurring flights.\r\n\r\nThis Board has enforced compliance on lessees and contractors before on matters of vital state interest. Your resolutions of 2014 and 2019 required all Massport lessees and contractors to pay above the minimum wage — demonstrating clearly that the Board has both the authority and the willingness to impose conditions on those operating at Massport facilities. The authority and obligation to enforce 740 CMR 25.03 are identical. The fact that you have allowed deportation flights — up 143% in 2025 — to continue from Hanscom without requiring compliance with your own regulations means you bear direct responsibility for the harm being done to Massachusetts residents.\r\n\r\nWe demand you immediately implement a screening program for all involuntary transfers boarded onto flights at Hanscom Field that guarantees the due process and habeas rights of each person have been fully respected before departure. We demand you halt all large charter operations at Hanscom Field unless they have received a waiver from the Massport Executive Director in compliance with 740 CMR 25.00. And we demand you honor Governor Healey's Executive Order No. 650 by ending Massport's role as a staging ground for federal civil immigration enforcement.\r\n\r\nYou cannot defy Governor Healey's explicit order by not taking any action. The Massachusetts Constitution demands action. Our Governor has demanded action. Over two thousand Massachusetts residents have\r\ndemanded action. Make these changes now.\r\n\r\nSincerely,\r\n\r\n{{ writer.address_block }}\r\n",
+          "sort_order": 0
+        }
+      ]
+    }
+  ]
+}

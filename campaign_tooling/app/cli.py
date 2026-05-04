@@ -1,123 +1,243 @@
 """Flask CLI commands.
 
 Usage:
-    flask seed       # creates a starter CT pension campaign
-    flask reset-db   # drops and recreates all tables (DANGEROUS)
+    flask export-seed                # dump every campaign to seed/<slug>.json
+    flask import-seed [paths...]     # load seed/*.json (or named files)
+    flask import-seed --replace      # overwrite existing campaigns on conflict
+    flask reset-db                   # drop and recreate every table
 """
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import click
-from flask import Flask
+from flask import Flask, current_app
 
 from .extensions import db
 from .models import Artifact, Campaign, Recipient, Target
 
 
 def register(app: Flask) -> None:
-    app.cli.add_command(seed)
+    app.cli.add_command(export_seed)
+    app.cli.add_command(import_seed)
     app.cli.add_command(reset_db)
 
 
-@click.command("seed")
-def seed() -> None:
-    """Seed the DB with a starter CT pension fund campaign."""
-    existing = db.session.scalar(db.select(Campaign).where(Campaign.slug == "ct-pension"))
-    if existing:
-        click.echo("ct-pension campaign already exists; skipping.")
+def _seed_dir() -> Path:
+    """Path to the seed/ directory at the project root (next to instance/)."""
+    return Path(current_app.root_path).parent / "seed"
+
+
+# ---------------------------------------------------------------------------
+# Serialization
+# ---------------------------------------------------------------------------
+
+
+def _serialize_recipient(r: Recipient) -> dict:
+    return {
+        "id": r.id,
+        "formal_name": r.formal_name,
+        "first_name": r.first_name,
+        "last_name": r.last_name,
+        "salutation": r.salutation,
+        "title": r.title,
+        "organization": r.organization,
+        "email": r.email,
+        "street1": r.street1,
+        "street2": r.street2,
+        "city": r.city,
+        "state": r.state,
+        "postal_code": r.postal_code,
+        "sort_order": r.sort_order,
+    }
+
+
+def _serialize_artifact(a: Artifact) -> dict:
+    return {
+        "id": a.id,
+        "name": a.name,
+        "kind": a.kind,
+        "subject": a.subject,
+        "body": a.body,
+        "sort_order": a.sort_order,
+    }
+
+
+def _serialize_target(t: Target) -> dict:
+    return {
+        "id": t.id,
+        "name": t.name,
+        "description": t.description,
+        "sort_order": t.sort_order,
+        "recipients": [_serialize_recipient(r) for r in t.recipients],
+        "artifacts": [_serialize_artifact(a) for a in t.artifacts],
+    }
+
+
+def _serialize_campaign(c: Campaign) -> dict:
+    return {
+        "campaign": {
+            "id": c.id,
+            "slug": c.slug,
+            "name": c.name,
+            "subhead": c.subhead,
+            "description": c.description,
+            "body_md": c.body_md,
+            "active": c.active,
+            "sort_order": c.sort_order,
+        },
+        "targets": [_serialize_target(t) for t in c.targets],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Export
+# ---------------------------------------------------------------------------
+
+
+@click.command("export-seed")
+def export_seed() -> None:
+    """Dump every campaign to seed/<slug>.json (overwrites existing files)."""
+    seed_dir = _seed_dir()
+    seed_dir.mkdir(exist_ok=True)
+
+    campaigns = db.session.scalars(db.select(Campaign).order_by(Campaign.id)).all()
+    for c in campaigns:
+        path = seed_dir / f"{c.slug}.json"
+        with path.open("w") as f:
+            json.dump(_serialize_campaign(c), f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        click.echo(f"Wrote {path}")
+    click.echo(f"Exported {len(campaigns)} campaign(s).")
+
+
+# ---------------------------------------------------------------------------
+# Import
+# ---------------------------------------------------------------------------
+
+
+def _try_preserve_id(obj, requested_id, model) -> None:
+    """Assign the JSON-recorded id to the new row if it isn't taken; otherwise
+    let the DB auto-assign. Pre-checking avoids an IntegrityError on insert.
+
+    Note: PostgreSQL's autoincrement sequences don't advance on explicit-id
+    inserts, so after large imports on Supabase the next auto-assigned id
+    can collide with reused values. SQLite (used for local dev) doesn't
+    have this problem. Add a `SELECT setval(...)` step here when we move
+    the prod store to Postgres.
+    """
+    if requested_id is None:
         return
+    if db.session.get(model, requested_id) is None:
+        obj.id = requested_id
+
+
+def _import_campaign(data: dict, *, replace: bool) -> str:
+    """Insert one campaign from a parsed JSON dict.
+
+    Returns one of: "imported", "replaced", "skipped".
+    """
+    cdata = data["campaign"]
+    slug = cdata["slug"]
+
+    existing = db.session.scalar(db.select(Campaign).where(Campaign.slug == slug))
+    status = "imported"
+    if existing is not None:
+        if not replace:
+            return "skipped"
+        db.session.delete(existing)
+        db.session.flush()
+        status = "replaced"
 
     campaign = Campaign(
-        slug="ct-pension",
-        name="Connecticut Pension Fund — Letter Campaign",
-        description=(
-            "Tell Connecticut state officials to protect public pensions and refuse "
-            "risky private-equity exposure."
-        ),
-        body_md=(
-            "Public pensions in Connecticut affect tens of thousands of retirees, "
-            "teachers, and state workers. Send a personalized letter — by email or "
-            "post — to the officials who set state investment policy."
-        ),
-        active=True,
+        slug=cdata["slug"],
+        name=cdata["name"],
+        subhead=cdata.get("subhead", ""),
+        description=cdata.get("description", ""),
+        body_md=cdata.get("body_md", ""),
+        active=cdata.get("active", True),
+        sort_order=cdata.get("sort_order", 0),
     )
+    _try_preserve_id(campaign, cdata.get("id"), Campaign)
     db.session.add(campaign)
     db.session.flush()
 
-    treasurer = Target(
-        campaign_id=campaign.id,
-        name="State Treasurer",
-        description=(
-            "Connecticut's Treasurer is the sole fiduciary of the state pension fund."
-        ),
-        sort_order=1,
+    _RECIPIENT_FIELDS = (
+        "formal_name", "first_name", "last_name", "salutation",
+        "title", "organization", "email",
+        "street1", "street2", "city", "state", "postal_code",
     )
-    treasurer.recipients.append(
-        Recipient(
-            formal_name="Treasurer Erick Russell",
-            first_name="Erick",
-            last_name="Russell",
-            salutation="Treasurer Russell",
-            title="State Treasurer",
-            organization="State of Connecticut",
-            email="treasurer.russell@ct.gov",
-            street1="165 Capitol Avenue",
-            city="Hartford",
-            state="CT",
-            postal_code="06106",
-            sort_order=1,
+
+    for tdata in data.get("targets", []):
+        target = Target(
+            campaign_id=campaign.id,
+            name=tdata["name"],
+            description=tdata.get("description", ""),
+            sort_order=tdata.get("sort_order", 0),
         )
-    )
-    treasurer.artifacts.append(
-        Artifact(
-            kind=Artifact.KIND_EMAIL,
-            name="Short email",
-            subject="Protect Connecticut public pensions",
-            body=(
-                "Dear {{ recipient.salutation }},\n\n"
-                "I am writing as a Connecticut resident to ask that you protect the "
-                "state's public pension fund from inappropriate exposure to private-equity "
-                "and other high-risk strategies.\n\n"
-                "Please make decisions about pension fund allocation transparent to the "
-                "people whose retirements depend on it.\n\n"
-                "Sincerely,\n"
-                "{{ writer.name }}\n"
-                "{{ writer.city }}{% if writer.state %}, {{ writer.state }}{% endif %}\n"
-            ),
-            sort_order=1,
-        )
-    )
-    treasurer.artifacts.append(
-        Artifact(
-            kind=Artifact.KIND_LETTER,
-            name="Postal letter",
-            subject="",
-            body=(
-                "{{ writer.address_block }}\n\n"
-                "{{ date_long }}\n\n"
-                "{{ recipient.formal_name }}\n"
-                "{{ recipient.street1 }}\n"
-                "{{ recipient.city }}, {{ recipient.state }} {{ recipient.postal_code }}\n\n"
-                "Dear {{ recipient.salutation }},\n\n"
-                "I am writing as a Connecticut resident to ask that you protect the "
-                "state's public pension fund from inappropriate exposure to private-equity "
-                "and other high-risk strategies. The retirements of teachers, state "
-                "workers, and many of my neighbors depend on the prudent stewardship of "
-                "this fund.\n\n"
-                "Specifically, I ask that you publish quarterly disclosures of all "
-                "alternative-investment holdings, including fees paid, and that you "
-                "establish a clear ceiling on illiquid allocations.\n\n"
-                "Thank you for your attention to this matter.\n\n"
-                "Sincerely,\n\n\n"
-                "{{ writer.name }}\n"
-            ),
-            sort_order=2,
-        )
-    )
-    campaign.targets.append(treasurer)
+        _try_preserve_id(target, tdata.get("id"), Target)
+        db.session.add(target)
+        db.session.flush()
+
+        for rdata in tdata.get("recipients", []):
+            recipient = Recipient(target_id=target.id)
+            for field in _RECIPIENT_FIELDS:
+                setattr(recipient, field, rdata.get(field, ""))
+            recipient.sort_order = rdata.get("sort_order", 0)
+            _try_preserve_id(recipient, rdata.get("id"), Recipient)
+            db.session.add(recipient)
+
+        for adata in tdata.get("artifacts", []):
+            artifact = Artifact(
+                target_id=target.id,
+                name=adata.get("name", "Untitled"),
+                kind=adata.get("kind", Artifact.KIND_EMAIL),
+                subject=adata.get("subject", ""),
+                body=adata.get("body", ""),
+                sort_order=adata.get("sort_order", 0),
+            )
+            _try_preserve_id(artifact, adata.get("id"), Artifact)
+            db.session.add(artifact)
+
+    db.session.flush()
+    return status
+
+
+@click.command("import-seed")
+@click.option("--replace", is_flag=True, help="Replace existing campaigns with the same slug.")
+@click.argument("paths", nargs=-1, type=click.Path(exists=True, dir_okay=False))
+def import_seed(replace: bool, paths: tuple[str, ...]) -> None:
+    """Load campaigns from seed/*.json (or specified files)."""
+    if paths:
+        path_objs = [Path(p) for p in paths]
+    else:
+        seed_dir = _seed_dir()
+        path_objs = sorted(seed_dir.glob("*.json")) if seed_dir.exists() else []
+
+    if not path_objs:
+        click.echo("No seed files found.")
+        return
+
+    counts = {"imported": 0, "replaced": 0, "skipped": 0}
+    for path in path_objs:
+        with path.open() as f:
+            data = json.load(f)
+        result = _import_campaign(data, replace=replace)
+        counts[result] += 1
+        click.echo(f"  {result}: {path.name}")
 
     db.session.commit()
-    click.echo("Seeded ct-pension campaign with 1 target / 1 recipient / 2 artifacts.")
+    click.echo(
+        f"Done — {counts['imported']} imported, "
+        f"{counts['replaced']} replaced, {counts['skipped']} skipped."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Maintenance
+# ---------------------------------------------------------------------------
 
 
 @click.command("reset-db")
