@@ -21,7 +21,7 @@ from flask import Blueprint, abort, redirect, render_template, request, url_for
 
 from .extensions import db
 from .models import Artifact, Campaign, Target
-from .substitution import Writer, render
+from .substitution import Writer, markers_to_html, render, render_with_highlights
 
 bp = Blueprint("public", __name__, template_folder="templates")
 
@@ -108,11 +108,21 @@ def action(slug: str):
                 continue
             rendered_subject = render(artifact.subject, writer=writer, target=target)
             rendered_body = render(artifact.body, writer=writer, target=target)
+            # Highlighted variants for on-page display only; the mailto link
+            # and clipboard copy use the plain-text versions above.
+            subject_html = markers_to_html(
+                render_with_highlights(artifact.subject, writer=writer, target=target)
+            )
+            body_html = markers_to_html(
+                render_with_highlights(artifact.body, writer=writer, target=target)
+            )
             per_artifact.append(
                 {
                     "artifact": artifact,
                     "subject": rendered_subject,
                     "body": rendered_body,
+                    "subject_html": subject_html,
+                    "body_html": body_html,
                     "mailto": _mailto(target.email, rendered_subject, rendered_body)
                     if artifact.kind == Artifact.KIND_EMAIL
                     else None,
@@ -145,6 +155,9 @@ def print_letter(slug: str, target_id: int, artifact_id: int):
     if not writer.name:
         return redirect(url_for("public.campaign", slug=slug))
     body = render(artifact.body, writer=writer, target=target)
+    body_html = markers_to_html(
+        render_with_highlights(artifact.body, writer=writer, target=target)
+    )
     return render_template(
         "public/print_letter.html",
         campaign=campaign,
@@ -152,6 +165,7 @@ def print_letter(slug: str, target_id: int, artifact_id: int):
         artifact=artifact,
         writer=writer,
         body=body,
+        body_html=body_html,
     )
 
 

@@ -125,11 +125,22 @@ button.danger { background: var(--error); }
 .kind-email { background: #d6e9ff; }
 .kind-letter { background: #fde9c2; }
 
+/* Substituted-value highlight in rendered letter bodies and previews.
+   Browser default is bright yellow; soften it for readability. */
+mark {
+  background: #fff7d6;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
 @media print {
   .site-header, nav, .no-print { display: none !important; }
   main { max-width: none; padding: 0; }
   body { background: white; }
   .letter { white-space: pre-wrap; }
+  /* Don't print the highlight — it muddies the page on real paper. */
+  mark { background: transparent; padding: 0; }
 }
 
 .letter {

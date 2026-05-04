@@ -17,7 +17,7 @@
       <button onclick="window.print()">Print this letter</button>
       <a class="button secondary" href="javascript:history.back()">Back</a>
     </div>
-    <pre class="letter" style="border: none; padding: 0;">{{ body }}</pre>
+    <pre class="letter" style="border: none; padding: 0;">{{ body_html|safe }}</pre>
   </div>
 </body>
 </html>

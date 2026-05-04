@@ -23,17 +23,21 @@
         </summary>
 
         {% if item.artifact.kind == 'email' %}
-          <p class="muted">Subject: {{ item.subject }}</p>
-          <pre class="letter">{{ item.body }}</pre>
+          <p class="muted">Subject: {{ item.subject_html|safe }}</p>
+          <pre class="letter">{{ item.body_html|safe }}</pre>
+          {# Plain-text copy for clipboard. textContent of an HTMLElement
+             unfortunately drops <pre> whitespace in some browsers — using a
+             textarea preserves newlines reliably. #}
+          <textarea hidden class="plaintext-body">{{ item.body }}</textarea>
           <p>
             <a class="button" href="{{ item.mailto }}">Open in email client &rarr;</a>
             <button type="button" class="secondary"
-                    onclick="navigator.clipboard.writeText(this.previousElementSibling.previousElementSibling.previousElementSibling.textContent)">
+                    onclick="navigator.clipboard.writeText(this.closest('details').querySelector('.plaintext-body').value)">
               Copy body
             </button>
           </p>
         {% else %}
-          <pre class="letter">{{ item.body }}</pre>
+          <pre class="letter">{{ item.body_html|safe }}</pre>
           <p>
             <a class="button" target="_blank"
                href="{{ url_for('public.print_letter',

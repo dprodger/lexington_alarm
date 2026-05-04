@@ -122,18 +122,37 @@ class _Highlighted:
         return f"{_MARK_OPEN}{value}{_MARK_CLOSE}"
 
 
-def render_for_preview(template: str, today: date | None = None) -> str:
-    """Render with test data; substituted values bear sentinel markers."""
+def render_with_highlights(template: str, *, writer, target, today: date | None = None) -> str:
+    """Render with sentinel markers around each substituted value.
+
+    Used for both the admin preview (with fixed test data) and the public
+    action page (with the live writer's info). Pair with `markers_to_html`
+    to produce safely escaped HTML with <mark> tags around substitutions.
+    """
     today = today or date.today()
     return _env.from_string(template).render(
-        writer=_Highlighted(_PREVIEW_WRITER),
-        target=_Highlighted(_PREVIEW_TARGET),
+        writer=_Highlighted(writer),
+        target=_Highlighted(target),
         date=f"{_MARK_OPEN}{today.isoformat()}{_MARK_CLOSE}",
         date_long=f"{_MARK_OPEN}{today.strftime('%B %-d, %Y')}{_MARK_CLOSE}",
     )
 
 
-def preview_to_html(rendered_with_markers: str) -> str:
+def render_for_preview(template: str, today: date | None = None) -> str:
+    """Render with fixed test data; substituted values bear sentinel markers."""
+    return render_with_highlights(
+        template,
+        writer=_PREVIEW_WRITER,
+        target=_PREVIEW_TARGET,
+        today=today,
+    )
+
+
+def markers_to_html(rendered_with_markers: str) -> str:
     """HTML-escape then convert the sentinels into <mark> tags."""
     escaped = html.escape(rendered_with_markers)
     return escaped.replace(_MARK_OPEN, "<mark>").replace(_MARK_CLOSE, "</mark>")
+
+
+# Backwards-compatible alias for the original admin preview helper.
+preview_to_html = markers_to_html
