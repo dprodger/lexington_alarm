@@ -15,7 +15,7 @@
     <h2>{{ row.target.formal_name }}</h2>
     {% if row.target.title %}<p class="muted">{{ row.target.title }}{% if row.target.organization %}, {{ row.target.organization }}{% endif %}</p>{% endif %}
 
-    {% for item in row.items %}
+    {% for item in row.entries %}
       <details>
         <summary>
           <strong>{{ item.artifact.name }}</strong>

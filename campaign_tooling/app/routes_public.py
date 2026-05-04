@@ -119,7 +119,9 @@ def action(slug: str):
                 }
             )
         if per_artifact:
-            rows.append({"target": target, "items": per_artifact})
+            # Key is "entries" not "items" — dicts already have an .items() method
+            # and Jinja's `row.items` would resolve to the method, not this list.
+            rows.append({"target": target, "entries": per_artifact})
 
     return render_template(
         "public/action.html",
