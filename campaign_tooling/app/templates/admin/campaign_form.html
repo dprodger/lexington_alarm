@@ -129,6 +129,12 @@
         <span class="kind-badge kind-{{ a.kind }}">{{ a.kind }}</span>
       </summary>
       <form method="post" action="{{ url_for('admin.artifact_edit', artifact_id=a.id) }}">
+        <p>
+          <button type="submit"
+                  class="link-button"
+                  formaction="{{ url_for('admin.artifact_preview') }}"
+                  formtarget="_blank">Preview with test data &nearr;</button>
+        </p>
         {{ render_artifact_fields(a) }}
         <p>
           <button type="submit">Save</button>
@@ -142,6 +148,12 @@
   <details class="card">
     <summary><strong>+ Add artifact</strong></summary>
     <form method="post" action="{{ url_for('admin.artifact_new', campaign_id=campaign.id) }}">
+      <p>
+        <button type="submit"
+                class="link-button"
+                formaction="{{ url_for('admin.artifact_preview') }}"
+                formtarget="_blank">Preview with test data &nearr;</button>
+      </p>
       {{ render_artifact_fields(None) }}
       <p><button type="submit">Add artifact</button></p>
     </form>

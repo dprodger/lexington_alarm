@@ -19,8 +19,10 @@ so autoescape is off — HTML escaping would corrupt those outputs.
 
 from __future__ import annotations
 
+import html
 from dataclasses import dataclass
 from datetime import date
+from types import SimpleNamespace
 
 from jinja2 import Environment
 
@@ -60,3 +62,78 @@ def render(template: str, *, writer, target, today: date | None = None) -> str:
         date=today.isoformat(),
         date_long=today.strftime("%B %-d, %Y"),
     )
+
+
+# ---------------------------------------------------------------------------
+# Admin preview rendering — uses fixed test data, wraps each substituted
+# value in sentinel markers that get converted to <mark> tags after the
+# template body is HTML-escaped. That sequence keeps any `<` or `&` from
+# the admin-authored body literal in the output, while still letting the
+# yellow highlight surround the substituted values.
+# ---------------------------------------------------------------------------
+
+_MARK_OPEN = "\x01MARK_OPEN\x01"
+_MARK_CLOSE = "\x01MARK_CLOSE\x01"
+
+
+_PREVIEW_WRITER = Writer(
+    name="Test Writer",
+    email="test@example.com",
+    organization="Sample Org",
+    street1="123 Main Street",
+    street2="",
+    city="Hartford",
+    state="CT",
+    postal_code="06106",
+)
+
+
+_PREVIEW_TARGET = SimpleNamespace(
+    formal_name="Hon. Sample Recipient",
+    first_name="Sample",
+    last_name="Recipient",
+    salutation="Senator Recipient",
+    title="State Senator",
+    organization="Sample State Government",
+    email="recipient@example.gov",
+    street1="1 Capitol Drive",
+    street2="",
+    city="Hartford",
+    state="CT",
+    postal_code="06106",
+)
+
+
+class _Highlighted:
+    """Wraps an object so attribute access returns marker-wrapped values."""
+
+    def __init__(self, obj):
+        self._obj = obj
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(name)
+        try:
+            value = getattr(self._obj, name)
+        except AttributeError:
+            return ""
+        if value in (None, ""):
+            return ""
+        return f"{_MARK_OPEN}{value}{_MARK_CLOSE}"
+
+
+def render_for_preview(template: str, today: date | None = None) -> str:
+    """Render with test data; substituted values bear sentinel markers."""
+    today = today or date.today()
+    return _env.from_string(template).render(
+        writer=_Highlighted(_PREVIEW_WRITER),
+        target=_Highlighted(_PREVIEW_TARGET),
+        date=f"{_MARK_OPEN}{today.isoformat()}{_MARK_CLOSE}",
+        date_long=f"{_MARK_OPEN}{today.strftime('%B %-d, %Y')}{_MARK_CLOSE}",
+    )
+
+
+def preview_to_html(rendered_with_markers: str) -> str:
+    """HTML-escape then convert the sentinels into <mark> tags."""
+    escaped = html.escape(rendered_with_markers)
+    return escaped.replace(_MARK_OPEN, "<mark>").replace(_MARK_CLOSE, "</mark>")

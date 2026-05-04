@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Preview · {{ name }}{% endblock %}
+{% block content %}
+
+<h1>Preview: {{ name }}</h1>
+<p class="muted">
+  Rendered with test data. Substituted values are
+  <mark>highlighted in yellow</mark>.
+  Test writer: <code>Test Writer</code> in <code>Hartford, CT</code>.
+  Test target: <code>Hon. Sample Recipient</code>.
+</p>
+
+{% if error %}
+  <div class="card flash flash-error">
+    <strong>Template error</strong><br>
+    <code>{{ error }}</code>
+  </div>
+{% else %}
+
+  <div class="row">
+    <span class="muted">Kind: <strong>{{ kind }}</strong></span>
+  </div>
+
+  {% if subject_html %}
+    <h2>Subject</h2>
+    <pre class="letter">{{ subject_html|safe }}</pre>
+  {% endif %}
+
+  <h2>Body</h2>
+  <pre class="letter">{{ body_html|safe }}</pre>
+
+{% endif %}
+
+<p class="no-print"><button onclick="window.close()" class="secondary">Close</button></p>
+{% endblock %}

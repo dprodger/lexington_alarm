@@ -23,6 +23,7 @@ from flask import (
 
 from .extensions import db
 from .models import Artifact, Campaign, Target
+from .substitution import preview_to_html, render_for_preview
 
 bp = Blueprint("admin", __name__, template_folder="templates")
 
@@ -192,6 +193,35 @@ def artifact_delete(artifact_id: int):
     db.session.delete(artifact)
     db.session.commit()
     return redirect(url_for("admin.campaign_edit", campaign_id=campaign_id))
+
+
+@bp.route("/preview", methods=["POST"])
+@_require_admin
+def artifact_preview():
+    """Render an unsaved artifact body with test data, highlighting substitutions."""
+    name = request.form.get("name", "").strip() or "Untitled artifact"
+    kind = request.form.get("kind", Artifact.KIND_EMAIL)
+    subject = request.form.get("subject", "").strip()
+    body = request.form.get("body", "")
+
+    try:
+        body_marked = render_for_preview(body)
+        subject_marked = render_for_preview(subject) if subject else ""
+        body_html = preview_to_html(body_marked)
+        subject_html = preview_to_html(subject_marked) if subject_marked else ""
+        error = None
+    except Exception as exc:  # noqa: BLE001 — surface any Jinja error to the admin
+        body_html = subject_html = ""
+        error = f"{type(exc).__name__}: {exc}"
+
+    return render_template(
+        "admin/preview.html",
+        name=name,
+        kind=kind,
+        subject_html=subject_html,
+        body_html=body_html,
+        error=error,
+    )
 
 
 def _apply_artifact_form(artifact: Artifact, form) -> None:
