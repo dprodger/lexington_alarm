@@ -60,7 +60,9 @@ def _writer_query(writer: Writer) -> dict:
 @bp.route("/")
 def index():
     campaigns = db.session.scalars(
-        db.select(Campaign).where(Campaign.active.is_(True)).order_by(Campaign.name)
+        db.select(Campaign)
+        .where(Campaign.active.is_(True))
+        .order_by(Campaign.sort_order, Campaign.name)
     ).all()
     return render_template("public/index.html", campaigns=campaigns)
 
@@ -68,8 +70,10 @@ def index():
 @bp.route("/c/<slug>", methods=["GET", "POST"])
 def campaign(slug: str):
     campaign = db.session.scalar(db.select(Campaign).where(Campaign.slug == slug))
-    if campaign is None or not campaign.active:
+    if campaign is None:
         abort(404)
+    if not campaign.active:
+        return render_template("public/inactive.html", campaign=campaign), 410
     if request.method == "POST":
         writer = Writer(
             name=request.form.get("name", "").strip(),
@@ -91,8 +95,10 @@ def campaign(slug: str):
 @bp.route("/c/<slug>/action")
 def action(slug: str):
     campaign = db.session.scalar(db.select(Campaign).where(Campaign.slug == slug))
-    if campaign is None or not campaign.active:
+    if campaign is None:
         abort(404)
+    if not campaign.active:
+        return redirect(url_for("public.campaign", slug=slug))
     writer = _writer_from_args()
     if not writer.name:
         # No writer info — bounce back to the form.
@@ -145,8 +151,10 @@ def action(slug: str):
 @bp.route("/c/<slug>/print/<int:target_id>/<int:artifact_id>")
 def print_letter(slug: str, target_id: int, artifact_id: int):
     campaign = db.session.scalar(db.select(Campaign).where(Campaign.slug == slug))
-    if campaign is None or not campaign.active:
+    if campaign is None:
         abort(404)
+    if not campaign.active:
+        return redirect(url_for("public.campaign", slug=slug))
     target = db.session.get(Target, target_id) or abort(404)
     artifact = db.session.get(Artifact, artifact_id) or abort(404)
     if target.campaign_id != campaign.id or artifact.campaign_id != campaign.id:

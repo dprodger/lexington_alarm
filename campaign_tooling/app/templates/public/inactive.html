@@ -1,0 +1,16 @@
+{% extends "base_public.html" %}
+{% block title %}Inactive campaign · Lexington Alarm{% endblock %}
+{% block content %}
+<div class="la-highlight-box">
+  <h2>Not currently active</h2>
+  <p>
+    That isn't a currently active campaign.
+    See our <a href="{{ url_for('public.index') }}">list of active campaigns</a>.
+  </p>
+  <p>
+    <a class="la-button" href="{{ url_for('public.index') }}">
+      Browse active campaigns &rarr;
+    </a>
+  </p>
+</div>
+{% endblock %}

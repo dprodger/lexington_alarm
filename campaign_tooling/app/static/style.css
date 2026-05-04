@@ -274,6 +274,17 @@ body.public { background: var(--la-white); }
 }
 .la-highlight-box h2 a:hover { text-decoration: underline; }
 
+/* Campaign subhead — sentence-case bolder serif sitting between the title
+   and the blurb. Mirrors lexingtonalarm.org campaign-card layout. */
+.la-subhead {
+  font-family: var(--la-font-heading);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--fg);
+  margin-top: 0;
+  margin-bottom: var(--la-spacing-md);
+}
+
 /* Highlight box used for campaign cards — distinctive red-left strip
    matches lexingtonalarm.org's .la-highlight-box. */
 .la-highlight-box {

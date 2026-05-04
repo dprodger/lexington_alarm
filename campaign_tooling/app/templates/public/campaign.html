@@ -3,6 +3,9 @@
 {% block content %}
 <p><a href="{{ url_for('public.index') }}">&larr; All campaigns</a></p>
 <h1>{{ campaign.name }}</h1>
+{% if campaign.subhead %}
+  <p class="la-subhead">{{ campaign.subhead }}</p>
+{% endif %}
 {% if campaign.description %}
   <p class="muted">{{ campaign.description }}</p>
 {% endif %}

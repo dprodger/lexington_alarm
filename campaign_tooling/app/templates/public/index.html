@@ -14,6 +14,9 @@
   {% for c in campaigns %}
     <div class="la-highlight-box">
       <h2><a href="{{ url_for('public.campaign', slug=c.slug) }}">{{ c.name }}</a></h2>
+      {% if c.subhead %}
+        <p class="la-subhead">{{ c.subhead }}</p>
+      {% endif %}
       {% if c.description %}
         <p>{{ c.description }}</p>
       {% endif %}

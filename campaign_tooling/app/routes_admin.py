@@ -59,21 +59,31 @@ def logout():
 @bp.route("/")
 @_require_admin
 def index():
-    campaigns = db.session.scalars(db.select(Campaign).order_by(Campaign.name)).all()
+    campaigns = db.session.scalars(
+        db.select(Campaign).order_by(Campaign.sort_order, Campaign.name)
+    ).all()
     return render_template("admin/index.html", campaigns=campaigns)
+
+
+def _apply_campaign_form(c: Campaign, form) -> None:
+    c.slug = form["slug"].strip()
+    c.name = form["name"].strip()
+    c.subhead = form.get("subhead", "").strip()
+    c.description = form.get("description", "").strip()
+    c.body_md = form.get("body_md", "")
+    c.active = "active" in form
+    try:
+        c.sort_order = int(form.get("sort_order") or 0)
+    except ValueError:
+        c.sort_order = 0
 
 
 @bp.route("/campaigns/new", methods=["GET", "POST"])
 @_require_admin
 def campaign_new():
     if request.method == "POST":
-        c = Campaign(
-            slug=request.form["slug"].strip(),
-            name=request.form["name"].strip(),
-            description=request.form.get("description", "").strip(),
-            body_md=request.form.get("body_md", ""),
-            active="active" in request.form,
-        )
+        c = Campaign(slug=request.form["slug"].strip(), name=request.form["name"].strip())
+        _apply_campaign_form(c, request.form)
         db.session.add(c)
         db.session.commit()
         flash("Campaign created.", "success")
@@ -86,11 +96,7 @@ def campaign_new():
 def campaign_edit(campaign_id: int):
     campaign = db.session.get(Campaign, campaign_id) or abort(404)
     if request.method == "POST":
-        campaign.slug = request.form["slug"].strip()
-        campaign.name = request.form["name"].strip()
-        campaign.description = request.form.get("description", "").strip()
-        campaign.body_md = request.form.get("body_md", "")
-        campaign.active = "active" in request.form
+        _apply_campaign_form(campaign, request.form)
         db.session.commit()
         flash("Saved.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))

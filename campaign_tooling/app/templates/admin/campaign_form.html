@@ -66,16 +66,24 @@
       <input type="text" name="slug" value="{{ campaign.slug if campaign else '' }}" required pattern="[a-z0-9\-]+">
     </label>
   </div>
+  <label>Subhead (sentence-case subtitle shown under the name)
+    <input type="text" name="subhead" value="{{ campaign.subhead if campaign else '' }}">
+  </label>
   <label>Description (one-paragraph blurb)
     <textarea name="description" rows="3">{{ campaign.description if campaign else '' }}</textarea>
   </label>
   <label>Body (longer copy explaining the campaign — Markdown OK)
     <textarea name="body_md" rows="10">{{ campaign.body_md if campaign else '' }}</textarea>
   </label>
-  <label class="inline">
-    <input type="checkbox" name="active" {% if not campaign or campaign.active %}checked{% endif %}>
-    Active (visible to public)
-  </label>
+  <div class="row">
+    <label class="inline">
+      <input type="checkbox" name="active" {% if not campaign or campaign.active %}checked{% endif %}>
+      Active (visible to public)
+    </label>
+    <label>Sort order (lower numbers appear first)
+      <input type="text" name="sort_order" value="{{ campaign.sort_order if campaign else 0 }}">
+    </label>
+  </div>
   <p><button type="submit">{% if campaign %}Save{% else %}Create{% endif %}</button>
     {% if campaign %}
       <button type="submit" formaction="{{ url_for('admin.campaign_delete', campaign_id=campaign.id) }}"
