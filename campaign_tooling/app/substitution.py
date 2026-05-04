@@ -1,15 +1,28 @@
-"""Variable substitution for artifact bodies.
+"""Artifact body rendering, backed by Jinja2.
 
-Supports `{{ writer.name }}`, `{{ target.formal_name }}`, `{{ date }}`, etc.
-Whitespace inside the braces is tolerated. Unknown placeholders are left
-in place so admins can spot typos rather than silently dropping content.
+Artifact bodies and email subjects are rendered as Jinja2 templates so admins
+can use `{{ var }}` placeholders, `{% if %}` / `{% for %}` control flow,
+and built-in filters. The template scope is:
+
+    writer     — Writer dataclass (name, email, address fields, address_block)
+    target     — SQLAlchemy Target row (formal_name, salutation, address, ...)
+    date       — ISO date string ("2026-05-04")
+    date_long  — long form ("May 4, 2026")
+
+Admins are token-gated and trusted to author templates. Writer and target
+values are passed as data, not re-rendered, so a writer cannot inject
+template syntax via form input.
+
+Output is plain text destined for `mailto:` URLs and printable letters,
+so autoescape is off — HTML escaping would corrupt those outputs.
 """
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from datetime import date
+
+from jinja2 import Environment
 
 
 @dataclass
@@ -36,42 +49,14 @@ class Writer:
         return "\n".join(l for l in lines if l)
 
 
-_PLACEHOLDER_RE = re.compile(r"\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}")
-
-
-def _resolve(path: str, scope: dict) -> str | None:
-    """Walk dotted path against scope. Return None if not found."""
-    parts = path.split(".")
-    cur = scope
-    for part in parts:
-        if isinstance(cur, dict):
-            if part not in cur:
-                return None
-            cur = cur[part]
-        else:
-            if not hasattr(cur, part):
-                return None
-            cur = getattr(cur, part)
-    return "" if cur is None else str(cur)
+_env = Environment(autoescape=False, keep_trailing_newline=True)
 
 
 def render(template: str, *, writer, target, today: date | None = None) -> str:
-    """Substitute placeholders in `template`.
-
-    Available scopes: `writer.*`, `target.*`, `date` (ISO yyyy-mm-dd),
-    `date_long` (e.g. "May 4, 2026").
-    """
     today = today or date.today()
-    scope = {
-        "writer": writer,
-        "target": target,
-        "date": today.isoformat(),
-        "date_long": today.strftime("%B %-d, %Y") if hasattr(today, "strftime") else today.isoformat(),
-    }
-
-    def sub(match: re.Match) -> str:
-        path = match.group(1)
-        value = _resolve(path, scope)
-        return match.group(0) if value is None else value
-
-    return _PLACEHOLDER_RE.sub(sub, template)
+    return _env.from_string(template).render(
+        writer=writer,
+        target=target,
+        date=today.isoformat(),
+        date_long=today.strftime("%B %-d, %Y"),
+    )
