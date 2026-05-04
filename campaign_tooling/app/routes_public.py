@@ -15,12 +15,14 @@ add tracking.
 
 from __future__ import annotations
 
+import re
 from urllib.parse import quote, urlencode
 
-from flask import Blueprint, abort, redirect, render_template, request, url_for
+from flask import Blueprint, Response, abort, redirect, render_template, request, url_for
 
 from .extensions import db
 from .models import Artifact, Campaign, Target
+from .pdf import render_letter_pdf
 from .substitution import Writer, markers_to_html, render, render_with_highlights
 
 bp = Blueprint("public", __name__, template_folder="templates")
@@ -180,3 +182,35 @@ def print_letter(slug: str, target_id: int, artifact_id: int):
 def _mailto(to_addr: str, subject: str, body: str) -> str:
     params = urlencode({"subject": subject, "body": body}, quote_via=quote)
     return f"mailto:{quote(to_addr)}?{params}"
+
+
+@bp.route("/c/<slug>/pdf/<int:target_id>/<int:artifact_id>")
+def letter_pdf(slug: str, target_id: int, artifact_id: int):
+    campaign = db.session.scalar(db.select(Campaign).where(Campaign.slug == slug))
+    if campaign is None:
+        abort(404)
+    if not campaign.active:
+        return redirect(url_for("public.campaign", slug=slug))
+    target = db.session.get(Target, target_id) or abort(404)
+    artifact = db.session.get(Artifact, artifact_id) or abort(404)
+    if target.campaign_id != campaign.id or artifact.campaign_id != campaign.id:
+        abort(404)
+    writer = _writer_from_args()
+    if not writer.name:
+        return redirect(url_for("public.campaign", slug=slug))
+
+    body = render(artifact.body, writer=writer, target=target)
+    pdf_bytes = render_letter_pdf(
+        body,
+        title=f"{campaign.name} — letter to {target.formal_name}",
+    )
+
+    safe = re.sub(r"[^A-Za-z0-9]+", "_", target.formal_name).strip("_")[:50] or "letter"
+    filename = f"{campaign.slug}_{safe}.pdf"
+    # `inline` so browsers display in their built-in viewer instead of
+    # triggering a download dialog.
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )

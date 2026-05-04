@@ -7,17 +7,55 @@
   <style>
     body { background: white; }
     .page { max-width: 6.5in; margin: 0.5in auto; padding: 0; }
-    .toolbar { margin-bottom: 1rem; }
-    @media print { .toolbar { display: none; } .page { margin: 0; max-width: none; } }
+    .toolbar { margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    @media print { .toolbar, #toast { display: none !important; } .page { margin: 0; max-width: none; } }
   </style>
 </head>
 <body>
   <div class="page">
     <div class="toolbar no-print">
-      <button onclick="window.print()">Print this letter</button>
+      <button type="button" onclick="window.print()">Print this letter</button>
+      <button type="button" class="secondary" onclick="copyLetterText()">Copy text</button>
+      <a class="button secondary" target="_blank"
+         href="{{ url_for('public.letter_pdf', slug=campaign.slug, target_id=target.id, artifact_id=artifact.id) }}{% if request.query_string %}?{{ request.query_string.decode() }}{% endif %}">
+        Generate PDF
+      </a>
       <a class="button secondary" href="javascript:history.back()">Back</a>
     </div>
     <pre class="letter" style="border: none; padding: 0;">{{ body_html|safe }}</pre>
   </div>
+
+  {# Plain-text body for clipboard, kept off-screen so it doesn't print. #}
+  <textarea hidden id="plaintext-body">{{ body }}</textarea>
+
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script>
+    (function () {
+      var toastTimer = null;
+      window.showToast = function (message, ms) {
+        ms = ms || 5000;
+        var el = document.getElementById("toast");
+        if (!el) return;
+        el.textContent = message;
+        el.hidden = false;
+        void el.offsetWidth;
+        el.classList.add("toast--visible");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          el.classList.remove("toast--visible");
+          setTimeout(function () { el.hidden = true; }, 250);
+        }, ms);
+      };
+    })();
+
+    function copyLetterText() {
+      var ta = document.getElementById("plaintext-body");
+      if (!ta) return;
+      navigator.clipboard.writeText(ta.value).then(
+        function () { showToast("Letter text copied to clipboard"); },
+        function () { showToast("Could not copy — please select the text manually"); }
+      );
+    }
+  </script>
 </body>
 </html>
