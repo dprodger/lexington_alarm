@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ campaign.name }} — letter to {{ target.formal_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { background: white; }
+    .page { max-width: 6.5in; margin: 0.5in auto; padding: 0; }
+    .toolbar { margin-bottom: 1rem; }
+    @media print { .toolbar { display: none; } .page { margin: 0; max-width: none; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar no-print">
+      <button onclick="window.print()">Print this letter</button>
+      <a class="button secondary" href="javascript:history.back()">Back</a>
+    </div>
+    <pre class="letter" style="border: none; padding: 0;">{{ body }}</pre>
+  </div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Admin · Campaigns{% endblock %}
+{% block content %}
+<h1>Campaigns</h1>
+<p><a class="button" href="{{ url_for('admin.campaign_new') }}">New campaign</a></p>
+
+{% if not campaigns %}
+  <p class="muted">No campaigns yet.</p>
+{% else %}
+  <ul>
+    {% for c in campaigns %}
+      <li>
+        <a href="{{ url_for('admin.campaign_edit', campaign_id=c.id) }}">{{ c.name }}</a>
+        <span class="muted">/{{ c.slug }}</span>
+        {% if not c.active %}<span class="muted">(inactive)</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

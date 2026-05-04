@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Admin login{% endblock %}
+{% block content %}
+<h1>Admin login</h1>
+<p class="muted">Enter the admin token (set in your <code>.env</code> as <code>ADMIN_TOKEN</code>).</p>
+<form method="post">
+  <label>Token
+    <input type="password" name="token" autofocus required>
+  </label>
+  <p><button type="submit">Sign in</button></p>
+</form>
+{% endblock %}

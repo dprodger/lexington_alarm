@@ -1,0 +1,146 @@
+:root {
+  --fg: #1a1a1a;
+  --muted: #666;
+  --bg: #fafafa;
+  --accent: #1e4d2b;
+  --border: #ddd;
+  --error: #b00020;
+  --success: #1e7c35;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+nav a, nav .link-button {
+  margin-left: 1rem;
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.inline { display: inline; margin: 0; }
+.link-button {
+  background: none; border: none; color: var(--fg);
+  cursor: pointer; padding: 0; font: inherit;
+  text-decoration: underline;
+}
+
+h1, h2, h3 { line-height: 1.2; }
+
+a { color: var(--accent); }
+
+label { display: block; margin-top: 0.75rem; font-weight: 600; }
+input[type="text"], input[type="email"], input[type="password"],
+textarea, select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+}
+textarea { min-height: 8rem; font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; }
+
+button, .button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+button.secondary, .button.secondary {
+  background: white;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+button.danger { background: var(--error); }
+
+.flashes { list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; }
+.flash { padding: 0.5rem 0.75rem; border-radius: 4px; margin: 0.25rem 1rem; }
+.flash-error { background: #fde7ea; color: var(--error); }
+.flash-success { background: #e6f4ea; color: var(--success); }
+
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.muted { color: var(--muted); font-size: 0.9rem; }
+
+.target-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.target-row:last-child { border-bottom: none; }
+.target-row .actions { white-space: nowrap; }
+
+.kind-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: #eee;
+  margin-left: 0.5rem;
+}
+.kind-email { background: #d6e9ff; }
+.kind-letter { background: #fde9c2; }
+
+@media print {
+  .site-header, nav, .no-print { display: none !important; }
+  main { max-width: none; padding: 0; }
+  body { background: white; }
+  .letter { white-space: pre-wrap; }
+}
+
+.letter {
+  white-space: pre-wrap;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  background: white;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+details > summary { cursor: pointer; padding: 0.25rem 0; }
