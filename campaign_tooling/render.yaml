@@ -1,0 +1,36 @@
+# Render Blueprint for the campaign_tooling Flask app.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Notes:
+#   - rootDir scopes the build to the campaign_tooling/ subdirectory of
+#     the lexington_alarm repo, so Render ignores everything else.
+#   - Workers are pinned to 1 because db.create_all() runs at app startup
+#     and isn't race-safe across processes on a fresh schema. Once we wire
+#     up Alembic migrations and stop creating tables in-process, scale up.
+#   - DATABASE_URL and ADMIN_TOKEN are sync:false — set them by hand in the
+#     Render dashboard so secrets never live in the repo.
+#   - SECRET_KEY uses generateValue:true — Render mints a random value once
+#     and stores it on the service. Don't change it casually; it invalidates
+#     existing admin sessions.
+
+services:
+  - type: web
+    name: campaign-tooling
+    runtime: python
+    rootDir: campaign_tooling
+    plan: free
+    region: oregon  # change if you want a different Render region
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 60 wsgi:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false

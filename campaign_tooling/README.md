@@ -99,6 +99,28 @@ By design, all email sends happen from the writer's own email client via `mailto
 
 Postal letters are rendered as a printable HTML view with a `Print` button. A future iteration may swap that for server-rendered PDFs (WeasyPrint or similar).
 
+## Deployment (Render)
+
+The repo ships a `render.yaml` Blueprint that defines the Render web service. It pins `rootDir: campaign_tooling` so Render builds only this subdirectory of the parent `lexington_alarm` repo.
+
+### First-time setup
+
+1. **Push your branch** to GitHub. Render pulls from there.
+2. **Create the Blueprint**: Render dashboard → **New** → **Blueprint** → connect the `lexington_alarm` GitHub repo. Render reads `campaign_tooling/render.yaml` and offers to create the `campaign-tooling` service.
+3. **Set the two secret env vars** (Render prompts you because they're declared `sync: false`):
+   - `DATABASE_URL` — the same Supabase Session Pooler string from your local `.env`, with `+psycopg` driver and URL-encoded password.
+   - `ADMIN_TOKEN` — a fresh strong value for production. Don't reuse the local `dev-admin`.
+4. **Deploy**. The first build runs `pip install -r requirements.txt`; the start command boots gunicorn. Watch the deploy log for errors.
+5. **Seed (one-time)**. Once the deploy is live, open the service's **Shell** tab in the Render dashboard and run `flask --app wsgi seed`. This creates the tables in the `campaign_tooling` schema and inserts the starter CT pension campaign.
+6. **Visit the public URL** Render assigned (`https://campaign-tooling.onrender.com` or similar) and confirm the campaign list and admin login both work.
+
+### Notes
+
+- **Free tier sleeps after 15 minutes of inactivity** and the first request after sleep takes ~30s to wake. Upgrade to **Starter** ($7/mo) when this becomes user-visible.
+- **Workers are pinned to 1** in `render.yaml`. `db.create_all()` runs in the app factory and isn't race-safe; once we wire Alembic migrations as a release step, raise `--workers` to 2.
+- **`SECRET_KEY` is auto-generated** by Render via `generateValue: true`. Don't rotate it casually — it invalidates existing admin sessions.
+- **Auto-deploy is on**: every push to `main` triggers a Render build. Disable in the dashboard if you want manual control.
+
 ## TODOs before this is production-ready
 
 - [ ] **Real auth** — replace shared `ADMIN_TOKEN` with proper user accounts (Supabase Auth, Flask-Login, or HTTP basic at the reverse proxy).
