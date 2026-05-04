@@ -1,0 +1,121 @@
+{% extends "base_public.html" %}
+{% block title %}{{ target.name }} · {{ campaign.name }} · Lexington Alarm{% endblock %}
+{% block content %}
+<p>
+  <a href="{{ url_for('public.targets', slug=campaign.slug) }}?{{ writer_query|urlencode }}">&larr; All audiences</a>
+</p>
+
+<h1>{{ target.name }}</h1>
+<p class="muted">Part of <em>{{ campaign.name }}</em> · sending as <strong>{{ writer.name }}</strong></p>
+{% if target.description %}<p>{{ target.description }}</p>{% endif %}
+
+<h2>Recipients ({{ target.recipients|length }})</h2>
+<ul class="recipient-list">
+  {% for r in target.recipients %}
+    <li>
+      <strong>{{ r.formal_name }}</strong>
+      {% if r.title %}<span class="muted">— {{ r.title }}{% if r.organization %}, {{ r.organization }}{% endif %}</span>{% endif %}
+      {% if r.has_email %}<span class="kind-badge kind-email">email</span>{% endif %}
+      {% if r.has_address %}<span class="kind-badge kind-letter">postal</span>{% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+{% if not artifact_views %}
+  <p>No actions are available for this target with the contact info you provided.</p>
+{% endif %}
+
+<script>
+  function copySampleBody(button) {
+    var ta = button.closest(".artifact-card").querySelector(".plaintext-body");
+    if (!ta) return;
+    navigator.clipboard.writeText(ta.value).then(
+      function () { showToast("Body copied to clipboard"); },
+      function () { showToast("Could not copy — please select the text manually"); }
+    );
+  }
+
+  function sendAllEmails(button) {
+    var card = button.closest(".artifact-card");
+    var links = card.querySelectorAll("a.mailto-link");
+    if (!links.length) return;
+    // Click each mailto: link inside the same user-gesture event handler so
+    // browsers treat them as user-initiated. The OS's mailto handler picks
+    // them up; the page itself doesn't navigate.
+    links.forEach(function (a) { a.click(); });
+    showToast("Opened " + links.length + " email" + (links.length == 1 ? "" : "s") + " in your email client");
+  }
+</script>
+
+{% for view in artifact_views %}
+  <div class="la-highlight-box artifact-card">
+    <h2 style="margin-top: 0;">
+      {{ view.artifact.name }}
+      <span class="kind-badge kind-{{ view.artifact.kind }}">{{ view.artifact.kind }}</span>
+    </h2>
+
+    <p class="muted">
+      Will be sent to {{ view.per_recipient|length }} recipient{{ '' if view.per_recipient|length == 1 else 's' }}.
+      {% if view.per_recipient|length > 1 %}
+        Preview below shows the version for <strong>{{ view.sample_recipient.formal_name }}</strong>;
+        each recipient will get their own personalized copy.
+      {% endif %}
+    </p>
+
+    {% if view.artifact.kind == 'email' and view.sample_subject_html %}
+      <p class="muted">Subject: {{ view.sample_subject_html|safe }}</p>
+    {% endif %}
+    <pre class="letter">{{ view.sample_body_html|safe }}</pre>
+    <textarea hidden class="plaintext-body">{{ view.per_recipient[0].body }}</textarea>
+
+    {% if view.artifact.kind == 'email' %}
+      <p>
+        <button type="button" class="la-button" onclick="sendAllEmails(this)">
+          Send all
+          ({{ view.per_recipient|length }} email{{ '' if view.per_recipient|length == 1 else 's' }})
+        </button>
+        <button type="button" class="la-button la-button-secondary" onclick="copySampleBody(this)">
+          Copy sample body
+        </button>
+      </p>
+      <details>
+        <summary class="muted">Send to recipients individually</summary>
+        <ul class="recipient-link-list">
+          {% for entry in view.per_recipient %}
+            <li>
+              <a class="mailto-link" href="{{ entry.mailto }}">
+                {{ entry.recipient.formal_name }} &lt;{{ entry.recipient.email }}&gt; &rarr;
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+      {# Hidden mailto: anchors used by sendAllEmails(). Kept outside the
+         <details> so the bulk handler always finds them. #}
+      <div hidden>
+        {% for entry in view.per_recipient %}
+          <a class="mailto-link" href="{{ entry.mailto }}"></a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>
+        <a class="la-button" target="_blank"
+           href="{{ url_for('public.letters_pdf',
+                            slug=campaign.slug,
+                            target_id=target.id,
+                            artifact_id=view.artifact.id) }}?{{ writer_query|urlencode }}">
+          Download all as PDF
+          ({{ view.per_recipient|length }} letter{{ '' if view.per_recipient|length == 1 else 's' }}) &rarr;
+        </a>
+        <a class="la-button la-button-secondary" target="_blank"
+           href="{{ url_for('public.print_letters',
+                            slug=campaign.slug,
+                            target_id=target.id,
+                            artifact_id=view.artifact.id) }}?{{ writer_query|urlencode }}">
+          Open printable view &rarr;
+        </a>
+      </p>
+    {% endif %}
+  </div>
+{% endfor %}
+{% endblock %}

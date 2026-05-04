@@ -38,21 +38,47 @@ class Campaign(db.Model):
         cascade="all, delete-orphan",
         order_by="Target.sort_order",
     )
-    artifacts: Mapped[list["Artifact"]] = relationship(
-        back_populates="campaign",
-        cascade="all, delete-orphan",
-        order_by="Artifact.sort_order",
-    )
 
 
 class Target(db.Model):
-    """A recipient of the campaign — a person to be written to."""
+    """A conceptual audience within a campaign — e.g. "Massport Board"
+    or "Governor". A Target groups one or more Recipients (the actual
+    people the writer will reach) and the Artifacts (letter templates)
+    that get sent to those recipients.
+    """
 
     __tablename__ = "targets"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     campaign_id: Mapped[int] = mapped_column(
         ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    )
+
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    campaign: Mapped["Campaign"] = relationship(back_populates="targets")
+    recipients: Mapped[list["Recipient"]] = relationship(
+        back_populates="target",
+        cascade="all, delete-orphan",
+        order_by="Recipient.sort_order",
+    )
+    artifacts: Mapped[list["Artifact"]] = relationship(
+        back_populates="target",
+        cascade="all, delete-orphan",
+        order_by="Artifact.sort_order",
+    )
+
+
+class Recipient(db.Model):
+    """A real person within a Target — a row carrying contact info."""
+
+    __tablename__ = "recipients"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("targets.id", ondelete="CASCADE"), nullable=False
     )
 
     formal_name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -71,7 +97,7 @@ class Target(db.Model):
 
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-    campaign: Mapped["Campaign"] = relationship(back_populates="targets")
+    target: Mapped["Target"] = relationship(back_populates="recipients")
 
     @property
     def has_email(self) -> bool:
@@ -86,10 +112,7 @@ class Target(db.Model):
         """Multi-line postal address — street + city/state/zip.
 
         Does NOT include `formal_name`; templates typically render that
-        separately on its own line above the address. (Compare with
-        Writer.address_block which does include the writer's name —
-        that's intentional, since a writer's return address normally
-        bundles the name with the address.)
+        separately on its own line above the address.
         """
         lines = []
         if self.street1:
@@ -105,11 +128,10 @@ class Target(db.Model):
 
 
 class Artifact(db.Model):
-    """A letter template — body copy with {{var}} placeholders.
-
-    `kind` is "email" or "letter". Email artifacts produce a mailto: link;
-    letter artifacts produce a printable view. Each campaign can carry
-    several artifacts (e.g. short email + long email + postal letter).
+    """A letter template — body copy with {{var}} placeholders, attached
+    to a Target. `kind` is "email" or "letter". A Target can carry a mix
+    of email and letter artifacts; the public flow fans them out across
+    every Recipient in the Target.
     """
 
     __tablename__ = "artifacts"
@@ -118,8 +140,8 @@ class Artifact(db.Model):
     KIND_LETTER = "letter"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    campaign_id: Mapped[int] = mapped_column(
-        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("targets.id", ondelete="CASCADE"), nullable=False
     )
 
     name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -128,4 +150,4 @@ class Artifact(db.Model):
     body: Mapped[str] = mapped_column(Text, nullable=False, default="")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-    campaign: Mapped["Campaign"] = relationship(back_populates="artifacts")
+    target: Mapped["Target"] = relationship(back_populates="artifacts")

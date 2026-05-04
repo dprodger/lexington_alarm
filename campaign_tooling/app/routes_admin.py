@@ -22,14 +22,14 @@ from flask import (
 )
 
 from .extensions import db
-from .models import Artifact, Campaign, Target
+from .models import Artifact, Campaign, Recipient, Target
 from .substitution import preview_to_html, render_for_preview
 
 bp = Blueprint("admin", __name__, template_folder="templates")
 
 
 # Schema offered to the in-page autocomplete helper on the artifact body /
-# subject fields. Keep this in sync with substitution.Writer / models.Target
+# subject fields. Keep this in sync with substitution.Writer / models.Recipient
 # and the date variables passed into substitution.render(). A `null` entry
 # means "leaf — no further attributes."
 PLACEHOLDER_SCHEMA: dict = {
@@ -38,12 +38,13 @@ PLACEHOLDER_SCHEMA: dict = {
         "street1", "street2", "city", "state", "postal_code",
         "address_block",
     ],
-    "target": [
+    "recipient": [
         "formal_name", "first_name", "last_name", "salutation",
         "title", "organization", "email",
         "street1", "street2", "city", "state", "postal_code",
         "address_block",
     ],
+    "target": ["name", "description"],
     "date": None,
     "date_long": None,
 }
@@ -86,6 +87,9 @@ def index():
     return render_template("admin/index.html", campaigns=campaigns)
 
 
+# --- Campaigns ------------------------------------------------------------
+
+
 def _apply_campaign_form(c: Campaign, form) -> None:
     c.slug = form["slug"].strip()
     c.name = form["name"].strip()
@@ -109,7 +113,7 @@ def campaign_new():
         db.session.commit()
         flash("Campaign created.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=c.id))
-    return render_template("admin/campaign_form.html", campaign=None, placeholder_schema=PLACEHOLDER_SCHEMA)
+    return render_template("admin/campaign_form.html", campaign=None)
 
 
 @bp.route("/campaigns/<int:campaign_id>", methods=["GET", "POST"])
@@ -121,7 +125,7 @@ def campaign_edit(campaign_id: int):
         db.session.commit()
         flash("Saved.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))
-    return render_template("admin/campaign_form.html", campaign=campaign, placeholder_schema=PLACEHOLDER_SCHEMA)
+    return render_template("admin/campaign_form.html", campaign=campaign)
 
 
 @bp.route("/campaigns/<int:campaign_id>/delete", methods=["POST"])
@@ -137,24 +141,41 @@ def campaign_delete(campaign_id: int):
 # --- Targets --------------------------------------------------------------
 
 
+def _apply_target_form(target: Target, form) -> None:
+    target.name = form.get("name", "").strip()
+    target.description = form.get("description", "").strip()
+    try:
+        target.sort_order = int(form.get("sort_order") or 0)
+    except ValueError:
+        target.sort_order = 0
+
+
 @bp.route("/campaigns/<int:campaign_id>/targets/new", methods=["POST"])
 @_require_admin
 def target_new(campaign_id: int):
     campaign = db.session.get(Campaign, campaign_id) or abort(404)
-    target = Target(campaign_id=campaign.id, formal_name=request.form.get("formal_name", "").strip())
+    target = Target(campaign_id=campaign.id, name=request.form.get("name", "").strip() or "Untitled")
     _apply_target_form(target, request.form)
     db.session.add(target)
     db.session.commit()
-    return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))
+    flash("Target added.", "success")
+    return redirect(url_for("admin.target_edit", target_id=target.id))
 
 
-@bp.route("/targets/<int:target_id>/edit", methods=["POST"])
+@bp.route("/targets/<int:target_id>", methods=["GET", "POST"])
 @_require_admin
 def target_edit(target_id: int):
     target = db.session.get(Target, target_id) or abort(404)
-    _apply_target_form(target, request.form)
-    db.session.commit()
-    return redirect(url_for("admin.campaign_edit", campaign_id=target.campaign_id))
+    if request.method == "POST":
+        _apply_target_form(target, request.form)
+        db.session.commit()
+        flash("Saved.", "success")
+        return redirect(url_for("admin.target_edit", target_id=target.id))
+    return render_template(
+        "admin/target_form.html",
+        target=target,
+        placeholder_schema=PLACEHOLDER_SCHEMA,
+    )
 
 
 @bp.route("/targets/<int:target_id>/delete", methods=["POST"])
@@ -164,10 +185,14 @@ def target_delete(target_id: int):
     campaign_id = target.campaign_id
     db.session.delete(target)
     db.session.commit()
+    flash("Target deleted.", "success")
     return redirect(url_for("admin.campaign_edit", campaign_id=campaign_id))
 
 
-def _apply_target_form(target: Target, form) -> None:
+# --- Recipients -----------------------------------------------------------
+
+
+def _apply_recipient_form(recipient: Recipient, form) -> None:
     for field in (
         "formal_name",
         "first_name",
@@ -182,25 +207,70 @@ def _apply_target_form(target: Target, form) -> None:
         "state",
         "postal_code",
     ):
-        setattr(target, field, form.get(field, "").strip())
+        setattr(recipient, field, form.get(field, "").strip())
     try:
-        target.sort_order = int(form.get("sort_order") or 0)
+        recipient.sort_order = int(form.get("sort_order") or 0)
     except ValueError:
-        target.sort_order = 0
+        recipient.sort_order = 0
+
+
+@bp.route("/targets/<int:target_id>/recipients/new", methods=["POST"])
+@_require_admin
+def recipient_new(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+    recipient = Recipient(
+        target_id=target.id,
+        formal_name=request.form.get("formal_name", "").strip(),
+    )
+    _apply_recipient_form(recipient, request.form)
+    db.session.add(recipient)
+    db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=target.id))
+
+
+@bp.route("/recipients/<int:recipient_id>/edit", methods=["POST"])
+@_require_admin
+def recipient_edit(recipient_id: int):
+    recipient = db.session.get(Recipient, recipient_id) or abort(404)
+    _apply_recipient_form(recipient, request.form)
+    db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=recipient.target_id))
+
+
+@bp.route("/recipients/<int:recipient_id>/delete", methods=["POST"])
+@_require_admin
+def recipient_delete(recipient_id: int):
+    recipient = db.session.get(Recipient, recipient_id) or abort(404)
+    target_id = recipient.target_id
+    db.session.delete(recipient)
+    db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=target_id))
 
 
 # --- Artifacts ------------------------------------------------------------
 
 
-@bp.route("/campaigns/<int:campaign_id>/artifacts/new", methods=["POST"])
+def _apply_artifact_form(artifact: Artifact, form) -> None:
+    artifact.name = form.get("name", "").strip() or "Untitled"
+    kind = form.get("kind", Artifact.KIND_EMAIL)
+    artifact.kind = kind if kind in (Artifact.KIND_EMAIL, Artifact.KIND_LETTER) else Artifact.KIND_EMAIL
+    artifact.subject = form.get("subject", "").strip()
+    artifact.body = form.get("body", "")
+    try:
+        artifact.sort_order = int(form.get("sort_order") or 0)
+    except ValueError:
+        artifact.sort_order = 0
+
+
+@bp.route("/targets/<int:target_id>/artifacts/new", methods=["POST"])
 @_require_admin
-def artifact_new(campaign_id: int):
-    campaign = db.session.get(Campaign, campaign_id) or abort(404)
-    artifact = Artifact(campaign_id=campaign.id, name=request.form.get("name", "").strip() or "Untitled")
+def artifact_new(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+    artifact = Artifact(target_id=target.id, name=request.form.get("name", "").strip() or "Untitled")
     _apply_artifact_form(artifact, request.form)
     db.session.add(artifact)
     db.session.commit()
-    return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))
+    return redirect(url_for("admin.target_edit", target_id=target.id))
 
 
 @bp.route("/artifacts/<int:artifact_id>/edit", methods=["POST"])
@@ -209,17 +279,17 @@ def artifact_edit(artifact_id: int):
     artifact = db.session.get(Artifact, artifact_id) or abort(404)
     _apply_artifact_form(artifact, request.form)
     db.session.commit()
-    return redirect(url_for("admin.campaign_edit", campaign_id=artifact.campaign_id))
+    return redirect(url_for("admin.target_edit", target_id=artifact.target_id))
 
 
 @bp.route("/artifacts/<int:artifact_id>/delete", methods=["POST"])
 @_require_admin
 def artifact_delete(artifact_id: int):
     artifact = db.session.get(Artifact, artifact_id) or abort(404)
-    campaign_id = artifact.campaign_id
+    target_id = artifact.target_id
     db.session.delete(artifact)
     db.session.commit()
-    return redirect(url_for("admin.campaign_edit", campaign_id=campaign_id))
+    return redirect(url_for("admin.target_edit", target_id=target_id))
 
 
 @bp.route("/preview", methods=["POST"])
@@ -249,15 +319,3 @@ def artifact_preview():
         body_html=body_html,
         error=error,
     )
-
-
-def _apply_artifact_form(artifact: Artifact, form) -> None:
-    artifact.name = form.get("name", "").strip() or "Untitled"
-    kind = form.get("kind", Artifact.KIND_EMAIL)
-    artifact.kind = kind if kind in (Artifact.KIND_EMAIL, Artifact.KIND_LETTER) else Artifact.KIND_EMAIL
-    artifact.subject = form.get("subject", "").strip()
-    artifact.body = form.get("body", "")
-    try:
-        artifact.sort_order = int(form.get("sort_order") or 0)
-    except ValueError:
-        artifact.sort_order = 0

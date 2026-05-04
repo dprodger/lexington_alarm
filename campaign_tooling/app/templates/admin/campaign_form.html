@@ -4,56 +4,6 @@
 {% endblock %}
 {% block content %}
 
-{% macro render_target_fields(t) %}
-  <div class="row">
-    <label>Formal name (e.g., "Governor Maura Healey")
-      <input type="text" name="formal_name" value="{{ t.formal_name if t else '' }}" required>
-    </label>
-    <label>Salutation (e.g., "Governor Healey")
-      <input type="text" name="salutation" value="{{ t.salutation if t else '' }}">
-    </label>
-  </div>
-  <div class="row">
-    <label>First name <input type="text" name="first_name" value="{{ t.first_name if t else '' }}"></label>
-    <label>Last name <input type="text" name="last_name" value="{{ t.last_name if t else '' }}"></label>
-  </div>
-  <div class="row">
-    <label>Title <input type="text" name="title" value="{{ t.title if t else '' }}"></label>
-    <label>Organization <input type="text" name="organization" value="{{ t.organization if t else '' }}"></label>
-  </div>
-  <label>Email <input type="email" name="email" value="{{ t.email if t else '' }}"></label>
-  <label>Street 1 <input type="text" name="street1" value="{{ t.street1 if t else '' }}"></label>
-  <label>Street 2 <input type="text" name="street2" value="{{ t.street2 if t else '' }}"></label>
-  <div class="row-3">
-    <label>City <input type="text" name="city" value="{{ t.city if t else '' }}"></label>
-    <label>State <input type="text" name="state" value="{{ t.state if t else '' }}"></label>
-    <label>Postal code <input type="text" name="postal_code" value="{{ t.postal_code if t else '' }}"></label>
-  </div>
-  <label>Sort order <input type="text" name="sort_order" value="{{ t.sort_order if t else 0 }}"></label>
-{% endmacro %}
-
-{% macro render_artifact_fields(a) %}
-  <div class="row">
-    <label>Name (internal)
-      <input type="text" name="name" value="{{ a.name if a else '' }}" required>
-    </label>
-    <label>Kind
-      <select name="kind">
-        <option value="email" {% if a and a.kind == 'email' %}selected{% endif %}>Email</option>
-        <option value="letter" {% if a and a.kind == 'letter' %}selected{% endif %}>Postal letter</option>
-      </select>
-    </label>
-  </div>
-  <label>Subject (email only — used as mailto subject)
-    <input type="text" name="subject" class="placeholder-aware"
-           value="{{ a.subject if a else '' }}">
-  </label>
-  <label>Body
-    <textarea name="body" rows="14" class="placeholder-aware">{{ a.body if a else '' }}</textarea>
-  </label>
-  <label>Sort order <input type="text" name="sort_order" value="{{ a.sort_order if a else 0 }}"></label>
-{% endmacro %}
-
 <p><a href="{{ url_for('admin.index') }}">&larr; All campaigns</a></p>
 
 <h1>{% if campaign %}Edit campaign{% else %}New campaign{% endif %}</h1>
@@ -89,90 +39,42 @@
     {% if campaign %}
       <button type="submit" formaction="{{ url_for('admin.campaign_delete', campaign_id=campaign.id) }}"
               formmethod="post" class="danger"
-              onclick="return confirm('Delete campaign and all its targets/artifacts?')">Delete</button>
+              onclick="return confirm('Delete campaign and all its targets, recipients, and artifacts?')">Delete</button>
     {% endif %}
   </p>
 </form>
 
 {% if campaign %}
-  <h2>Targets <span class="muted">— recipients of letters</span></h2>
-  <p class="muted">Each target needs at minimum a formal name. Add an email and/or address depending on whether they should receive emails, postal letters, or both.</p>
+  <h2>Targets <span class="muted">— audiences within this campaign</span></h2>
+  <p class="muted">A target is a conceptual audience (e.g. "Massport Board" or "Governor"). Each target groups one or more recipients and the letter templates sent to them.</p>
 
-  {% for t in campaign.targets %}
-    <details class="card">
-      <summary><strong>{{ t.formal_name }}</strong>
-        {% if t.has_email %}<span class="kind-badge kind-email">email</span>{% endif %}
-        {% if t.has_address %}<span class="kind-badge kind-letter">postal</span>{% endif %}
-      </summary>
-      <form method="post" action="{{ url_for('admin.target_edit', target_id=t.id) }}">
-        {{ render_target_fields(t) }}
-        <p>
-          <button type="submit">Save</button>
-          <button type="submit" formaction="{{ url_for('admin.target_delete', target_id=t.id) }}"
-                  class="danger" onclick="return confirm('Delete this target?')">Delete</button>
-        </p>
-      </form>
-    </details>
-  {% endfor %}
+  {% if campaign.targets %}
+    <ul class="target-list">
+      {% for t in campaign.targets %}
+        <li class="card">
+          <strong><a href="{{ url_for('admin.target_edit', target_id=t.id) }}">{{ t.name }}</a></strong>
+          <span class="muted">— {{ t.recipients|length }} recipient{{ '' if t.recipients|length == 1 else 's' }}, {{ t.artifacts|length }} artifact{{ '' if t.artifacts|length == 1 else 's' }}</span>
+          {% if t.description %}<p class="muted">{{ t.description }}</p>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No targets yet.</p>
+  {% endif %}
 
   <details class="card">
     <summary><strong>+ Add target</strong></summary>
     <form method="post" action="{{ url_for('admin.target_new', campaign_id=campaign.id) }}">
-      {{ render_target_fields(None) }}
+      <label>Name (e.g., "Massport Board", "Governor")
+        <input type="text" name="name" required>
+      </label>
+      <label>Description (shown to writers — explain who this audience is)
+        <textarea name="description" rows="2"></textarea>
+      </label>
+      <label>Sort order <input type="text" name="sort_order" value="0"></label>
       <p><button type="submit">Add target</button></p>
     </form>
   </details>
-
-  <h2>Artifacts <span class="muted">— letter templates</span></h2>
-  <p class="muted">
-    Type <code>{% raw %}{{ {% endraw %}</code> in any subject or body field to pop up a list of
-    available placeholders (<code>writer</code>, <code>target</code>,
-    <code>date</code>, <code>date_long</code>); type a dot to drill into
-    that scope's attributes. Arrow keys navigate, Enter or Tab accepts.
-  </p>
-
-  {% for a in campaign.artifacts %}
-    <details class="card">
-      <summary><strong>{{ a.name }}</strong>
-        <span class="kind-badge kind-{{ a.kind }}">{{ a.kind }}</span>
-      </summary>
-      <form method="post" action="{{ url_for('admin.artifact_edit', artifact_id=a.id) }}">
-        <p>
-          <button type="submit"
-                  class="link-button"
-                  formaction="{{ url_for('admin.artifact_preview') }}"
-                  formtarget="_blank">Preview with test data &nearr;</button>
-        </p>
-        {{ render_artifact_fields(a) }}
-        <p>
-          <button type="submit">Save</button>
-          <button type="submit" formaction="{{ url_for('admin.artifact_delete', artifact_id=a.id) }}"
-                  class="danger" onclick="return confirm('Delete this artifact?')">Delete</button>
-        </p>
-      </form>
-    </details>
-  {% endfor %}
-
-  <details class="card">
-    <summary><strong>+ Add artifact</strong></summary>
-    <form method="post" action="{{ url_for('admin.artifact_new', campaign_id=campaign.id) }}">
-      <p>
-        <button type="submit"
-                class="link-button"
-                formaction="{{ url_for('admin.artifact_preview') }}"
-                formtarget="_blank">Preview with test data &nearr;</button>
-      </p>
-      {{ render_artifact_fields(None) }}
-      <p><button type="submit">Add artifact</button></p>
-    </form>
-  </details>
-{% endif %}
-
-{% if placeholder_schema %}
-<script>
-  window.PLACEHOLDER_SCHEMA = {{ placeholder_schema|tojson }};
-</script>
-<script src="{{ url_for('static', filename='placeholder-helper.js') }}"></script>
 {% endif %}
 
 {% endblock %}

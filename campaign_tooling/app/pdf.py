@@ -37,17 +37,24 @@ def _to_latin1_safe(text: str) -> str:
 
 
 def render_letter_pdf(body: str, *, title: str = "") -> bytes:
-    """Render a plain-text letter body as a US Letter PDF.
+    """Render a single letter body as a US Letter PDF (one or more pages)."""
+    return render_letters_pdf([body], title=title)
 
-    Margins are 1 inch on all sides. Body is set in 12pt Times with a
-    line height of ~0.22 inches (matches a 12pt Times default leading).
+
+def render_letters_pdf(bodies: list[str], *, title: str = "") -> bytes:
+    """Render one or more letter bodies as a single US Letter PDF.
+
+    Each body starts on a fresh page. Margins are 1 inch on all sides;
+    body text is 12pt Times with ~0.22 inch line height. Auto page-break
+    handles overflow within a single body.
     """
     pdf = FPDF(format="letter", unit="in")
     if title:
         pdf.set_title(title)
     pdf.set_margins(left=1.0, top=1.0, right=1.0)
     pdf.set_auto_page_break(auto=True, margin=1.0)
-    pdf.add_page()
     pdf.set_font("Times", size=12)
-    pdf.multi_cell(w=0, h=0.22, text=_to_latin1_safe(body))
+    for body in bodies:
+        pdf.add_page()
+        pdf.multi_cell(w=0, h=0.22, text=_to_latin1_safe(body))
     return bytes(pdf.output())

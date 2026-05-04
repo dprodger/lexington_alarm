@@ -5,13 +5,15 @@ can use `{{ var }}` placeholders, `{% if %}` / `{% for %}` control flow,
 and built-in filters. The template scope is:
 
     writer     — Writer dataclass (name, email, address fields, address_block)
-    target     — SQLAlchemy Target row (formal_name, salutation, address, ...)
+    recipient  — SQLAlchemy Recipient row (formal_name, salutation, address, ...)
+    target     — SQLAlchemy Target row (name, description) — the conceptual
+                 group the recipient belongs to
     date       — ISO date string ("2026-05-04")
     date_long  — long form ("May 4, 2026")
 
-Admins are token-gated and trusted to author templates. Writer and target
-values are passed as data, not re-rendered, so a writer cannot inject
-template syntax via form input.
+Admins are token-gated and trusted to author templates. Writer, recipient,
+and target values are passed as data, not re-rendered, so a writer cannot
+inject template syntax via form input.
 
 Output is plain text destined for `mailto:` URLs and printable letters,
 so autoescape is off — HTML escaping would corrupt those outputs.
@@ -54,11 +56,12 @@ class Writer:
 _env = Environment(autoescape=False, keep_trailing_newline=True)
 
 
-def render(template: str, *, writer, target, today: date | None = None) -> str:
+def render(template: str, *, writer, recipient, target=None, today: date | None = None) -> str:
     today = today or date.today()
     return _env.from_string(template).render(
         writer=writer,
-        target=target,
+        recipient=recipient,
+        target=target if target is not None else getattr(recipient, "target", None),
         date=today.isoformat(),
         date_long=today.strftime("%B %-d, %Y"),
     )
@@ -88,7 +91,7 @@ _PREVIEW_WRITER = Writer(
 )
 
 
-_PREVIEW_TARGET = SimpleNamespace(
+_PREVIEW_RECIPIENT = SimpleNamespace(
     formal_name="Hon. Sample Recipient",
     first_name="Sample",
     last_name="Recipient",
@@ -101,6 +104,12 @@ _PREVIEW_TARGET = SimpleNamespace(
     city="Hartford",
     state="CT",
     postal_code="06106",
+)
+
+
+_PREVIEW_TARGET = SimpleNamespace(
+    name="Sample Target Group",
+    description="Sample description of the audience.",
 )
 
 
@@ -122,7 +131,9 @@ class _Highlighted:
         return f"{_MARK_OPEN}{value}{_MARK_CLOSE}"
 
 
-def render_with_highlights(template: str, *, writer, target, today: date | None = None) -> str:
+def render_with_highlights(
+    template: str, *, writer, recipient, target=None, today: date | None = None
+) -> str:
     """Render with sentinel markers around each substituted value.
 
     Used for both the admin preview (with fixed test data) and the public
@@ -130,9 +141,11 @@ def render_with_highlights(template: str, *, writer, target, today: date | None 
     to produce safely escaped HTML with <mark> tags around substitutions.
     """
     today = today or date.today()
+    target = target if target is not None else getattr(recipient, "target", None)
     return _env.from_string(template).render(
         writer=_Highlighted(writer),
-        target=_Highlighted(target),
+        recipient=_Highlighted(recipient),
+        target=_Highlighted(target) if target is not None else _Highlighted(SimpleNamespace()),
         date=f"{_MARK_OPEN}{today.isoformat()}{_MARK_CLOSE}",
         date_long=f"{_MARK_OPEN}{today.strftime('%B %-d, %Y')}{_MARK_CLOSE}",
     )
@@ -143,6 +156,7 @@ def render_for_preview(template: str, today: date | None = None) -> str:
     return render_with_highlights(
         template,
         writer=_PREVIEW_WRITER,
+        recipient=_PREVIEW_RECIPIENT,
         target=_PREVIEW_TARGET,
         today=today,
     )

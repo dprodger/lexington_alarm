@@ -11,7 +11,7 @@ import click
 from flask import Flask
 
 from .extensions import db
-from .models import Artifact, Campaign, Target
+from .models import Artifact, Campaign, Recipient, Target
 
 
 def register(app: Flask) -> None:
@@ -44,8 +44,16 @@ def seed() -> None:
     db.session.add(campaign)
     db.session.flush()
 
-    campaign.targets.append(
-        Target(
+    treasurer = Target(
+        campaign_id=campaign.id,
+        name="State Treasurer",
+        description=(
+            "Connecticut's Treasurer is the sole fiduciary of the state pension fund."
+        ),
+        sort_order=1,
+    )
+    treasurer.recipients.append(
+        Recipient(
             formal_name="Treasurer Erick Russell",
             first_name="Erick",
             last_name="Russell",
@@ -60,14 +68,13 @@ def seed() -> None:
             sort_order=1,
         )
     )
-
-    campaign.artifacts.append(
+    treasurer.artifacts.append(
         Artifact(
             kind=Artifact.KIND_EMAIL,
             name="Short email",
             subject="Protect Connecticut public pensions",
             body=(
-                "Dear {{ target.salutation }},\n\n"
+                "Dear {{ recipient.salutation }},\n\n"
                 "I am writing as a Connecticut resident to ask that you protect the "
                 "state's public pension fund from inappropriate exposure to private-equity "
                 "and other high-risk strategies.\n\n"
@@ -80,8 +87,7 @@ def seed() -> None:
             sort_order=1,
         )
     )
-
-    campaign.artifacts.append(
+    treasurer.artifacts.append(
         Artifact(
             kind=Artifact.KIND_LETTER,
             name="Postal letter",
@@ -89,10 +95,10 @@ def seed() -> None:
             body=(
                 "{{ writer.address_block }}\n\n"
                 "{{ date_long }}\n\n"
-                "{{ target.formal_name }}\n"
-                "{{ target.street1 }}\n"
-                "{{ target.city }}, {{ target.state }} {{ target.postal_code }}\n\n"
-                "Dear {{ target.salutation }},\n\n"
+                "{{ recipient.formal_name }}\n"
+                "{{ recipient.street1 }}\n"
+                "{{ recipient.city }}, {{ recipient.state }} {{ recipient.postal_code }}\n\n"
+                "Dear {{ recipient.salutation }},\n\n"
                 "I am writing as a Connecticut resident to ask that you protect the "
                 "state's public pension fund from inappropriate exposure to private-equity "
                 "and other high-risk strategies. The retirements of teachers, state "
@@ -108,9 +114,10 @@ def seed() -> None:
             sort_order=2,
         )
     )
+    campaign.targets.append(treasurer)
 
     db.session.commit()
-    click.echo("Seeded ct-pension campaign with 1 target and 2 artifacts.")
+    click.echo("Seeded ct-pension campaign with 1 target / 1 recipient / 2 artifacts.")
 
 
 @click.command("reset-db")
