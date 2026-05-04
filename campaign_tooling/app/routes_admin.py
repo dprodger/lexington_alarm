@@ -28,6 +28,27 @@ from .substitution import preview_to_html, render_for_preview
 bp = Blueprint("admin", __name__, template_folder="templates")
 
 
+# Schema offered to the in-page autocomplete helper on the artifact body /
+# subject fields. Keep this in sync with substitution.Writer / models.Target
+# and the date variables passed into substitution.render(). A `null` entry
+# means "leaf — no further attributes."
+PLACEHOLDER_SCHEMA: dict = {
+    "writer": [
+        "name", "email", "organization",
+        "street1", "street2", "city", "state", "postal_code",
+        "address_block",
+    ],
+    "target": [
+        "formal_name", "first_name", "last_name", "salutation",
+        "title", "organization", "email",
+        "street1", "street2", "city", "state", "postal_code",
+        "address_block",
+    ],
+    "date": None,
+    "date_long": None,
+}
+
+
 def _require_admin(view):
     @wraps(view)
     def wrapper(*args, **kwargs):
@@ -88,7 +109,7 @@ def campaign_new():
         db.session.commit()
         flash("Campaign created.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=c.id))
-    return render_template("admin/campaign_form.html", campaign=None)
+    return render_template("admin/campaign_form.html", campaign=None, placeholder_schema=PLACEHOLDER_SCHEMA)
 
 
 @bp.route("/campaigns/<int:campaign_id>", methods=["GET", "POST"])
@@ -100,7 +121,7 @@ def campaign_edit(campaign_id: int):
         db.session.commit()
         flash("Saved.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))
-    return render_template("admin/campaign_form.html", campaign=campaign)
+    return render_template("admin/campaign_form.html", campaign=campaign, placeholder_schema=PLACEHOLDER_SCHEMA)
 
 
 @bp.route("/campaigns/<int:campaign_id>/delete", methods=["POST"])

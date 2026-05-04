@@ -45,10 +45,11 @@
     </label>
   </div>
   <label>Subject (email only — used as mailto subject)
-    <input type="text" name="subject" value="{{ a.subject if a else '' }}">
+    <input type="text" name="subject" class="placeholder-aware"
+           value="{{ a.subject if a else '' }}">
   </label>
   <label>Body
-    <textarea name="body" rows="14">{{ a.body if a else '' }}</textarea>
+    <textarea name="body" rows="14" class="placeholder-aware">{{ a.body if a else '' }}</textarea>
   </label>
   <label>Sort order <input type="text" name="sort_order" value="{{ a.sort_order if a else 0 }}"></label>
 {% endmacro %}
@@ -124,11 +125,10 @@
 
   <h2>Artifacts <span class="muted">— letter templates</span></h2>
   <p class="muted">
-    Use placeholders like <code>{% raw %}{{ writer.name }}{% endraw %}</code>,
-    <code>{% raw %}{{ writer.address_block }}{% endraw %}</code>,
-    <code>{% raw %}{{ target.salutation }}{% endraw %}</code>,
-    <code>{% raw %}{{ target.formal_name }}{% endraw %}</code>,
-    <code>{% raw %}{{ date_long }}{% endraw %}</code>.
+    Type <code>{% raw %}{{ {% endraw %}</code> in any subject or body field to pop up a list of
+    available placeholders (<code>writer</code>, <code>target</code>,
+    <code>date</code>, <code>date_long</code>); type a dot to drill into
+    that scope's attributes. Arrow keys navigate, Enter or Tab accepts.
   </p>
 
   {% for a in campaign.artifacts %}
@@ -166,6 +166,13 @@
       <p><button type="submit">Add artifact</button></p>
     </form>
   </details>
+{% endif %}
+
+{% if placeholder_schema %}
+<script>
+  window.PLACEHOLDER_SCHEMA = {{ placeholder_schema|tojson }};
+</script>
+<script src="{{ url_for('static', filename='placeholder-helper.js') }}"></script>
 {% endif %}
 
 {% endblock %}

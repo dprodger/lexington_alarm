@@ -184,6 +184,31 @@ mark {
 
 details > summary { cursor: pointer; padding: 0.25rem 0; }
 
+/* Autocomplete popup for the {{ var }} placeholder helper on admin
+   artifact body / subject fields. */
+.placeholder-popup {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 0.9rem;
+  z-index: 1000;
+  max-height: 240px;
+  overflow-y: auto;
+  display: none;
+}
+.placeholder-popup-item {
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.placeholder-popup-item.active,
+.placeholder-popup-item:hover {
+  background: var(--la-blue);
+  color: white;
+}
+
 #toast {
   position: fixed;
   bottom: 1.5rem;
