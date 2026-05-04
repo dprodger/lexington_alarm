@@ -88,6 +88,7 @@ Artifact bodies and email subjects support these placeholders:
 | `{{ target.formal_name }}`, `{{ target.salutation }}`, `{{ target.first_name }}`, `{{ target.last_name }}` | Target (recipient) names |
 | `{{ target.title }}`, `{{ target.organization }}`, `{{ target.email }}` | Target metadata |
 | `{{ target.street1 }}`, `{{ target.city }}`, `{{ target.state }}`, `{{ target.postal_code }}` | Target's address |
+| `{{ target.address_block }}` | Multi-line target address (street / city, state zip), *not* including `formal_name` |
 | `{{ date }}` | ISO date (`2026-05-04`) |
 | `{{ date_long }}` | Long form (`May 4, 2026`) |
 

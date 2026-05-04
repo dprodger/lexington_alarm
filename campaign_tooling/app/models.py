@@ -81,6 +81,28 @@ class Target(db.Model):
     def has_address(self) -> bool:
         return bool(self.street1.strip() and self.city.strip())
 
+    @property
+    def address_block(self) -> str:
+        """Multi-line postal address — street + city/state/zip.
+
+        Does NOT include `formal_name`; templates typically render that
+        separately on its own line above the address. (Compare with
+        Writer.address_block which does include the writer's name —
+        that's intentional, since a writer's return address normally
+        bundles the name with the address.)
+        """
+        lines = []
+        if self.street1:
+            lines.append(self.street1)
+        if self.street2:
+            lines.append(self.street2)
+        city_state = ", ".join(p for p in [self.city, self.state] if p)
+        if self.postal_code:
+            city_state = f"{city_state} {self.postal_code}".strip()
+        if city_state:
+            lines.append(city_state)
+        return "\n".join(lines)
+
 
 class Artifact(db.Model):
     """A letter template — body copy with {{var}} placeholders.
