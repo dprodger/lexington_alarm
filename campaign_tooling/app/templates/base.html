@@ -32,5 +32,28 @@
   <main>
     {% block content %}{% endblock %}
   </main>
+
+  {# Site-wide toast notification, hidden until showToast() is called. #}
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script>
+    (function () {
+      var toastTimer = null;
+      window.showToast = function (message, ms) {
+        ms = ms || 5000;
+        var el = document.getElementById("toast");
+        if (!el) return;
+        el.textContent = message;
+        el.hidden = false;
+        // Force a reflow before adding the visible class so the transition runs.
+        void el.offsetWidth;
+        el.classList.add("toast--visible");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          el.classList.remove("toast--visible");
+          setTimeout(function () { el.hidden = true; }, 250);
+        }, ms);
+      };
+    })();
+  </script>
 </body>
 </html>

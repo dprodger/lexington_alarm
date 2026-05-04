@@ -10,6 +10,17 @@
   <p>No recipients available for the contact info you provided.</p>
 {% endif %}
 
+<script>
+  function copyArtifactBody(button) {
+    var ta = button.closest("details").querySelector(".plaintext-body");
+    if (!ta) return;
+    navigator.clipboard.writeText(ta.value).then(
+      function () { showToast("Email body copied to clipboard"); },
+      function () { showToast("Could not copy — please select the text manually"); }
+    );
+  }
+</script>
+
 {% for row in rows %}
   <div class="card">
     <h2>{{ row.target.formal_name }}</h2>
@@ -31,8 +42,7 @@
           <textarea hidden class="plaintext-body">{{ item.body }}</textarea>
           <p>
             <a class="button" href="{{ item.mailto }}">Open in email client &rarr;</a>
-            <button type="button" class="secondary"
-                    onclick="navigator.clipboard.writeText(this.closest('details').querySelector('.plaintext-body').value)">
+            <button type="button" class="secondary" onclick="copyArtifactBody(this)">
               Copy body
             </button>
           </p>

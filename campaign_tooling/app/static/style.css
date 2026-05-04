@@ -155,3 +155,25 @@ mark {
 }
 
 details > summary { cursor: pointer; padding: 0.25rem 0; }
+
+#toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1a1a1a;
+  color: white;
+  padding: 0.65rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 90vw;
+}
+#toast.toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
