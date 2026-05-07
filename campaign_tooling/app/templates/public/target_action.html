@@ -2,41 +2,110 @@
 {% block title %}{{ target.name }} · {{ campaign.name }} · Lexington Alarm{% endblock %}
 {% block content %}
 <p>
-  <a href="{{ url_for('public.targets', slug=campaign.slug) }}?{{ writer_query|urlencode }}">&larr; All audiences</a>
+  <a href="{{ url_for('public.campaign', slug=campaign.slug) }}{% if writer_query %}?{{ writer_query|urlencode }}{% endif %}">&larr; Back to campaign</a>
 </p>
 
 <h1>{{ target.name }}</h1>
-<p class="muted">Part of <em>{{ campaign.name }}</em> · sending as <strong>{{ writer.name }}</strong></p>
+<p class="muted">Part of <em>{{ campaign.name }}</em>{% if writer.name %} · sending as <strong>{{ writer.name }}</strong>{% endif %}</p>
 {% if target.description %}<p>{{ target.description }}</p>{% endif %}
 
-{% if target.parameters %}
-  <div class="la-highlight-box">
-    <h2 style="margin-top: 0;">A few details before you write</h2>
-    <p class="muted">These appear in the body of every letter to this audience.</p>
-    <form method="post">
-      {% for p in target.parameters %}
-        <label>
-          {{ p.label or p.key }}{% if p.required %} *{% endif %}
-          <input type="text" name="p_{{ p.key }}"
-                 value="{{ parameter_values.get(p.key, '') }}"
-                 {% if p.required %}required{% endif %}>
-          {% if p.help_text %}<small class="muted">{{ p.help_text }}</small>{% endif %}
-        </label>
-      {% endfor %}
-      <p>
-        <button type="submit" class="la-button">
-          {% if parameters_form_required %}Continue &rarr;{% else %}Update{% endif %}
-        </button>
-      </p>
-    </form>
+<details class="la-highlight-box" {% if not ready %}open{% endif %}>
+  <summary>
+    <strong>Your details</strong>
+    {% if ready %}<span class="muted edit-hint">— click to edit</span>{% endif %}
+    {% if ready %}
+      <dl class="details-readonly">
+        {% if writer.name %}<dt>Name</dt><dd>{{ writer.name }}</dd>{% endif %}
+        {% if writer.email %}<dt>Email</dt><dd>{{ writer.email }}</dd>{% endif %}
+        {% if writer.organization %}<dt>Organization</dt><dd>{{ writer.organization }}</dd>{% endif %}
+        {% if writer.street1 %}
+          <dt>Address</dt>
+          <dd>{{ writer.street1 }}{% if writer.street2 %}, {{ writer.street2 }}{% endif %}{% if writer.city %}, {{ writer.city }}{% endif %}{% if writer.state %}, {{ writer.state }}{% endif %}{% if writer.postal_code %} {{ writer.postal_code }}{% endif %}</dd>
+        {% endif %}
+        {% for p in target.parameters %}
+          {% if parameter_values.get(p.key) %}
+            <dt>{{ p.label or p.key }}</dt><dd>{{ parameter_values[p.key] }}</dd>
+          {% endif %}
+        {% endfor %}
+      </dl>
+    {% endif %}
+  </summary>
+<form method="post" style="margin-top: 1rem;">
+  {% if not ready %}<p>Fill in your contact info to generate personalized letters and emails.</p>{% endif %}
+  <label>Your name *
+    <input type="text" name="name" value="{{ writer.name }}" required>
+  </label>
+  <label>Your email *
+    <input type="email" name="email" value="{{ writer.email }}" required>
+  </label>
+  <label>Organization (optional)
+    <input type="text" name="organization" value="{{ writer.organization }}">
+  </label>
+  <label>Street address
+    <input type="text" name="street1" value="{{ writer.street1 }}">
+  </label>
+  <label>Street address (line 2)
+    <input type="text" name="street2" value="{{ writer.street2 }}">
+  </label>
+  <div class="row-3">
+    <label>City <input type="text" name="city" value="{{ writer.city }}"></label>
+    <label>State <input type="text" name="state" value="{{ writer.state }}"></label>
+    <label>Postal code <input type="text" name="postal_code" value="{{ writer.postal_code }}"></label>
   </div>
-{% endif %}
+  <p class="muted">Your information is only used to fill in your letters. We don't store it on the server.</p>
 
-{% if parameters_form_required %}
-  {# Required parameters not yet filled in — stop here and let the writer
-     supply them before rendering any artifacts. #}
-{% else %}
+  {% if target.parameters %}
+    <h3>A few details about you</h3>
+    <p class="muted">These appear in the body of every letter to this audience.</p>
+    {% for p in target.parameters %}
+      <label>
+        {{ p.label or p.key }}{% if p.required %} *{% endif %}
+        <input type="text" name="p_{{ p.key }}"
+               value="{{ parameter_values.get(p.key, '') }}"
+               {% if p.required %}required{% endif %}>
+        {% if p.help_text %}<small class="muted">{{ p.help_text }}</small>{% endif %}
+      </label>
+    {% endfor %}
+  {% endif %}
 
+  <p>
+    <button type="submit" class="la-button">
+      {% if ready %}Update{% else %}Continue &rarr;{% endif %}
+    </button>
+  </p>
+
+  {# DEV-ONLY test helper. Delete this block (and the matching script below) before launch. #}
+  <p class="muted" style="border-top: 1px dashed #ccc; padding-top: 0.75rem;">
+    <a href="#" id="dev-fill-test">Fill test data (dev only)</a>
+  </p>
+</form>
+</details>
+
+{# DEV-ONLY: remove with the link above #}
+<script>
+  document.getElementById("dev-fill-test")?.addEventListener("click", function (e) {
+    e.preventDefault();
+    const fields = {
+      name: "Test Writer",
+      email: "test@example.com",
+      organization: "",
+      street1: "123 Main Street",
+      street2: "",
+      city: "Hartford",
+      state: "CT",
+      postal_code: "06106",
+    };
+    for (const [name, value] of Object.entries(fields)) {
+      const el = document.querySelector(`input[name="${name}"]`);
+      if (el) el.value = value;
+    }
+    document.querySelectorAll('input[name^="p_"]').forEach(function (el) {
+      el.value = "test_" + el.name.slice(2);
+    });
+  });
+</script>
+
+{% if ready %}
 <h2>Recipients ({{ target.recipients|length }})</h2>
 <ul class="recipient-list">
   {% for r in target.recipients %}
@@ -131,7 +200,7 @@
            href="{{ url_for('public.letters_pdf',
                             slug=campaign.slug,
                             target_id=target.id,
-                            artifact_id=view.artifact.id) }}?{{ (full_query or writer_query)|urlencode }}">
+                            artifact_id=view.artifact.id) }}?{{ full_query|urlencode }}">
           Download all as PDF
           ({{ view.per_recipient|length }} letter{{ '' if view.per_recipient|length == 1 else 's' }}) &rarr;
         </a>
@@ -139,7 +208,7 @@
            href="{{ url_for('public.print_letters',
                             slug=campaign.slug,
                             target_id=target.id,
-                            artifact_id=view.artifact.id) }}?{{ (full_query or writer_query)|urlencode }}">
+                            artifact_id=view.artifact.id) }}?{{ full_query|urlencode }}">
           Open printable view &rarr;
         </a>
       </p>

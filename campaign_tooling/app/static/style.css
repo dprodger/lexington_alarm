@@ -131,6 +131,18 @@ button.danger { background: var(--error); }
 
 .muted { color: var(--muted); font-size: 0.9rem; }
 
+.details-readonly {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 0.75rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+}
+.details-readonly dt { color: var(--muted); }
+.details-readonly dd { margin: 0; }
+details[open] .details-readonly,
+details[open] .edit-hint { display: none; }
+
 .target-row {
   display: flex;
   justify-content: space-between;

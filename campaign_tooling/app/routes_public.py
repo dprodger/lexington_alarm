@@ -1,22 +1,26 @@
 """Public letter-writer flow.
 
-Navigation: campaign → target → recipient.
+Navigation: campaign overview → target → recipient.
 
   1. /                                    — list active campaigns
-  2. /c/<slug>                            — campaign detail + writer info form
-  3. /c/<slug>/targets                    — list of targets (audiences) within
-                                            the campaign
-  4. /c/<slug>/t/<target_id>              — per-target action page (recipients
-                                            and artifacts; "send all" buttons)
-  5. /c/<slug>/t/<target_id>/print/<artifact_id>
+  2. /c/<slug>                            — campaign overview + target cards
+                                            (no form)
+  3. /c/<slug>/t/<target_id>              — per-target page: writer info +
+                                            this target's parameters + the
+                                            artifact previews
+  4. /c/<slug>/t/<target_id>/print/<artifact_id>
                                           — printable view, one page per
                                             recipient, for a letter artifact
-  6. /c/<slug>/t/<target_id>/pdf/<artifact_id>
+  5. /c/<slug>/t/<target_id>/pdf/<artifact_id>
                                           — combined PDF, one page per
                                             recipient
 
-Writer info is held in the URL query string (no DB persistence) so the
-flow is shareable, restartable, and stateless.
+Writer info and parameter values ride in the URL query string (no DB
+persistence) so the flow is shareable, restartable, and stateless. Writer
+info propagates from the target page back to the campaign overview via
+the "back to campaign" link, so a writer can pick a second target without
+re-entering name/email — but parameter values are scoped to a single
+target and don't carry across.
 """
 
 from __future__ import annotations
@@ -68,7 +72,7 @@ def _writer_query(writer: Writer) -> dict:
 def _parameters_from_args(target: Target) -> dict:
     """Pull this target's parameter values out of the request query string.
 
-    Each parameter is sent as ``p_<key>``; missing ones are returned as the
+    Each parameter is sent as ``p_<key>``; missing ones come back as the
     empty string so templates render them as blank rather than raising.
     """
     return {
@@ -102,39 +106,14 @@ def index():
     return render_template("public/index.html", campaigns=campaigns)
 
 
-@bp.route("/c/<slug>", methods=["GET", "POST"])
+@bp.route("/c/<slug>")
 def campaign(slug: str):
     campaign = _load_campaign_or_404(slug)
     if not campaign.active:
         return render_template("public/inactive.html", campaign=campaign), 410
-    if request.method == "POST":
-        writer = Writer(
-            name=request.form.get("name", "").strip(),
-            email=request.form.get("email", "").strip(),
-            street1=request.form.get("street1", "").strip(),
-            street2=request.form.get("street2", "").strip(),
-            city=request.form.get("city", "").strip(),
-            state=request.form.get("state", "").strip(),
-            postal_code=request.form.get("postal_code", "").strip(),
-            organization=request.form.get("organization", "").strip(),
-        )
-        return redirect(
-            url_for("public.targets", slug=slug) + "?" + urlencode(_writer_query(writer))
-        )
     writer = _writer_from_args()
-    return render_template("public/campaign.html", campaign=campaign, writer=writer)
-
-
-@bp.route("/c/<slug>/targets")
-def targets(slug: str):
-    campaign = _load_campaign_or_404(slug)
-    if not campaign.active:
-        return redirect(url_for("public.campaign", slug=slug))
-    writer = _writer_from_args()
-    if not writer.name:
-        return redirect(url_for("public.campaign", slug=slug))
     return render_template(
-        "public/targets.html",
+        "public/campaign.html",
         campaign=campaign,
         writer=writer,
         writer_query=_writer_query(writer),
@@ -149,14 +128,20 @@ def target_action(slug: str, target_id: int):
     target = db.session.get(Target, target_id) or abort(404)
     if target.campaign_id != campaign.id:
         abort(404)
-    writer = _writer_from_args()
-    if not writer.name:
-        return redirect(url_for("public.campaign", slug=slug))
 
-    # Parameter capture: POST receives values from the form, then we redirect
-    # to the same URL with the values folded into the query string. That keeps
-    # GET stateless and shareable, matching how writer info is handled.
+    # POST: writer info + this target's parameters. We redirect to GET with
+    # everything in the query string so the page is shareable and restartable.
     if request.method == "POST":
+        writer = Writer(
+            name=request.form.get("name", "").strip(),
+            email=request.form.get("email", "").strip(),
+            street1=request.form.get("street1", "").strip(),
+            street2=request.form.get("street2", "").strip(),
+            city=request.form.get("city", "").strip(),
+            state=request.form.get("state", "").strip(),
+            postal_code=request.form.get("postal_code", "").strip(),
+            organization=request.form.get("organization", "").strip(),
+        )
         submitted = {
             p.key: request.form.get(f"p_{p.key}", "").strip()
             for p in target.parameters
@@ -167,19 +152,21 @@ def target_action(slug: str, target_id: int):
             + ("?" + urlencode(merged) if merged else "")
         )
 
+    writer = _writer_from_args()
     parameters = _parameters_from_args(target)
-    missing = _missing_required(target, parameters)
-    if missing:
+
+    # No writer info yet → just show the form. Skip the artifact-rendering pass.
+    if not writer.name:
         return render_template(
             "public/target_action.html",
             campaign=campaign,
             target=target,
             writer=writer,
             writer_query=_writer_query(writer),
+            full_query=_writer_query(writer),
             artifact_views=[],
-            parameters_form_required=True,
             parameter_values=parameters,
-            missing_parameters=missing,
+            ready=False,
         )
 
     artifact_views = []
@@ -262,8 +249,8 @@ def target_action(slug: str, target_id: int):
         writer_query=_writer_query(writer),
         full_query={**_writer_query(writer), **_parameters_query(parameters)},
         artifact_views=artifact_views,
-        parameters_form_required=False,
         parameter_values=parameters,
+        ready=True,
     )
 
 
@@ -277,10 +264,8 @@ def print_letters(slug: str, target_id: int, artifact_id: int):
     if target.campaign_id != campaign.id or artifact.target_id != target.id:
         abort(404)
     writer = _writer_from_args()
-    if not writer.name:
-        return redirect(url_for("public.campaign", slug=slug))
     parameters = _parameters_from_args(target)
-    if _missing_required(target, parameters):
+    if not writer.name or _missing_required(target, parameters):
         return redirect(
             url_for("public.target_action", slug=slug, target_id=target_id)
             + "?" + urlencode({**_writer_query(writer), **_parameters_query(parameters)})
@@ -328,10 +313,8 @@ def letters_pdf(slug: str, target_id: int, artifact_id: int):
     if target.campaign_id != campaign.id or artifact.target_id != target.id:
         abort(404)
     writer = _writer_from_args()
-    if not writer.name:
-        return redirect(url_for("public.campaign", slug=slug))
     parameters = _parameters_from_args(target)
-    if _missing_required(target, parameters):
+    if not writer.name or _missing_required(target, parameters):
         return redirect(
             url_for("public.target_action", slug=slug, target_id=target_id)
             + "?" + urlencode({**_writer_query(writer), **_parameters_query(parameters)})
