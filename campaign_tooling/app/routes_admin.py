@@ -7,6 +7,7 @@ TODO before this goes anywhere near production.
 
 from __future__ import annotations
 
+import re
 from functools import wraps
 
 from flask import (
@@ -22,17 +23,19 @@ from flask import (
 )
 
 from .extensions import db
-from .models import Artifact, Campaign, Recipient, Target
+from .models import Artifact, Campaign, Recipient, Target, TargetParameter
 from .substitution import preview_to_html, render_for_preview
 
 bp = Blueprint("admin", __name__, template_folder="templates")
 
 
-# Schema offered to the in-page autocomplete helper on the artifact body /
-# subject fields. Keep this in sync with substitution.Writer / models.Recipient
-# and the date variables passed into substitution.render(). A `null` entry
-# means "leaf — no further attributes."
-PLACEHOLDER_SCHEMA: dict = {
+# Base schema offered to the in-page autocomplete helper on the artifact
+# body / subject fields. Keep this in sync with substitution.Writer /
+# models.Recipient and the date variables passed into substitution.render().
+# A `null` entry means "leaf — no further attributes." The `parameter` scope
+# is added per-target by `_placeholder_schema_for(target)` when the target
+# has any parameters defined.
+_BASE_PLACEHOLDER_SCHEMA: dict = {
     "writer": [
         "name", "email", "organization",
         "street1", "street2", "city", "state", "postal_code",
@@ -48,6 +51,16 @@ PLACEHOLDER_SCHEMA: dict = {
     "date": None,
     "date_long": None,
 }
+
+
+def _placeholder_schema_for(target: Target) -> dict:
+    schema = dict(_BASE_PLACEHOLDER_SCHEMA)
+    if target.parameters:
+        schema["parameter"] = [p.key for p in target.parameters]
+    return schema
+
+
+_PARAM_KEY_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
 def _require_admin(view):
@@ -174,7 +187,7 @@ def target_edit(target_id: int):
     return render_template(
         "admin/target_form.html",
         target=target,
-        placeholder_schema=PLACEHOLDER_SCHEMA,
+        placeholder_schema=_placeholder_schema_for(target),
     )
 
 
@@ -243,6 +256,76 @@ def recipient_delete(recipient_id: int):
     recipient = db.session.get(Recipient, recipient_id) or abort(404)
     target_id = recipient.target_id
     db.session.delete(recipient)
+    db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=target_id))
+
+
+# --- Parameters -----------------------------------------------------------
+
+
+def _apply_parameter_form(parameter: TargetParameter, form) -> str | None:
+    """Mutate `parameter` from `form`. Returns an error message string, or
+    None on success. Caller is responsible for committing.
+    """
+    raw_key = form.get("key", "").strip().lower()
+    if not _PARAM_KEY_RE.match(raw_key):
+        return "Key must start with a lowercase letter and contain only lowercase letters, digits, and underscores."
+
+    # Reject duplicate keys within the same target.
+    sibling = db.session.scalar(
+        db.select(TargetParameter).where(
+            TargetParameter.target_id == parameter.target_id,
+            TargetParameter.key == raw_key,
+            TargetParameter.id != (parameter.id or -1),
+        )
+    )
+    if sibling is not None:
+        return f"Another parameter on this target already uses the key '{raw_key}'."
+
+    parameter.key = raw_key
+    parameter.label = form.get("label", "").strip()
+    parameter.help_text = form.get("help_text", "").strip()
+    parameter.required = "required" in form
+    try:
+        parameter.sort_order = int(form.get("sort_order") or 0)
+    except ValueError:
+        parameter.sort_order = 0
+    return None
+
+
+@bp.route("/targets/<int:target_id>/parameters/new", methods=["POST"])
+@_require_admin
+def parameter_new(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+    parameter = TargetParameter(target_id=target.id)
+    error = _apply_parameter_form(parameter, request.form)
+    if error:
+        flash(error, "error")
+        return redirect(url_for("admin.target_edit", target_id=target.id))
+    db.session.add(parameter)
+    db.session.commit()
+    flash("Parameter added.", "success")
+    return redirect(url_for("admin.target_edit", target_id=target.id))
+
+
+@bp.route("/parameters/<int:parameter_id>/edit", methods=["POST"])
+@_require_admin
+def parameter_edit(parameter_id: int):
+    parameter = db.session.get(TargetParameter, parameter_id) or abort(404)
+    error = _apply_parameter_form(parameter, request.form)
+    if error:
+        flash(error, "error")
+    else:
+        db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=parameter.target_id))
+
+
+@bp.route("/parameters/<int:parameter_id>/delete", methods=["POST"])
+@_require_admin
+def parameter_delete(parameter_id: int):
+    parameter = db.session.get(TargetParameter, parameter_id) or abort(404)
+    target_id = parameter.target_id
+    db.session.delete(parameter)
     db.session.commit()
     return redirect(url_for("admin.target_edit", target_id=target_id))
 

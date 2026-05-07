@@ -14,9 +14,10 @@ from pathlib import Path
 
 import click
 from flask import Flask, current_app
+from sqlalchemy import text
 
 from .extensions import db
-from .models import Artifact, Campaign, Recipient, Target
+from .models import Artifact, Campaign, Recipient, Target, TargetParameter
 
 
 def register(app: Flask) -> None:
@@ -65,12 +66,24 @@ def _serialize_artifact(a: Artifact) -> dict:
     }
 
 
+def _serialize_parameter(p: TargetParameter) -> dict:
+    return {
+        "id": p.id,
+        "key": p.key,
+        "label": p.label,
+        "help_text": p.help_text,
+        "required": p.required,
+        "sort_order": p.sort_order,
+    }
+
+
 def _serialize_target(t: Target) -> dict:
     return {
         "id": t.id,
         "name": t.name,
         "description": t.description,
         "sort_order": t.sort_order,
+        "parameters": [_serialize_parameter(p) for p in t.parameters],
         "recipients": [_serialize_recipient(r) for r in t.recipients],
         "artifacts": [_serialize_artifact(a) for a in t.artifacts],
     }
@@ -122,16 +135,37 @@ def _try_preserve_id(obj, requested_id, model) -> None:
     """Assign the JSON-recorded id to the new row if it isn't taken; otherwise
     let the DB auto-assign. Pre-checking avoids an IntegrityError on insert.
 
-    Note: PostgreSQL's autoincrement sequences don't advance on explicit-id
-    inserts, so after large imports on Supabase the next auto-assigned id
-    can collide with reused values. SQLite (used for local dev) doesn't
-    have this problem. Add a `SELECT setval(...)` step here when we move
-    the prod store to Postgres.
+    On Postgres this leaves the SERIAL sequence behind the highest id,
+    so the next auto-assigned id collides with a preserved one — see
+    `_resync_postgres_sequences` below for the fix-up that runs after
+    import.
     """
     if requested_id is None:
         return
     if db.session.get(model, requested_id) is None:
         obj.id = requested_id
+
+
+_ID_TABLES = (Campaign, Target, Recipient, Artifact, TargetParameter)
+
+
+def _resync_postgres_sequences() -> None:
+    """Bump each ``id`` sequence to ``MAX(id)`` after a seed import.
+
+    No-op on SQLite (sequences are managed differently). Called from
+    ``import-seed`` so a reseed can't leave admin-driven inserts colliding
+    with preserved ids.
+    """
+    if db.engine.dialect.name != "postgresql":
+        return
+    for model in _ID_TABLES:
+        schema = model.__table__.schema
+        table = model.__tablename__
+        full = f"{schema}.{table}" if schema else table
+        db.session.execute(text(
+            f"SELECT setval(pg_get_serial_sequence('{full}', 'id'), "
+            f"COALESCE((SELECT MAX(id) FROM {full}), 1))"
+        ))
 
 
 def _import_campaign(data: dict, *, replace: bool) -> str:
@@ -181,6 +215,18 @@ def _import_campaign(data: dict, *, replace: bool) -> str:
         db.session.add(target)
         db.session.flush()
 
+        for pdata in tdata.get("parameters", []):
+            parameter = TargetParameter(
+                target_id=target.id,
+                key=pdata.get("key", ""),
+                label=pdata.get("label", ""),
+                help_text=pdata.get("help_text", ""),
+                required=pdata.get("required", True),
+                sort_order=pdata.get("sort_order", 0),
+            )
+            _try_preserve_id(parameter, pdata.get("id"), TargetParameter)
+            db.session.add(parameter)
+
         for rdata in tdata.get("recipients", []):
             recipient = Recipient(target_id=target.id)
             for field in _RECIPIENT_FIELDS:
@@ -228,6 +274,7 @@ def import_seed(replace: bool, paths: tuple[str, ...]) -> None:
         counts[result] += 1
         click.echo(f"  {result}: {path.name}")
 
+    _resync_postgres_sequences()
     db.session.commit()
     click.echo(
         f"Done — {counts['imported']} imported, "

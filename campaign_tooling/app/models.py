@@ -69,6 +69,11 @@ class Target(db.Model):
         cascade="all, delete-orphan",
         order_by="Artifact.sort_order",
     )
+    parameters: Mapped[list["TargetParameter"]] = relationship(
+        back_populates="target",
+        cascade="all, delete-orphan",
+        order_by="TargetParameter.sort_order",
+    )
 
 
 class Recipient(db.Model):
@@ -151,3 +156,28 @@ class Artifact(db.Model):
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     target: Mapped["Target"] = relationship(back_populates="artifacts")
+
+
+class TargetParameter(db.Model):
+    """A free-form string the writer must supply before a Target's artifacts
+    can be rendered — e.g. ``job_title`` or ``employer``.
+
+    Templates reference these as ``{{ parameter.<key> }}``. ``key`` is the
+    identifier used in the template; ``label`` is what the writer sees on
+    the form. Strings only.
+    """
+
+    __tablename__ = "target_parameters"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("targets.id", ondelete="CASCADE"), nullable=False
+    )
+
+    key: Mapped[str] = mapped_column(String(64), nullable=False)
+    label: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    help_text: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    target: Mapped["Target"] = relationship(back_populates="parameters")

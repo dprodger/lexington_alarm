@@ -65,6 +65,26 @@ def _writer_query(writer: Writer) -> dict:
     }
 
 
+def _parameters_from_args(target: Target) -> dict:
+    """Pull this target's parameter values out of the request query string.
+
+    Each parameter is sent as ``p_<key>``; missing ones are returned as the
+    empty string so templates render them as blank rather than raising.
+    """
+    return {
+        p.key: request.args.get(f"p_{p.key}", "").strip()
+        for p in target.parameters
+    }
+
+
+def _parameters_query(parameters: dict) -> dict:
+    return {f"p_{k}": v for k, v in parameters.items() if v}
+
+
+def _missing_required(target: Target, parameters: dict) -> list:
+    return [p for p in target.parameters if p.required and not parameters.get(p.key)]
+
+
 def _load_campaign_or_404(slug: str) -> Campaign:
     campaign = db.session.scalar(db.select(Campaign).where(Campaign.slug == slug))
     if campaign is None:
@@ -121,7 +141,7 @@ def targets(slug: str):
     )
 
 
-@bp.route("/c/<slug>/t/<int:target_id>")
+@bp.route("/c/<slug>/t/<int:target_id>", methods=["GET", "POST"])
 def target_action(slug: str, target_id: int):
     campaign = _load_campaign_or_404(slug)
     if not campaign.active:
@@ -132,6 +152,35 @@ def target_action(slug: str, target_id: int):
     writer = _writer_from_args()
     if not writer.name:
         return redirect(url_for("public.campaign", slug=slug))
+
+    # Parameter capture: POST receives values from the form, then we redirect
+    # to the same URL with the values folded into the query string. That keeps
+    # GET stateless and shareable, matching how writer info is handled.
+    if request.method == "POST":
+        submitted = {
+            p.key: request.form.get(f"p_{p.key}", "").strip()
+            for p in target.parameters
+        }
+        merged = {**_writer_query(writer), **_parameters_query(submitted)}
+        return redirect(
+            url_for("public.target_action", slug=slug, target_id=target_id)
+            + ("?" + urlencode(merged) if merged else "")
+        )
+
+    parameters = _parameters_from_args(target)
+    missing = _missing_required(target, parameters)
+    if missing:
+        return render_template(
+            "public/target_action.html",
+            campaign=campaign,
+            target=target,
+            writer=writer,
+            writer_query=_writer_query(writer),
+            artifact_views=[],
+            parameters_form_required=True,
+            parameter_values=parameters,
+            missing_parameters=missing,
+        )
 
     artifact_views = []
     for artifact in target.artifacts:
@@ -146,10 +195,18 @@ def target_action(slug: str, target_id: int):
         per_recipient = []
         for recipient in eligible:
             rendered_subject = render(
-                artifact.subject, writer=writer, recipient=recipient, target=target
+                artifact.subject,
+                writer=writer,
+                recipient=recipient,
+                target=target,
+                parameters=parameters,
             )
             rendered_body = render(
-                artifact.body, writer=writer, recipient=recipient, target=target
+                artifact.body,
+                writer=writer,
+                recipient=recipient,
+                target=target,
+                parameters=parameters,
             )
             per_recipient.append(
                 {
@@ -167,14 +224,24 @@ def target_action(slug: str, target_id: int):
         sample_subject_html = (
             markers_to_html(
                 render_with_highlights(
-                    artifact.subject, writer=writer, recipient=sample, target=target
+                    artifact.subject,
+                    writer=writer,
+                    recipient=sample,
+                    target=target,
+                    parameters=parameters,
                 )
             )
             if artifact.subject
             else ""
         )
         sample_body_html = markers_to_html(
-            render_with_highlights(artifact.body, writer=writer, recipient=sample, target=target)
+            render_with_highlights(
+                artifact.body,
+                writer=writer,
+                recipient=sample,
+                target=target,
+                parameters=parameters,
+            )
         )
 
         artifact_views.append(
@@ -193,7 +260,10 @@ def target_action(slug: str, target_id: int):
         target=target,
         writer=writer,
         writer_query=_writer_query(writer),
+        full_query={**_writer_query(writer), **_parameters_query(parameters)},
         artifact_views=artifact_views,
+        parameters_form_required=False,
+        parameter_values=parameters,
     )
 
 
@@ -209,14 +279,32 @@ def print_letters(slug: str, target_id: int, artifact_id: int):
     writer = _writer_from_args()
     if not writer.name:
         return redirect(url_for("public.campaign", slug=slug))
+    parameters = _parameters_from_args(target)
+    if _missing_required(target, parameters):
+        return redirect(
+            url_for("public.target_action", slug=slug, target_id=target_id)
+            + "?" + urlencode({**_writer_query(writer), **_parameters_query(parameters)})
+        )
 
     letters = []
     for recipient in target.recipients:
         if artifact.kind == Artifact.KIND_LETTER and not recipient.has_address:
             continue
-        body = render(artifact.body, writer=writer, recipient=recipient, target=target)
+        body = render(
+            artifact.body,
+            writer=writer,
+            recipient=recipient,
+            target=target,
+            parameters=parameters,
+        )
         body_html = markers_to_html(
-            render_with_highlights(artifact.body, writer=writer, recipient=recipient, target=target)
+            render_with_highlights(
+                artifact.body,
+                writer=writer,
+                recipient=recipient,
+                target=target,
+                parameters=parameters,
+            )
         )
         letters.append({"recipient": recipient, "body": body, "body_html": body_html})
 
@@ -242,12 +330,26 @@ def letters_pdf(slug: str, target_id: int, artifact_id: int):
     writer = _writer_from_args()
     if not writer.name:
         return redirect(url_for("public.campaign", slug=slug))
+    parameters = _parameters_from_args(target)
+    if _missing_required(target, parameters):
+        return redirect(
+            url_for("public.target_action", slug=slug, target_id=target_id)
+            + "?" + urlencode({**_writer_query(writer), **_parameters_query(parameters)})
+        )
 
     bodies = []
     for recipient in target.recipients:
         if artifact.kind == Artifact.KIND_LETTER and not recipient.has_address:
             continue
-        bodies.append(render(artifact.body, writer=writer, recipient=recipient, target=target))
+        bodies.append(
+            render(
+                artifact.body,
+                writer=writer,
+                recipient=recipient,
+                target=target,
+                parameters=parameters,
+            )
+        )
 
     if not bodies:
         abort(404)

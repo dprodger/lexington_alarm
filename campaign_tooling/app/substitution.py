@@ -8,6 +8,9 @@ and built-in filters. The template scope is:
     recipient  — SQLAlchemy Recipient row (formal_name, salutation, address, ...)
     target     — SQLAlchemy Target row (name, description) — the conceptual
                  group the recipient belongs to
+    parameter  — namespace of free-form strings the writer supplied for this
+                 Target (e.g. ``parameter.job_title``); empty string when a
+                 referenced key wasn't supplied
     date       — ISO date string ("2026-05-04")
     date_long  — long form ("May 4, 2026")
 
@@ -56,12 +59,21 @@ class Writer:
 _env = Environment(autoescape=False, keep_trailing_newline=True)
 
 
-def render(template: str, *, writer, recipient, target=None, today: date | None = None) -> str:
+def render(
+    template: str,
+    *,
+    writer,
+    recipient,
+    target=None,
+    parameters: dict | None = None,
+    today: date | None = None,
+) -> str:
     today = today or date.today()
     return _env.from_string(template).render(
         writer=writer,
         recipient=recipient,
         target=target if target is not None else getattr(recipient, "target", None),
+        parameter=SimpleNamespace(**(parameters or {})),
         date=today.isoformat(),
         date_long=today.strftime("%B %-d, %Y"),
     )
@@ -113,6 +125,21 @@ _PREVIEW_TARGET = SimpleNamespace(
 )
 
 
+class _HighlightedAny:
+    """Stand-in for the ``parameter`` scope in admin preview rendering.
+
+    The admin preview endpoint doesn't know which Target the artifact will
+    end up under, so it can't enumerate the real parameter keys. Any
+    ``parameter.<x>`` reference is rendered as ``<x>``, marker-wrapped so
+    the preview highlights it like a real substitution.
+    """
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(name)
+        return f"{_MARK_OPEN}<{name}>{_MARK_CLOSE}"
+
+
 class _Highlighted:
     """Wraps an object so attribute access returns marker-wrapped values."""
 
@@ -132,7 +159,13 @@ class _Highlighted:
 
 
 def render_with_highlights(
-    template: str, *, writer, recipient, target=None, today: date | None = None
+    template: str,
+    *,
+    writer,
+    recipient,
+    target=None,
+    parameters: dict | None = None,
+    today: date | None = None,
 ) -> str:
     """Render with sentinel markers around each substituted value.
 
@@ -146,19 +179,26 @@ def render_with_highlights(
         writer=_Highlighted(writer),
         recipient=_Highlighted(recipient),
         target=_Highlighted(target) if target is not None else _Highlighted(SimpleNamespace()),
+        parameter=_Highlighted(SimpleNamespace(**(parameters or {}))),
         date=f"{_MARK_OPEN}{today.isoformat()}{_MARK_CLOSE}",
         date_long=f"{_MARK_OPEN}{today.strftime('%B %-d, %Y')}{_MARK_CLOSE}",
     )
 
 
 def render_for_preview(template: str, today: date | None = None) -> str:
-    """Render with fixed test data; substituted values bear sentinel markers."""
-    return render_with_highlights(
-        template,
-        writer=_PREVIEW_WRITER,
-        recipient=_PREVIEW_RECIPIENT,
-        target=_PREVIEW_TARGET,
-        today=today,
+    """Render with fixed test data; substituted values bear sentinel markers.
+
+    The `parameter` scope is a stand-in that highlights any referenced key
+    as ``<key>`` since the preview doesn't know the real Target.
+    """
+    today = today or date.today()
+    return _env.from_string(template).render(
+        writer=_Highlighted(_PREVIEW_WRITER),
+        recipient=_Highlighted(_PREVIEW_RECIPIENT),
+        target=_Highlighted(_PREVIEW_TARGET),
+        parameter=_HighlightedAny(),
+        date=f"{_MARK_OPEN}{today.isoformat()}{_MARK_CLOSE}",
+        date_long=f"{_MARK_OPEN}{today.strftime('%B %-d, %Y')}{_MARK_CLOSE}",
     )
 
 

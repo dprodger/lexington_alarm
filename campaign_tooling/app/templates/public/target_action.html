@@ -9,6 +9,34 @@
 <p class="muted">Part of <em>{{ campaign.name }}</em> · sending as <strong>{{ writer.name }}</strong></p>
 {% if target.description %}<p>{{ target.description }}</p>{% endif %}
 
+{% if target.parameters %}
+  <div class="la-highlight-box">
+    <h2 style="margin-top: 0;">A few details before you write</h2>
+    <p class="muted">These appear in the body of every letter to this audience.</p>
+    <form method="post">
+      {% for p in target.parameters %}
+        <label>
+          {{ p.label or p.key }}{% if p.required %} *{% endif %}
+          <input type="text" name="p_{{ p.key }}"
+                 value="{{ parameter_values.get(p.key, '') }}"
+                 {% if p.required %}required{% endif %}>
+          {% if p.help_text %}<small class="muted">{{ p.help_text }}</small>{% endif %}
+        </label>
+      {% endfor %}
+      <p>
+        <button type="submit" class="la-button">
+          {% if parameters_form_required %}Continue &rarr;{% else %}Update{% endif %}
+        </button>
+      </p>
+    </form>
+  </div>
+{% endif %}
+
+{% if parameters_form_required %}
+  {# Required parameters not yet filled in — stop here and let the writer
+     supply them before rendering any artifacts. #}
+{% else %}
+
 <h2>Recipients ({{ target.recipients|length }})</h2>
 <ul class="recipient-list">
   {% for r in target.recipients %}
@@ -103,7 +131,7 @@
            href="{{ url_for('public.letters_pdf',
                             slug=campaign.slug,
                             target_id=target.id,
-                            artifact_id=view.artifact.id) }}?{{ writer_query|urlencode }}">
+                            artifact_id=view.artifact.id) }}?{{ (full_query or writer_query)|urlencode }}">
           Download all as PDF
           ({{ view.per_recipient|length }} letter{{ '' if view.per_recipient|length == 1 else 's' }}) &rarr;
         </a>
@@ -111,11 +139,12 @@
            href="{{ url_for('public.print_letters',
                             slug=campaign.slug,
                             target_id=target.id,
-                            artifact_id=view.artifact.id) }}?{{ writer_query|urlencode }}">
+                            artifact_id=view.artifact.id) }}?{{ (full_query or writer_query)|urlencode }}">
           Open printable view &rarr;
         </a>
       </p>
     {% endif %}
   </div>
 {% endfor %}
+{% endif %}
 {% endblock %}

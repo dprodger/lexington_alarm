@@ -30,6 +30,31 @@
   <label>Sort order <input type="text" name="sort_order" value="{{ r.sort_order if r else 0 }}"></label>
 {% endmacro %}
 
+{% macro render_parameter_fields(p) %}
+  <div class="row">
+    <label>Key (used in templates as <code>{% raw %}{{ parameter.<key> }}{% endraw %}</code>)
+      <input type="text" name="key" value="{{ p.key if p else '' }}" required
+             pattern="[a-z][a-z0-9_]*"
+             title="Lowercase letters, digits, and underscores; must start with a letter.">
+    </label>
+    <label>Label (shown to writers)
+      <input type="text" name="label" value="{{ p.label if p else '' }}" required>
+    </label>
+  </div>
+  <label>Help text (optional, shown under the field)
+    <input type="text" name="help_text" value="{{ p.help_text if p else '' }}">
+  </label>
+  <div class="row">
+    <label class="inline">
+      <input type="checkbox" name="required" {% if p is none or p.required %}checked{% endif %}>
+      Required
+    </label>
+    <label>Sort order
+      <input type="text" name="sort_order" value="{{ p.sort_order if p else 0 }}">
+    </label>
+  </div>
+{% endmacro %}
+
 {% macro render_artifact_fields(a) %}
   <div class="row">
     <label>Name (internal)
@@ -102,11 +127,46 @@
   </form>
 </details>
 
+<h2>Parameters <span class="muted">— writer-supplied values for this target's letters</span></h2>
+<p class="muted">
+  Define free-form strings the writer must fill in before generating a letter
+  (e.g. <code>job_title</code>, <code>employer</code>). Reference them in any
+  artifact subject or body as <code>{% raw %}{{ parameter.<key> }}{% endraw %}</code>.
+  Leave empty if this target's letters don't need any.
+</p>
+
+{% for p in target.parameters %}
+  <details class="card">
+    <summary>
+      <strong>{{ p.label or p.key }}</strong>
+      <span class="muted">— <code>{% raw %}{{ parameter.{% endraw %}{{ p.key }}{% raw %} }}{% endraw %}</code></span>
+      {% if p.required %}<span class="kind-badge">required</span>{% endif %}
+    </summary>
+    <form method="post" action="{{ url_for('admin.parameter_edit', parameter_id=p.id) }}">
+      {{ render_parameter_fields(p) }}
+      <p>
+        <button type="submit">Save</button>
+        <button type="submit" formaction="{{ url_for('admin.parameter_delete', parameter_id=p.id) }}"
+                class="danger" onclick="return confirm('Delete this parameter?')">Delete</button>
+      </p>
+    </form>
+  </details>
+{% endfor %}
+
+<details class="card">
+  <summary><strong>+ Add parameter</strong></summary>
+  <form method="post" action="{{ url_for('admin.parameter_new', target_id=target.id) }}">
+    {{ render_parameter_fields(None) }}
+    <p><button type="submit">Add parameter</button></p>
+  </form>
+</details>
+
 <h2>Artifacts <span class="muted">— letter templates for this target</span></h2>
 <p class="muted">
   Type <code>{% raw %}{{ {% endraw %}</code> in any subject or body field to pop up a list of
   available placeholders (<code>writer</code>, <code>recipient</code>,
-  <code>target</code>, <code>date</code>, <code>date_long</code>); type a
+  <code>target</code>{% if target.parameters %}, <code>parameter</code>{% endif %},
+  <code>date</code>, <code>date_long</code>); type a
   dot to drill into that scope's attributes. Arrow keys navigate, Enter or
   Tab accepts.
 </p>
