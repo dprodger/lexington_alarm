@@ -23,7 +23,15 @@ from flask import (
 )
 
 from .extensions import db
-from .models import Artifact, Campaign, ParameterChoice, Recipient, Target, TargetParameter
+from .models import (
+    Artifact,
+    Campaign,
+    CampaignResource,
+    ParameterChoice,
+    Recipient,
+    Target,
+    TargetParameter,
+)
 from .substitution import preview_to_html, render_for_preview
 
 bp = Blueprint("admin", __name__, template_folder="templates")
@@ -499,6 +507,68 @@ def artifact_delete(artifact_id: int):
     db.session.delete(artifact)
     db.session.commit()
     return redirect(url_for("admin.target_edit", target_id=target_id))
+
+
+# --- Resources ------------------------------------------------------------
+
+
+def _apply_resource_form(resource: CampaignResource, form) -> str | None:
+    name = form.get("name", "").strip()
+    if not name:
+        return "Resource name is required."
+    raw_category = form.get("category", "")
+    if raw_category not in CampaignResource.CATEGORY_LABELS:
+        return f"Unknown category: {raw_category!r}."
+    resource.category = raw_category
+    resource.name = name
+    resource.url = form.get("url", "").strip()
+    return None
+
+
+@bp.route("/campaigns/<int:campaign_id>/resources/new", methods=["POST"])
+@_require_admin
+def resource_new(campaign_id: int):
+    campaign = db.session.get(Campaign, campaign_id) or abort(404)
+    resource = CampaignResource(campaign_id=campaign.id)
+    error = _apply_resource_form(resource, request.form)
+    if error:
+        flash(error, "error")
+        return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))
+    resource.sort_order = _next_sort_order(campaign.resources)
+    db.session.add(resource)
+    db.session.commit()
+    flash("Resource added.", "success")
+    return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))
+
+
+@bp.route("/campaigns/<int:campaign_id>/resources/reorder", methods=["POST"])
+@_require_admin
+def resources_reorder(campaign_id: int):
+    campaign = db.session.get(Campaign, campaign_id) or abort(404)
+    _apply_reorder(CampaignResource, {r.id for r in campaign.resources}, request.form.getlist("ids[]"))
+    return ("", 204)
+
+
+@bp.route("/resources/<int:resource_id>/edit", methods=["POST"])
+@_require_admin
+def resource_edit(resource_id: int):
+    resource = db.session.get(CampaignResource, resource_id) or abort(404)
+    error = _apply_resource_form(resource, request.form)
+    if error:
+        flash(error, "error")
+    else:
+        db.session.commit()
+    return redirect(url_for("admin.campaign_edit", campaign_id=resource.campaign_id))
+
+
+@bp.route("/resources/<int:resource_id>/delete", methods=["POST"])
+@_require_admin
+def resource_delete(resource_id: int):
+    resource = db.session.get(CampaignResource, resource_id) or abort(404)
+    campaign_id = resource.campaign_id
+    db.session.delete(resource)
+    db.session.commit()
+    return redirect(url_for("admin.campaign_edit", campaign_id=campaign_id))
 
 
 @bp.route("/preview", methods=["POST"])

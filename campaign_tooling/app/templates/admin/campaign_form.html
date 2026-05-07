@@ -113,6 +113,53 @@
       </form>
     </div>
   </details>
+
+  <h2>Resources <span class="muted">— off-site links shown on the campaign page</span></h2>
+  <p class="muted">Sister organizations, primary sources, related campaigns. Drag to reorder.</p>
+
+  {% set resource_categories = [
+    ('sister_organization', 'Sister Organization'),
+    ('primary_sources', 'Primary Sources'),
+    ('related_campaign', 'Related Campaign'),
+  ] %}
+
+  <div data-reorder-list data-reorder-url="{{ url_for('admin.resources_reorder', campaign_id=campaign.id) }}">
+  {% for r in campaign.resources %}
+    <div class="reorder-row" data-reorder-id="{{ r.id }}" style="padding: 0.4rem 0;">
+      <form method="post" action="{{ url_for('admin.resource_edit', resource_id=r.id) }}"
+            style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+        <select name="category" required style="min-width: 11rem;">
+          {% for value, label in resource_categories %}
+            <option value="{{ value }}" {% if r.category == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" name="name" value="{{ r.name }}" placeholder="name" required style="flex: 1; min-width: 10rem;">
+        <input type="url" name="url" value="{{ r.url }}" placeholder="https://..." style="flex: 2; min-width: 14rem;">
+        <button type="submit">Save</button>
+        <button type="submit" formaction="{{ url_for('admin.resource_delete', resource_id=r.id) }}"
+                class="danger" onclick="return confirm('Delete this resource?')">Delete</button>
+      </form>
+    </div>
+  {% endfor %}
+  </div>
+
+  <details class="disclosure-button">
+    <summary>Add resource</summary>
+    <div class="card">
+      <form method="post" action="{{ url_for('admin.resource_new', campaign_id=campaign.id) }}"
+            style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <select name="category" required style="min-width: 11rem;">
+          {% for value, label in resource_categories %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" name="name" placeholder="name" required style="flex: 1; min-width: 10rem;">
+        <input type="url" name="url" placeholder="https://..." style="flex: 2; min-width: 14rem;">
+        <button type="submit">Add resource</button>
+      </form>
+    </div>
+  </details>
 {% endif %}
 
 {% endblock %}

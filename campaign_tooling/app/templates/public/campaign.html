@@ -47,4 +47,22 @@
     </p>
   </div>
 {% endfor %}
+
+{% if campaign.resources %}
+  <section class="la-resources">
+    <h2>Resources</h2>
+    <ul class="la-resource-list">
+      {% for r in campaign.resources %}
+        <li class="la-resource">
+          <span class="la-resource-category">{{ r.category_label }}</span>
+          {% if r.url %}
+            <a class="la-resource-name" href="{{ r.url }}" target="_blank" rel="noopener">{{ r.name }} &rarr;</a>
+          {% else %}
+            <span class="la-resource-name">{{ r.name }}</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
 {% endblock %}

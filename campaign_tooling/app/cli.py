@@ -20,6 +20,7 @@ from .extensions import db
 from .models import (
     Artifact,
     Campaign,
+    CampaignResource,
     ParameterChoice,
     Recipient,
     Target,
@@ -107,6 +108,16 @@ def _serialize_target(t: Target) -> dict:
     }
 
 
+def _serialize_resource(r: CampaignResource) -> dict:
+    return {
+        "id": r.id,
+        "category": r.category,
+        "name": r.name,
+        "url": r.url,
+        "sort_order": r.sort_order,
+    }
+
+
 def _serialize_campaign(c: Campaign) -> dict:
     return {
         "campaign": {
@@ -122,6 +133,7 @@ def _serialize_campaign(c: Campaign) -> dict:
             "sort_order": c.sort_order,
         },
         "targets": [_serialize_target(t) for t in c.targets],
+        "resources": [_serialize_resource(r) for r in c.resources],
     }
 
 
@@ -166,7 +178,7 @@ def _try_preserve_id(obj, requested_id, model) -> None:
         obj.id = requested_id
 
 
-_ID_TABLES = (Campaign, Target, Recipient, Artifact, TargetParameter, ParameterChoice)
+_ID_TABLES = (Campaign, Target, Recipient, Artifact, TargetParameter, ParameterChoice, CampaignResource)
 
 
 def _resync_postgres_sequences() -> None:
@@ -279,6 +291,17 @@ def _import_campaign(data: dict, *, replace: bool) -> str:
             )
             _try_preserve_id(artifact, adata.get("id"), Artifact)
             db.session.add(artifact)
+
+    for rdata in data.get("resources", []):
+        resource = CampaignResource(
+            campaign_id=campaign.id,
+            category=rdata.get("category", CampaignResource.CATEGORY_PRIMARY_SOURCES),
+            name=rdata.get("name", ""),
+            url=rdata.get("url", ""),
+            sort_order=rdata.get("sort_order", 0),
+        )
+        _try_preserve_id(resource, rdata.get("id"), CampaignResource)
+        db.session.add(resource)
 
     db.session.flush()
     return status

@@ -40,6 +40,11 @@ class Campaign(db.Model):
         cascade="all, delete-orphan",
         order_by="Target.sort_order",
     )
+    resources: Mapped[list["CampaignResource"]] = relationship(
+        back_populates="campaign",
+        cascade="all, delete-orphan",
+        order_by="CampaignResource.sort_order",
+    )
 
 
 class Target(db.Model):
@@ -215,3 +220,38 @@ class ParameterChoice(db.Model):
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     parameter: Mapped["TargetParameter"] = relationship(back_populates="choices")
+
+
+class CampaignResource(db.Model):
+    """An off-site reference link shown on a campaign page — sister
+    organizations, primary sources, related campaigns. ``category`` is one
+    of the constants below; ``name`` is the link text; ``url`` is where it
+    points.
+    """
+
+    __tablename__ = "campaign_resources"
+
+    CATEGORY_SISTER = "sister_organization"
+    CATEGORY_PRIMARY_SOURCES = "primary_sources"
+    CATEGORY_RELATED_CAMPAIGN = "related_campaign"
+
+    CATEGORY_LABELS = {
+        CATEGORY_SISTER: "Sister Organization",
+        CATEGORY_PRIMARY_SOURCES: "Primary Sources",
+        CATEGORY_RELATED_CAMPAIGN: "Related Campaign",
+    }
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    )
+    category: Mapped[str] = mapped_column(String(40), nullable=False, default=CATEGORY_PRIMARY_SOURCES)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    url: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    campaign: Mapped["Campaign"] = relationship(back_populates="resources")
+
+    @property
+    def category_label(self) -> str:
+        return self.CATEGORY_LABELS.get(self.category, self.category)

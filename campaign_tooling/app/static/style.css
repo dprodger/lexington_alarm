@@ -425,6 +425,36 @@ body.public { background: var(--la-white); }
   margin: 0;
 }
 
+/* Resources section on a campaign page — small all-caps category overline
+   followed by the link. */
+.la-resources {
+  margin-top: var(--la-spacing-xl);
+}
+.la-resource-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.la-resource {
+  padding: var(--la-spacing-sm) 0;
+  border-top: 1px solid var(--border);
+}
+.la-resource:last-child {
+  border-bottom: 1px solid var(--border);
+}
+.la-resource-category {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--la-spacing-xs);
+}
+.la-resource-name {
+  font-weight: 500;
+}
+
 /* Highlight box used for campaign cards — distinctive red-left strip
    matches lexingtonalarm.org's .la-highlight-box. */
 .la-highlight-box {
