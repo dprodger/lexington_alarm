@@ -32,40 +32,49 @@
   </summary>
 <form method="post" style="margin-top: 1rem;">
   {% if not ready %}<p>Fill in your contact info to generate personalized letters and emails.</p>{% endif %}
-  <label>Your name *
-    <input type="text" name="name" value="{{ writer.name }}" required>
-  </label>
-  <label>Your email *
-    <input type="email" name="email" value="{{ writer.email }}" required>
-  </label>
-  <label>Organization (optional)
-    <input type="text" name="organization" value="{{ writer.organization }}">
-  </label>
-  <label>Street address
-    <input type="text" name="street1" value="{{ writer.street1 }}">
-  </label>
-  <label>Street address (line 2)
-    <input type="text" name="street2" value="{{ writer.street2 }}">
-  </label>
-  <div class="row-3">
-    <label>City <input type="text" name="city" value="{{ writer.city }}"></label>
-    <label>State <input type="text" name="state" value="{{ writer.state }}"></label>
-    <label>Postal code <input type="text" name="postal_code" value="{{ writer.postal_code }}"></label>
+  <div class="form-grid">
+    <label for="f_name">Your name *</label>
+    <input id="f_name" type="text" name="name" value="{{ writer.name }}" required>
+
+    <label for="f_email">Your email *</label>
+    <input id="f_email" type="email" name="email" value="{{ writer.email }}" required>
+
+    <label for="f_organization">Organization</label>
+    <div>
+      <input id="f_organization" type="text" name="organization" value="{{ writer.organization }}">
+      <div class="optional-hint">optional</div>
+    </div>
+
+    <label for="f_street1">Address</label>
+    <input id="f_street1" type="text" name="street1" value="{{ writer.street1 }}">
+
+    <input class="skip-label" type="text" name="street2" value="{{ writer.street2 }}"
+           aria-label="Street address line 2" placeholder="Apt, unit, etc.">
+
+    <label for="f_city">City</label>
+    <input id="f_city" type="text" name="city" value="{{ writer.city }}">
+
+    <label for="f_state">State</label>
+    <input id="f_state" type="text" name="state" value="{{ writer.state }}">
+
+    <label for="f_postal_code">Postal code</label>
+    <input id="f_postal_code" type="text" name="postal_code" value="{{ writer.postal_code }}">
   </div>
-  <p class="muted">Your information is only used to fill in your letters. We don't store it on the server.</p>
 
   {% if target.parameters %}
-    <h3>A few details about you</h3>
+    <h3 style="margin-top: 1.5rem;">Some campaign-specific information</h3>
     <p class="muted">These appear in the body of every letter to this audience.</p>
-    {% for p in target.parameters %}
-      <label>
-        {{ p.label or p.key }}{% if p.required %} *{% endif %}
-        <input type="text" name="p_{{ p.key }}"
-               value="{{ parameter_values.get(p.key, '') }}"
-               {% if p.required %}required{% endif %}>
-        {% if p.help_text %}<small class="muted">{{ p.help_text }}</small>{% endif %}
-      </label>
-    {% endfor %}
+    <div class="form-grid">
+      {% for p in target.parameters %}
+        <label for="f_p_{{ p.key }}">{{ p.label or p.key }}{% if p.required %} *{% endif %}</label>
+        <div>
+          <input id="f_p_{{ p.key }}" type="text" name="p_{{ p.key }}"
+                 value="{{ parameter_values.get(p.key, '') }}"
+                 {% if p.required %}required{% endif %}>
+          {% if p.help_text %}<div class="optional-hint">{{ p.help_text }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
   {% endif %}
 
   <p>
@@ -175,6 +184,11 @@
           Copy sample body
         </button>
       </p>
+      {% if view.per_recipient|length > 1 %}
+        <p class="muted" style="margin-top: -0.25rem;">
+          Your browser will ask permission to open each email — click <strong>Allow</strong> on every prompt.
+        </p>
+      {% endif %}
       <details>
         <summary class="muted">Send to recipients individually</summary>
         <ul class="recipient-link-list">

@@ -98,6 +98,23 @@ textarea { min-height: 8rem; font-family: ui-monospace, "SF Mono", Consolas, mon
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 .row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 0.75rem;
+  align-items: baseline;
+  margin-top: 1rem;
+}
+.form-grid label,
+.form-grid input { margin: 0; }
+.form-grid .skip-label { grid-column: 2; }
+.form-grid .optional-hint {
+  font-size: 0.85em;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
 button, .button {
   display: inline-block;
   padding: 0.5rem 1rem;
