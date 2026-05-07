@@ -143,6 +143,12 @@ button.danger { background: var(--error); }
 details[open] .details-readonly,
 details[open] .edit-hint { display: none; }
 
+.target-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 .target-row {
   display: flex;
   justify-content: space-between;

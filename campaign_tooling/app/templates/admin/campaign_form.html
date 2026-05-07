@@ -6,9 +6,8 @@
 
 <p><a href="{{ url_for('admin.index') }}">&larr; All campaigns</a></p>
 
-<h1>{% if campaign %}Edit campaign{% else %}New campaign{% endif %}</h1>
-
-<form method="post" class="card">
+{% macro render_campaign_form(campaign) %}
+<form method="post" style="margin-top: 1rem;">
   <div class="row">
     <label>Name
       <input type="text" name="name" value="{{ campaign.name if campaign else '' }}" required>
@@ -43,6 +42,33 @@
     {% endif %}
   </p>
 </form>
+{% endmacro %}
+
+{% if campaign %}
+<h1>{{ campaign.name }}</h1>
+
+<details class="card">
+  <summary>
+    <strong>Campaign details</strong>
+    <span class="muted edit-hint">— click to edit</span>
+    <dl class="details-readonly">
+      <dt>Name</dt><dd>{{ campaign.name }}</dd>
+      <dt>Slug</dt><dd><code>{{ campaign.slug }}</code></dd>
+      {% if campaign.subhead %}<dt>Subhead</dt><dd>{{ campaign.subhead }}</dd>{% endif %}
+      {% if campaign.description %}<dt>Description</dt><dd>{{ campaign.description }}</dd>{% endif %}
+      <dt>Active</dt><dd>{% if campaign.active %}yes{% else %}no{% endif %}</dd>
+      <dt>Sort order</dt><dd>{{ campaign.sort_order }}</dd>
+      {% if campaign.body_md %}<dt>Body</dt><dd><pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ campaign.body_md }}</pre></dd>{% endif %}
+    </dl>
+  </summary>
+  {{ render_campaign_form(campaign) }}
+</details>
+{% else %}
+<h1>New campaign</h1>
+<div class="card">
+  {{ render_campaign_form(None) }}
+</div>
+{% endif %}
 
 {% if campaign %}
   <h2>Targets <span class="muted">— audiences within this campaign</span></h2>
@@ -51,10 +77,15 @@
   {% if campaign.targets %}
     <ul class="target-list">
       {% for t in campaign.targets %}
-        <li class="card">
-          <strong><a href="{{ url_for('admin.target_edit', target_id=t.id) }}">{{ t.name }}</a></strong>
-          <span class="muted">— {{ t.recipients|length }} recipient{{ '' if t.recipients|length == 1 else 's' }}, {{ t.artifacts|length }} artifact{{ '' if t.artifacts|length == 1 else 's' }}</span>
-          {% if t.description %}<p class="muted">{{ t.description }}</p>{% endif %}
+        <li class="target-row">
+          <div>
+            <strong><a href="{{ url_for('admin.target_edit', target_id=t.id) }}">{{ t.name }}</a></strong>
+            {% if t.description %}<span class="muted">— {{ t.description }}</span>{% endif %}
+          </div>
+          <div class="muted">
+            {{ t.recipients|length }} recipient{{ '' if t.recipients|length == 1 else 's' }} ·
+            {{ t.artifacts|length }} artifact{{ '' if t.artifacts|length == 1 else 's' }}
+          </div>
         </li>
       {% endfor %}
     </ul>
