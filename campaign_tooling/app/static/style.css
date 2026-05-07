@@ -115,6 +115,23 @@ textarea { min-height: 8rem; font-family: ui-monospace, "SF Mono", Consolas, mon
   margin-top: 0.15rem;
 }
 
+/* <details> styled with the disclosure trigger looking like a regular button.
+   Apply to a <details> wrapper whose <summary> should read as a plain button
+   (no triangle, no plus, no card outline on the summary itself). */
+.disclosure-button summary {
+  display: inline-block;
+  list-style: none;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+}
+.disclosure-button summary::-webkit-details-marker { display: none; }
+.disclosure-button summary::marker { content: ""; }
+.disclosure-button > .card { margin-top: 0.75rem; }
+
 button, .button {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -176,6 +193,44 @@ details[open] .edit-hint { display: none; }
 }
 .target-row:last-child { border-bottom: none; }
 .target-row .actions { white-space: nowrap; }
+.target-row.dragging { opacity: 0.4; }
+.target-row .drag-handle,
+.reorder-row .drag-handle {
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--muted);
+  cursor: grab;
+  user-select: none;
+  font-size: 1.1em;
+  letter-spacing: -2px;
+}
+.target-row .drag-handle:active,
+.reorder-row .drag-handle:active { cursor: grabbing; }
+
+/* Inline disclosure row for admin lists where each row expands into an
+   edit form. Styled to match the tighter `.target-row` look on the
+   Campaigns page rather than the heavier `.card` look. */
+.reorder-row {
+  border-bottom: 1px solid var(--border);
+}
+.reorder-row:last-child { border-bottom: none; }
+.reorder-row.dragging { opacity: 0.4; }
+.reorder-row > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.reorder-row > summary::-webkit-details-marker { display: none; }
+.reorder-row > summary::marker { content: ""; }
+.reorder-row[open] > form {
+  padding: 0.25rem 0 1rem 1.25rem;
+  border-left: 2px solid var(--border);
+  margin-left: 0.5rem;
+}
 
 .kind-badge {
   display: inline-block;

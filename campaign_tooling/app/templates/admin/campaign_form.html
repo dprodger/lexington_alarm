@@ -25,15 +25,10 @@
   <label>Body (longer copy explaining the campaign — Markdown OK)
     <textarea name="body_md" rows="10">{{ campaign.body_md if campaign else '' }}</textarea>
   </label>
-  <div class="row">
-    <label class="inline">
-      <input type="checkbox" name="active" {% if not campaign or campaign.active %}checked{% endif %}>
-      Active (visible to public)
-    </label>
-    <label>Sort order (lower numbers appear first)
-      <input type="text" name="sort_order" value="{{ campaign.sort_order if campaign else 0 }}">
-    </label>
-  </div>
+  <label class="inline">
+    <input type="checkbox" name="active" {% if not campaign or campaign.active %}checked{% endif %}>
+    Active (visible to public)
+  </label>
   <p><button type="submit">{% if campaign %}Save{% else %}Create{% endif %}</button>
     {% if campaign %}
       <button type="submit" formaction="{{ url_for('admin.campaign_delete', campaign_id=campaign.id) }}"
@@ -57,7 +52,6 @@
       {% if campaign.subhead %}<dt>Subhead</dt><dd>{{ campaign.subhead }}</dd>{% endif %}
       {% if campaign.description %}<dt>Description</dt><dd>{{ campaign.description }}</dd>{% endif %}
       <dt>Active</dt><dd>{% if campaign.active %}yes{% else %}no{% endif %}</dd>
-      <dt>Sort order</dt><dd>{{ campaign.sort_order }}</dd>
       {% if campaign.body_md %}<dt>Body</dt><dd><pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ campaign.body_md }}</pre></dd>{% endif %}
     </dl>
   </summary>
@@ -75,10 +69,13 @@
   <p class="muted">A target is a conceptual audience (e.g. "Massport Board" or "Governor"). Each target groups one or more recipients and the letter templates sent to them.</p>
 
   {% if campaign.targets %}
-    <ul class="target-list">
+    <ul class="target-list"
+        data-reorder-list
+        data-reorder-url="{{ url_for('admin.targets_reorder', campaign_id=campaign.id) }}">
       {% for t in campaign.targets %}
-        <li class="target-row">
+        <li class="target-row" data-reorder-id="{{ t.id }}">
           <div>
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
             <strong><a href="{{ url_for('admin.target_edit', target_id=t.id) }}">{{ t.name }}</a></strong>
             {% if t.description %}<span class="muted">— {{ t.description }}</span>{% endif %}
           </div>
@@ -89,22 +86,24 @@
         </li>
       {% endfor %}
     </ul>
+    <p class="muted" style="font-size: 0.85em;">Drag the <span aria-hidden="true">⋮⋮</span> handle to reorder.</p>
   {% else %}
     <p class="muted">No targets yet.</p>
   {% endif %}
 
-  <details class="card">
-    <summary><strong>+ Add target</strong></summary>
-    <form method="post" action="{{ url_for('admin.target_new', campaign_id=campaign.id) }}">
-      <label>Name (e.g., "Massport Board", "Governor")
-        <input type="text" name="name" required>
-      </label>
-      <label>Description (shown to writers — explain who this audience is)
-        <textarea name="description" rows="2"></textarea>
-      </label>
-      <label>Sort order <input type="text" name="sort_order" value="0"></label>
-      <p><button type="submit">Add target</button></p>
-    </form>
+  <details class="disclosure-button">
+    <summary>Add target</summary>
+    <div class="card">
+      <form method="post" action="{{ url_for('admin.target_new', campaign_id=campaign.id) }}">
+        <label>Name (e.g., "Massport Board", "Governor")
+          <input type="text" name="name" required>
+        </label>
+        <label>Description (shown to writers — explain who this audience is)
+          <textarea name="description" rows="2"></textarea>
+        </label>
+        <p><button type="submit">Add target</button></p>
+      </form>
+    </div>
   </details>
 {% endif %}
 

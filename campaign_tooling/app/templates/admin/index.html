@@ -7,14 +7,20 @@
 {% if not campaigns %}
   <p class="muted">No campaigns yet.</p>
 {% else %}
-  <ul>
+  <ul class="target-list"
+      data-reorder-list
+      data-reorder-url="{{ url_for('admin.campaigns_reorder') }}">
     {% for c in campaigns %}
-      <li>
-        <a href="{{ url_for('admin.campaign_edit', campaign_id=c.id) }}">{{ c.name }}</a>
-        <span class="muted">/{{ c.slug }}</span>
-        {% if not c.active %}<span class="muted">(inactive)</span>{% endif %}
+      <li class="target-row" data-reorder-id="{{ c.id }}">
+        <div>
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+          <a href="{{ url_for('admin.campaign_edit', campaign_id=c.id) }}">{{ c.name }}</a>
+          <span class="muted">/{{ c.slug }}</span>
+          {% if not c.active %}<span class="muted">(inactive)</span>{% endif %}
+        </div>
       </li>
     {% endfor %}
   </ul>
+  <p class="muted" style="font-size: 0.85em;">Drag the <span aria-hidden="true">⋮⋮</span> handle to reorder.</p>
 {% endif %}
 {% endblock %}

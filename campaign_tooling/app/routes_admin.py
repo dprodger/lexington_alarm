@@ -104,16 +104,37 @@ def index():
 
 
 def _apply_campaign_form(c: Campaign, form) -> None:
+    """Update editable fields from the form. ``sort_order`` is not edited
+    via the form; it's managed by the drag-and-drop reorder route below.
+    """
     c.slug = form["slug"].strip()
     c.name = form["name"].strip()
     c.subhead = form.get("subhead", "").strip()
     c.description = form.get("description", "").strip()
     c.body_md = form.get("body_md", "")
     c.active = "active" in form
-    try:
-        c.sort_order = int(form.get("sort_order") or 0)
-    except ValueError:
-        c.sort_order = 0
+
+
+def _next_sort_order(rows) -> int:
+    return (max((r.sort_order for r in rows), default=-1) + 1)
+
+
+def _apply_reorder(model, valid_ids: set, raw_ids) -> None:
+    """Renumber ``sort_order`` on rows of ``model`` that appear in
+    ``raw_ids``. Skips ids not present in ``valid_ids`` to keep one
+    parent's reorder request from touching another parent's rows.
+    """
+    for index, raw in enumerate(raw_ids):
+        try:
+            row_id = int(raw)
+        except (TypeError, ValueError):
+            continue
+        if row_id not in valid_ids:
+            continue
+        row = db.session.get(model, row_id)
+        if row is not None:
+            row.sort_order = index
+    db.session.commit()
 
 
 @bp.route("/campaigns/new", methods=["GET", "POST"])
@@ -122,11 +143,21 @@ def campaign_new():
     if request.method == "POST":
         c = Campaign(slug=request.form["slug"].strip(), name=request.form["name"].strip())
         _apply_campaign_form(c, request.form)
+        existing = db.session.scalars(db.select(Campaign)).all()
+        c.sort_order = _next_sort_order(existing)
         db.session.add(c)
         db.session.commit()
         flash("Campaign created.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=c.id))
     return render_template("admin/campaign_form.html", campaign=None)
+
+
+@bp.route("/campaigns/reorder", methods=["POST"])
+@_require_admin
+def campaigns_reorder():
+    valid = {c.id for c in db.session.scalars(db.select(Campaign)).all()}
+    _apply_reorder(Campaign, valid, request.form.getlist("ids[]"))
+    return ("", 204)
 
 
 @bp.route("/campaigns/<int:campaign_id>", methods=["GET", "POST"])
@@ -155,12 +186,11 @@ def campaign_delete(campaign_id: int):
 
 
 def _apply_target_form(target: Target, form) -> None:
+    """Update name/description from the form. Sort order is not edited
+    via the form; it's managed by the drag-and-drop reorder route below.
+    """
     target.name = form.get("name", "").strip()
     target.description = form.get("description", "").strip()
-    try:
-        target.sort_order = int(form.get("sort_order") or 0)
-    except ValueError:
-        target.sort_order = 0
 
 
 @bp.route("/campaigns/<int:campaign_id>/targets/new", methods=["POST"])
@@ -169,10 +199,19 @@ def target_new(campaign_id: int):
     campaign = db.session.get(Campaign, campaign_id) or abort(404)
     target = Target(campaign_id=campaign.id, name=request.form.get("name", "").strip() or "Untitled")
     _apply_target_form(target, request.form)
+    target.sort_order = _next_sort_order(campaign.targets)
     db.session.add(target)
     db.session.commit()
     flash("Target added.", "success")
     return redirect(url_for("admin.target_edit", target_id=target.id))
+
+
+@bp.route("/campaigns/<int:campaign_id>/targets/reorder", methods=["POST"])
+@_require_admin
+def targets_reorder(campaign_id: int):
+    campaign = db.session.get(Campaign, campaign_id) or abort(404)
+    _apply_reorder(Target, {t.id for t in campaign.targets}, request.form.getlist("ids[]"))
+    return ("", 204)
 
 
 @bp.route("/targets/<int:target_id>", methods=["GET", "POST"])
@@ -221,10 +260,6 @@ def _apply_recipient_form(recipient: Recipient, form) -> None:
         "postal_code",
     ):
         setattr(recipient, field, form.get(field, "").strip())
-    try:
-        recipient.sort_order = int(form.get("sort_order") or 0)
-    except ValueError:
-        recipient.sort_order = 0
 
 
 @bp.route("/targets/<int:target_id>/recipients/new", methods=["POST"])
@@ -236,9 +271,18 @@ def recipient_new(target_id: int):
         formal_name=request.form.get("formal_name", "").strip(),
     )
     _apply_recipient_form(recipient, request.form)
+    recipient.sort_order = _next_sort_order(target.recipients)
     db.session.add(recipient)
     db.session.commit()
     return redirect(url_for("admin.target_edit", target_id=target.id))
+
+
+@bp.route("/targets/<int:target_id>/recipients/reorder", methods=["POST"])
+@_require_admin
+def recipients_reorder(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+    _apply_reorder(Recipient, {r.id for r in target.recipients}, request.form.getlist("ids[]"))
+    return ("", 204)
 
 
 @bp.route("/recipients/<int:recipient_id>/edit", methods=["POST"])
@@ -286,10 +330,6 @@ def _apply_parameter_form(parameter: TargetParameter, form) -> str | None:
     parameter.label = form.get("label", "").strip()
     parameter.help_text = form.get("help_text", "").strip()
     parameter.required = "required" in form
-    try:
-        parameter.sort_order = int(form.get("sort_order") or 0)
-    except ValueError:
-        parameter.sort_order = 0
     return None
 
 
@@ -302,10 +342,19 @@ def parameter_new(target_id: int):
     if error:
         flash(error, "error")
         return redirect(url_for("admin.target_edit", target_id=target.id))
+    parameter.sort_order = _next_sort_order(target.parameters)
     db.session.add(parameter)
     db.session.commit()
     flash("Parameter added.", "success")
     return redirect(url_for("admin.target_edit", target_id=target.id))
+
+
+@bp.route("/targets/<int:target_id>/parameters/reorder", methods=["POST"])
+@_require_admin
+def parameters_reorder(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+    _apply_reorder(TargetParameter, {p.id for p in target.parameters}, request.form.getlist("ids[]"))
+    return ("", 204)
 
 
 @bp.route("/parameters/<int:parameter_id>/edit", methods=["POST"])
@@ -339,10 +388,6 @@ def _apply_artifact_form(artifact: Artifact, form) -> None:
     artifact.kind = kind if kind in (Artifact.KIND_EMAIL, Artifact.KIND_LETTER) else Artifact.KIND_EMAIL
     artifact.subject = form.get("subject", "").strip()
     artifact.body = form.get("body", "")
-    try:
-        artifact.sort_order = int(form.get("sort_order") or 0)
-    except ValueError:
-        artifact.sort_order = 0
 
 
 @bp.route("/targets/<int:target_id>/artifacts/new", methods=["POST"])
@@ -351,9 +396,18 @@ def artifact_new(target_id: int):
     target = db.session.get(Target, target_id) or abort(404)
     artifact = Artifact(target_id=target.id, name=request.form.get("name", "").strip() or "Untitled")
     _apply_artifact_form(artifact, request.form)
+    artifact.sort_order = _next_sort_order(target.artifacts)
     db.session.add(artifact)
     db.session.commit()
     return redirect(url_for("admin.target_edit", target_id=target.id))
+
+
+@bp.route("/targets/<int:target_id>/artifacts/reorder", methods=["POST"])
+@_require_admin
+def artifacts_reorder(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+    _apply_reorder(Artifact, {a.id for a in target.artifacts}, request.form.getlist("ids[]"))
+    return ("", 204)
 
 
 @bp.route("/artifacts/<int:artifact_id>/edit", methods=["POST"])

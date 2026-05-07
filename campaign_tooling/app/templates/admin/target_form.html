@@ -27,7 +27,6 @@
     <label>State <input type="text" name="state" value="{{ r.state if r else '' }}"></label>
     <label>Postal code <input type="text" name="postal_code" value="{{ r.postal_code if r else '' }}"></label>
   </div>
-  <label>Sort order <input type="text" name="sort_order" value="{{ r.sort_order if r else 0 }}"></label>
 {% endmacro %}
 
 {% macro render_parameter_fields(p) %}
@@ -44,15 +43,10 @@
   <label>Help text (optional, shown under the field)
     <input type="text" name="help_text" value="{{ p.help_text if p else '' }}">
   </label>
-  <div class="row">
-    <label class="inline">
-      <input type="checkbox" name="required" {% if p is none or p.required %}checked{% endif %}>
-      Required
-    </label>
-    <label>Sort order
-      <input type="text" name="sort_order" value="{{ p.sort_order if p else 0 }}">
-    </label>
-  </div>
+  <label class="inline">
+    <input type="checkbox" name="required" {% if p is none or p.required %}checked{% endif %}>
+    Required
+  </label>
 {% endmacro %}
 
 {% macro render_artifact_fields(a) %}
@@ -74,7 +68,6 @@
   <label>Body
     <textarea name="body" rows="14" class="placeholder-aware">{{ a.body if a else '' }}</textarea>
   </label>
-  <label>Sort order <input type="text" name="sort_order" value="{{ a.sort_order if a else 0 }}"></label>
 {% endmacro %}
 
 <p>
@@ -90,7 +83,6 @@
   <label>Description (shown to writers — explain who this audience is)
     <textarea name="description" rows="3">{{ target.description }}</textarea>
   </label>
-  <label>Sort order <input type="text" name="sort_order" value="{{ target.sort_order }}"></label>
   <p>
     <button type="submit">Save</button>
     <button type="submit" formaction="{{ url_for('admin.target_delete', target_id=target.id) }}"
@@ -102,9 +94,12 @@
 <h2>Recipients <span class="muted">— the people in this audience</span></h2>
 <p class="muted">Every recipient receives the same artifacts (with their own contact info substituted in). Add an email and/or address depending on whether they should receive emails, postal letters, or both.</p>
 
+<div data-reorder-list data-reorder-url="{{ url_for('admin.recipients_reorder', target_id=target.id) }}">
 {% for r in target.recipients %}
-  <details class="card">
-    <summary><strong>{{ r.formal_name }}</strong>
+  <details class="reorder-row" data-reorder-id="{{ r.id }}">
+    <summary>
+      <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+      <strong>{{ r.formal_name }}</strong>
       {% if r.has_email %}<span class="kind-badge kind-email">email</span>{% endif %}
       {% if r.has_address %}<span class="kind-badge kind-letter">postal</span>{% endif %}
     </summary>
@@ -118,6 +113,7 @@
     </form>
   </details>
 {% endfor %}
+</div>
 
 <details class="card">
   <summary><strong>+ Add recipient</strong></summary>
@@ -135,9 +131,11 @@
   Leave empty if this target's letters don't need any.
 </p>
 
+<div data-reorder-list data-reorder-url="{{ url_for('admin.parameters_reorder', target_id=target.id) }}">
 {% for p in target.parameters %}
-  <details class="card">
+  <details class="reorder-row" data-reorder-id="{{ p.id }}">
     <summary>
+      <span class="drag-handle" aria-hidden="true">⋮⋮</span>
       <strong>{{ p.label or p.key }}</strong>
       <span class="muted">— <code>{% raw %}{{ parameter.{% endraw %}{{ p.key }}{% raw %} }}{% endraw %}</code></span>
       {% if p.required %}<span class="kind-badge">required</span>{% endif %}
@@ -152,6 +150,7 @@
     </form>
   </details>
 {% endfor %}
+</div>
 
 <details class="card">
   <summary><strong>+ Add parameter</strong></summary>
@@ -171,9 +170,12 @@
   Tab accepts.
 </p>
 
+<div data-reorder-list data-reorder-url="{{ url_for('admin.artifacts_reorder', target_id=target.id) }}">
 {% for a in target.artifacts %}
-  <details class="card">
-    <summary><strong>{{ a.name }}</strong>
+  <details class="reorder-row" data-reorder-id="{{ a.id }}">
+    <summary>
+      <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+      <strong>{{ a.name }}</strong>
       <span class="kind-badge kind-{{ a.kind }}">{{ a.kind }}</span>
     </summary>
     <form method="post" action="{{ url_for('admin.artifact_edit', artifact_id=a.id) }}">
@@ -192,6 +194,7 @@
     </form>
   </details>
 {% endfor %}
+</div>
 
 <details class="card">
   <summary><strong>+ Add artifact</strong></summary>

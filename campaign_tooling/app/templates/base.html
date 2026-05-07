@@ -38,6 +38,8 @@
 
   {% block footer %}{% endblock %}
 
+  <script defer src="{{ url_for('static', filename='reorder.js') }}"></script>
+
   {# Site-wide toast notification, hidden until showToast() is called. #}
   <div id="toast" role="status" aria-live="polite" hidden></div>
   <script>
