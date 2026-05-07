@@ -59,6 +59,29 @@ class Writer:
 _env = Environment(autoescape=False, keep_trailing_newline=True)
 
 
+# ---------------------------------------------------------------------------
+# Highlighting environment — used by the admin preview and the public
+# action-page sample render. Wraps the OUTPUT of every `{{ x }}` in
+# sentinel markers via Jinja's `finalize` hook, so values stay plain
+# during evaluation (`{% if x == 'foo' %}` works correctly). Markers are
+# turned into `<mark>` tags by `markers_to_html` after HTML-escaping.
+# ---------------------------------------------------------------------------
+
+_MARK_OPEN = "\x01MARK_OPEN\x01"
+_MARK_CLOSE = "\x01MARK_CLOSE\x01"
+
+
+def _highlight_finalize(value):
+    if value is None or value == "":
+        return ""
+    return f"{_MARK_OPEN}{value}{_MARK_CLOSE}"
+
+
+_env_marked = Environment(
+    autoescape=False, keep_trailing_newline=True, finalize=_highlight_finalize,
+)
+
+
 def render(
     template: str,
     *,
@@ -80,15 +103,12 @@ def render(
 
 
 # ---------------------------------------------------------------------------
-# Admin preview rendering — uses fixed test data, wraps each substituted
-# value in sentinel markers that get converted to <mark> tags after the
-# template body is HTML-escaped. That sequence keeps any `<` or `&` from
-# the admin-authored body literal in the output, while still letting the
-# yellow highlight surround the substituted values.
+# Admin preview rendering — uses fixed test data and the highlighting
+# environment (defined above). The HTML-escape + marker→<mark> sequence
+# keeps any `<` or `&` from the admin-authored body literal in the
+# output, while still letting the yellow highlight surround substituted
+# values.
 # ---------------------------------------------------------------------------
-
-_MARK_OPEN = "\x01MARK_OPEN\x01"
-_MARK_CLOSE = "\x01MARK_CLOSE\x01"
 
 
 _PREVIEW_WRITER = Writer(
@@ -125,37 +145,20 @@ _PREVIEW_TARGET = SimpleNamespace(
 )
 
 
-class _HighlightedAny:
+class _PreviewParameters:
     """Stand-in for the ``parameter`` scope in admin preview rendering.
 
     The admin preview endpoint doesn't know which Target the artifact will
     end up under, so it can't enumerate the real parameter keys. Any
-    ``parameter.<x>`` reference is rendered as ``<x>``, marker-wrapped so
-    the preview highlights it like a real substitution.
+    ``parameter.<x>`` reference returns ``<x>`` so the preview shows what
+    the placeholder would have been; the highlight environment wraps it
+    in `<mark>` tags at output time.
     """
 
     def __getattr__(self, name):
         if name.startswith("_"):
             raise AttributeError(name)
-        return f"{_MARK_OPEN}<{name}>{_MARK_CLOSE}"
-
-
-class _Highlighted:
-    """Wraps an object so attribute access returns marker-wrapped values."""
-
-    def __init__(self, obj):
-        self._obj = obj
-
-    def __getattr__(self, name):
-        if name.startswith("_"):
-            raise AttributeError(name)
-        try:
-            value = getattr(self._obj, name)
-        except AttributeError:
-            return ""
-        if value in (None, ""):
-            return ""
-        return f"{_MARK_OPEN}{value}{_MARK_CLOSE}"
+        return f"<{name}>"
 
 
 def render_with_highlights(
@@ -167,38 +170,37 @@ def render_with_highlights(
     parameters: dict | None = None,
     today: date | None = None,
 ) -> str:
-    """Render with sentinel markers around each substituted value.
-
-    Used for both the admin preview (with fixed test data) and the public
-    action page (with the live writer's info). Pair with `markers_to_html`
-    to produce safely escaped HTML with <mark> tags around substitutions.
+    """Render with the highlighting environment so every `{{ x }}` output
+    is wrapped in sentinel markers. Pair with `markers_to_html` to produce
+    safely escaped HTML with `<mark>` tags around substitutions. Values
+    stay plain during evaluation, so `{% if x == 'foo' %}` works.
     """
     today = today or date.today()
     target = target if target is not None else getattr(recipient, "target", None)
-    return _env.from_string(template).render(
-        writer=_Highlighted(writer),
-        recipient=_Highlighted(recipient),
-        target=_Highlighted(target) if target is not None else _Highlighted(SimpleNamespace()),
-        parameter=_Highlighted(SimpleNamespace(**(parameters or {}))),
-        date=f"{_MARK_OPEN}{today.isoformat()}{_MARK_CLOSE}",
-        date_long=f"{_MARK_OPEN}{today.strftime('%B %-d, %Y')}{_MARK_CLOSE}",
+    return _env_marked.from_string(template).render(
+        writer=writer,
+        recipient=recipient,
+        target=target if target is not None else SimpleNamespace(),
+        parameter=SimpleNamespace(**(parameters or {})),
+        date=today.isoformat(),
+        date_long=today.strftime("%B %-d, %Y"),
     )
 
 
 def render_for_preview(template: str, today: date | None = None) -> str:
-    """Render with fixed test data; substituted values bear sentinel markers.
-
-    The `parameter` scope is a stand-in that highlights any referenced key
-    as ``<key>`` since the preview doesn't know the real Target.
+    """Render with fixed test data; uses the highlighting environment so
+    every `{{ x }}` output is marker-wrapped. The `parameter` scope is a
+    stand-in that displays any referenced key as ``<key>`` since the
+    preview doesn't know the real Target.
     """
     today = today or date.today()
-    return _env.from_string(template).render(
-        writer=_Highlighted(_PREVIEW_WRITER),
-        recipient=_Highlighted(_PREVIEW_RECIPIENT),
-        target=_Highlighted(_PREVIEW_TARGET),
-        parameter=_HighlightedAny(),
-        date=f"{_MARK_OPEN}{today.isoformat()}{_MARK_CLOSE}",
-        date_long=f"{_MARK_OPEN}{today.strftime('%B %-d, %Y')}{_MARK_CLOSE}",
+    return _env_marked.from_string(template).render(
+        writer=_PREVIEW_WRITER,
+        recipient=_PREVIEW_RECIPIENT,
+        target=_PREVIEW_TARGET,
+        parameter=_PreviewParameters(),
+        date=today.isoformat(),
+        date_long=today.strftime("%B %-d, %Y"),
     )
 
 

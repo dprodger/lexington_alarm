@@ -90,7 +90,7 @@
     activeMatchInfo = match;
     activeMatches = filtered;
     activeIndex = 0;
-    showPopup(field);
+    showPopup(field, cursor);
   }
 
   function parseAtCursor(text, cursor) {
@@ -138,7 +138,7 @@
     field.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  function showPopup(field) {
+  function showPopup(field, cursor) {
     if (!popupEl) {
       popupEl = document.createElement("div");
       popupEl.className = "placeholder-popup";
@@ -147,7 +147,7 @@
       document.body.appendChild(popupEl);
     }
     renderPopup();
-    positionPopup(field);
+    positionPopup(field, cursor);
     popupEl.style.display = "block";
   }
 
@@ -163,13 +163,55 @@
     });
   }
 
-  function positionPopup(field) {
-    const rect = field.getBoundingClientRect();
+  function positionPopup(field, cursor) {
+    const { top, left } = caretCoords(field, cursor);
     popupEl.style.position = "fixed";
-    popupEl.style.left = rect.left + "px";
-    popupEl.style.top = (rect.bottom + 4) + "px";
+    popupEl.style.left = left + "px";
+    popupEl.style.top = (top + 4) + "px";
     popupEl.style.minWidth = "180px";
-    popupEl.style.maxWidth = Math.max(rect.width, 240) + "px";
+    popupEl.style.maxWidth = "320px";
+  }
+
+  // Caret coordinates in viewport space, returned as { top, left } where
+  // `top` is just below the caret's line. For an <input> we just put the
+  // popup under the field. For a <textarea> we mirror its text layout in a
+  // hidden div, drop a span at the caret offset, and read the span's
+  // position — the standard textarea-caret-position trick.
+  function caretCoords(field, position) {
+    const rect = field.getBoundingClientRect();
+    if (field.tagName === "INPUT") {
+      return { top: rect.bottom, left: rect.left };
+    }
+    const cs = getComputedStyle(field);
+    const div = document.createElement("div");
+    const props = [
+      "boxSizing", "width",
+      "borderLeftWidth", "borderRightWidth", "borderTopWidth", "borderBottomWidth",
+      "paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
+      "fontFamily", "fontSize", "fontWeight", "fontStyle", "fontVariant",
+      "letterSpacing", "wordSpacing", "lineHeight", "textIndent",
+      "textTransform", "tabSize",
+    ];
+    props.forEach(p => { div.style[p] = cs[p]; });
+    Object.assign(div.style, {
+      position: "absolute",
+      visibility: "hidden",
+      whiteSpace: "pre-wrap",
+      wordWrap: "break-word",
+      overflow: "hidden",
+      top: "0",
+      left: "-9999px",
+    });
+    document.body.appendChild(div);
+    div.textContent = field.value.substring(0, position);
+    const span = document.createElement("span");
+    span.textContent = field.value.substring(position) || ".";
+    div.appendChild(span);
+    const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2;
+    const top = rect.top + span.offsetTop - field.scrollTop + lineHeight;
+    const left = rect.left + span.offsetLeft - field.scrollLeft;
+    document.body.removeChild(div);
+    return { top, left };
   }
 
   function hidePopup() {
