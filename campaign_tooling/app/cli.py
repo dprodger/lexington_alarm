@@ -116,6 +116,8 @@ def _serialize_campaign(c: Campaign) -> dict:
             "subhead": c.subhead,
             "description": c.description,
             "body_md": c.body_md,
+            "action_header": c.action_header,
+            "action_blurb": c.action_blurb,
             "active": c.active,
             "sort_order": c.sort_order,
         },
@@ -209,6 +211,8 @@ def _import_campaign(data: dict, *, replace: bool) -> str:
         subhead=cdata.get("subhead", ""),
         description=cdata.get("description", ""),
         body_md=cdata.get("body_md", ""),
+        action_header=cdata.get("action_header", ""),
+        action_blurb=cdata.get("action_blurb", ""),
         active=cdata.get("active", True),
         sort_order=cdata.get("sort_order", 0),
     )

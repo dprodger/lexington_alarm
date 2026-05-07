@@ -25,6 +25,12 @@
   <label>Body (longer copy explaining the campaign — Markdown OK)
     <textarea name="body_md" rows="10">{{ campaign.body_md if campaign else '' }}</textarea>
   </label>
+  <label>Action header (heading shown above the target cards, e.g. "Send a letter to your state pension fund")
+    <input type="text" name="action_header" value="{{ campaign.action_header if campaign else '' }}">
+  </label>
+  <label>Action blurb (paragraph shown under the action header)
+    <textarea name="action_blurb" rows="3">{{ campaign.action_blurb if campaign else '' }}</textarea>
+  </label>
   <label class="inline">
     <input type="checkbox" name="active" {% if not campaign or campaign.active %}checked{% endif %}>
     Active (visible to public)
@@ -53,6 +59,8 @@
       {% if campaign.description %}<dt>Description</dt><dd>{{ campaign.description }}</dd>{% endif %}
       <dt>Active</dt><dd>{% if campaign.active %}yes{% else %}no{% endif %}</dd>
       {% if campaign.body_md %}<dt>Body</dt><dd><pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ campaign.body_md }}</pre></dd>{% endif %}
+      {% if campaign.action_header %}<dt>Action header</dt><dd>{{ campaign.action_header }}</dd>{% endif %}
+      {% if campaign.action_blurb %}<dt>Action blurb</dt><dd>{{ campaign.action_blurb }}</dd>{% endif %}
     </dl>
   </summary>
   {{ render_campaign_form(campaign) }}

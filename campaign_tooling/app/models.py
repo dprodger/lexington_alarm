@@ -26,6 +26,8 @@ class Campaign(db.Model):
     subhead: Mapped[str] = mapped_column(String(300), nullable=False, default="")
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     body_md: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    action_header: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    action_blurb: Mapped[str] = mapped_column(Text, nullable=False, default="")
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

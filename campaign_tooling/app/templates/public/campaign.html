@@ -16,11 +16,19 @@
   </div>
 {% endif %}
 
-<h2>Choose who to write to</h2>
-{% if not campaign.targets %}
-  <p class="muted">No targets configured yet.</p>
-{% else %}
-  <p>This campaign has {{ campaign.targets|length }} audience{{ '' if campaign.targets|length == 1 else 's' }}. Pick one to take action.</p>
+{% if campaign.action_header or campaign.action_blurb or campaign.targets %}
+  <section class="la-take-action">
+    <p class="la-take-action-label">Take action</p>
+    {% if campaign.action_header %}
+      <h2 class="la-take-action-header">{{ campaign.action_header }}</h2>
+    {% endif %}
+    {% if campaign.action_blurb %}
+      <p class="la-take-action-blurb">{{ campaign.action_blurb }}</p>
+    {% endif %}
+    {% if not campaign.targets %}
+      <p class="muted">No targets configured yet.</p>
+    {% endif %}
+  </section>
 {% endif %}
 
 {% for t in campaign.targets %}

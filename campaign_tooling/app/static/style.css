@@ -400,6 +400,31 @@ body.public { background: var(--la-white); }
   margin-bottom: var(--la-spacing-md);
 }
 
+/* "Take action" section above the target cards on a campaign page.
+   Small letter-spaced overline, large heading, and a blurb. */
+.la-take-action {
+  margin: var(--la-spacing-xl) 0 var(--la-spacing-md);
+}
+.la-take-action-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted, #666);
+  margin: 0 0 var(--la-spacing-sm);
+}
+.la-take-action-header {
+  font-family: var(--la-font-heading);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--fg);
+  margin: 0 0 var(--la-spacing-md);
+}
+.la-take-action-blurb {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
 /* Highlight box used for campaign cards — distinctive red-left strip
    matches lexingtonalarm.org's .la-highlight-box. */
 .la-highlight-box {

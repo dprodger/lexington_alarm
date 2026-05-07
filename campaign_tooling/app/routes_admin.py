@@ -112,6 +112,8 @@ def _apply_campaign_form(c: Campaign, form) -> None:
     c.subhead = form.get("subhead", "").strip()
     c.description = form.get("description", "").strip()
     c.body_md = form.get("body_md", "")
+    c.action_header = form.get("action_header", "").strip()
+    c.action_blurb = form.get("action_blurb", "").strip()
     c.active = "active" in form
 
 
