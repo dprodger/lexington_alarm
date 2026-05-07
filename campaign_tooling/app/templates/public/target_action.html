@@ -68,9 +68,22 @@
       {% for p in target.parameters %}
         <label for="f_p_{{ p.key }}">{{ p.label or p.key }}{% if p.required %} *{% endif %}</label>
         <div>
-          <input id="f_p_{{ p.key }}" type="text" name="p_{{ p.key }}"
-                 value="{{ parameter_values.get(p.key, '') }}"
-                 {% if p.required %}required{% endif %}>
+          {% if p.kind == 'select' %}
+            <select id="f_p_{{ p.key }}" name="p_{{ p.key }}"
+                    {% if p.required %}required{% endif %}>
+              {% if not p.required %}<option value=""></option>{% endif %}
+              {% for c in p.choices %}
+                <option value="{{ c.value }}"
+                        {% if parameter_values.get(p.key) == c.value %}selected{% endif %}>
+                  {{ c.label or c.value }}
+                </option>
+              {% endfor %}
+            </select>
+          {% else %}
+            <input id="f_p_{{ p.key }}" type="text" name="p_{{ p.key }}"
+                   value="{{ parameter_values.get(p.key, '') }}"
+                   {% if p.required %}required{% endif %}>
+          {% endif %}
           {% if p.help_text %}<div class="optional-hint">{{ p.help_text }}</div>{% endif %}
         </div>
       {% endfor %}

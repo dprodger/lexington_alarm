@@ -23,7 +23,7 @@ from flask import (
 )
 
 from .extensions import db
-from .models import Artifact, Campaign, Recipient, Target, TargetParameter
+from .models import Artifact, Campaign, ParameterChoice, Recipient, Target, TargetParameter
 from .substitution import preview_to_html, render_for_preview
 
 bp = Blueprint("admin", __name__, template_folder="templates")
@@ -330,6 +330,10 @@ def _apply_parameter_form(parameter: TargetParameter, form) -> str | None:
     parameter.label = form.get("label", "").strip()
     parameter.help_text = form.get("help_text", "").strip()
     parameter.required = "required" in form
+    raw_kind = form.get("kind", TargetParameter.KIND_TEXT)
+    parameter.kind = raw_kind if raw_kind in (
+        TargetParameter.KIND_TEXT, TargetParameter.KIND_SELECT
+    ) else TargetParameter.KIND_TEXT
     return None
 
 
@@ -377,6 +381,72 @@ def parameter_delete(parameter_id: int):
     db.session.delete(parameter)
     db.session.commit()
     return redirect(url_for("admin.target_edit", target_id=target_id))
+
+
+# --- Parameter choices ---------------------------------------------------
+
+
+def _apply_choice_form(choice: ParameterChoice, form) -> str | None:
+    value = form.get("value", "").strip()
+    if not value:
+        return "Stored value is required."
+    sibling = db.session.scalar(
+        db.select(ParameterChoice).where(
+            ParameterChoice.parameter_id == choice.parameter_id,
+            ParameterChoice.value == value,
+            ParameterChoice.id != (choice.id or -1),
+        )
+    )
+    if sibling is not None:
+        return f"Another choice on this parameter already uses the value '{value}'."
+    choice.value = value
+    choice.label = form.get("label", "").strip()
+    return None
+
+
+@bp.route("/parameters/<int:parameter_id>/choices/new", methods=["POST"])
+@_require_admin
+def choice_new(parameter_id: int):
+    parameter = db.session.get(TargetParameter, parameter_id) or abort(404)
+    choice = ParameterChoice(parameter_id=parameter.id)
+    error = _apply_choice_form(choice, request.form)
+    if error:
+        flash(error, "error")
+        return redirect(url_for("admin.target_edit", target_id=parameter.target_id))
+    choice.sort_order = _next_sort_order(parameter.choices)
+    db.session.add(choice)
+    db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=parameter.target_id))
+
+
+@bp.route("/choices/<int:choice_id>/edit", methods=["POST"])
+@_require_admin
+def choice_edit(choice_id: int):
+    choice = db.session.get(ParameterChoice, choice_id) or abort(404)
+    error = _apply_choice_form(choice, request.form)
+    if error:
+        flash(error, "error")
+    else:
+        db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=choice.parameter.target_id))
+
+
+@bp.route("/choices/<int:choice_id>/delete", methods=["POST"])
+@_require_admin
+def choice_delete(choice_id: int):
+    choice = db.session.get(ParameterChoice, choice_id) or abort(404)
+    target_id = choice.parameter.target_id
+    db.session.delete(choice)
+    db.session.commit()
+    return redirect(url_for("admin.target_edit", target_id=target_id))
+
+
+@bp.route("/parameters/<int:parameter_id>/choices/reorder", methods=["POST"])
+@_require_admin
+def choices_reorder(parameter_id: int):
+    parameter = db.session.get(TargetParameter, parameter_id) or abort(404)
+    _apply_reorder(ParameterChoice, {c.id for c in parameter.choices}, request.form.getlist("ids[]"))
+    return ("", 204)
 
 
 # --- Artifacts ------------------------------------------------------------

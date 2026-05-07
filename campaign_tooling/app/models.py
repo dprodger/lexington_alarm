@@ -164,10 +164,14 @@ class TargetParameter(db.Model):
 
     Templates reference these as ``{{ parameter.<key> }}``. ``key`` is the
     identifier used in the template; ``label`` is what the writer sees on
-    the form. Strings only.
+    the form. ``kind`` is "text" (free-form input) or "select" (dropdown
+    constrained to the linked ``ParameterChoice`` rows).
     """
 
     __tablename__ = "target_parameters"
+
+    KIND_TEXT = "text"
+    KIND_SELECT = "select"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     target_id: Mapped[int] = mapped_column(
@@ -178,6 +182,34 @@ class TargetParameter(db.Model):
     label: Mapped[str] = mapped_column(String(200), nullable=False, default="")
     help_text: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default=KIND_TEXT)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     target: Mapped["Target"] = relationship(back_populates="parameters")
+    choices: Mapped[list["ParameterChoice"]] = relationship(
+        back_populates="parameter",
+        cascade="all, delete-orphan",
+        order_by="ParameterChoice.sort_order",
+    )
+
+
+class ParameterChoice(db.Model):
+    """One option in a select-kind ``TargetParameter``.
+
+    ``value`` is what gets substituted into letter templates (so an admin
+    can keep template logic clean: ``{% if parameter.role == 'employed' %}``).
+    ``label`` is the human-readable text the writer sees in the dropdown
+    (e.g. "I am currently employed").
+    """
+
+    __tablename__ = "parameter_choices"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    parameter_id: Mapped[int] = mapped_column(
+        ForeignKey("target_parameters.id", ondelete="CASCADE"), nullable=False
+    )
+    value: Mapped[str] = mapped_column(String(200), nullable=False)
+    label: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    parameter: Mapped["TargetParameter"] = relationship(back_populates="choices")

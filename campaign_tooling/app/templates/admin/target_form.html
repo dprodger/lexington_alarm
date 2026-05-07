@@ -40,12 +40,20 @@
       <input type="text" name="label" value="{{ p.label if p else '' }}" required>
     </label>
   </div>
+  <div class="row">
+    <label>Type
+      <select name="kind">
+        <option value="text" {% if not p or p.kind == 'text' %}selected{% endif %}>Text — free-form input</option>
+        <option value="select" {% if p and p.kind == 'select' %}selected{% endif %}>Dropdown — choose from a list</option>
+      </select>
+    </label>
+    <label class="inline" style="align-self: end;">
+      <input type="checkbox" name="required" {% if p is none or p.required %}checked{% endif %}>
+      Required
+    </label>
+  </div>
   <label>Help text (optional, shown under the field)
     <input type="text" name="help_text" value="{{ p.help_text if p else '' }}">
-  </label>
-  <label class="inline">
-    <input type="checkbox" name="required" {% if p is none or p.required %}checked{% endif %}>
-    Required
   </label>
 {% endmacro %}
 
@@ -148,6 +156,36 @@
                 class="danger" onclick="return confirm('Delete this parameter?')">Delete</button>
       </p>
     </form>
+
+    {% if p.kind == 'select' %}
+      <h4 style="margin-top: 0.5rem;">Choices</h4>
+      <p class="muted" style="font-size: 0.85em;">
+        <strong>Stored value</strong> is what gets substituted into the letter
+        (use this in <code>{% raw %}{% if parameter.<key> == '...' %}{% endraw %}</code>).
+        <strong>Display label</strong> is what the writer sees in the dropdown.
+      </p>
+      <div data-reorder-list data-reorder-url="{{ url_for('admin.choices_reorder', parameter_id=p.id) }}">
+      {% for c in p.choices %}
+        <div class="reorder-row" data-reorder-id="{{ c.id }}" style="padding: 0.4rem 0;">
+          <form method="post" action="{{ url_for('admin.choice_edit', choice_id=c.id) }}"
+                style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+            <input type="text" name="value" value="{{ c.value }}" placeholder="stored value" required style="flex: 1; min-width: 8rem;">
+            <input type="text" name="label" value="{{ c.label }}" placeholder="display label" style="flex: 2; min-width: 10rem;">
+            <button type="submit">Save</button>
+            <button type="submit" formaction="{{ url_for('admin.choice_delete', choice_id=c.id) }}"
+                    class="danger" onclick="return confirm('Delete this choice?')">Delete</button>
+          </form>
+        </div>
+      {% endfor %}
+      </div>
+      <form method="post" action="{{ url_for('admin.choice_new', parameter_id=p.id) }}"
+            style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+        <input type="text" name="value" placeholder="new stored value" required style="flex: 1; min-width: 8rem;">
+        <input type="text" name="label" placeholder="display label" style="flex: 2; min-width: 10rem;">
+        <button type="submit">Add choice</button>
+      </form>
+    {% endif %}
   </details>
 {% endfor %}
 </div>

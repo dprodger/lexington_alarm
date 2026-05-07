@@ -17,7 +17,14 @@ from flask import Flask, current_app
 from sqlalchemy import text
 
 from .extensions import db
-from .models import Artifact, Campaign, Recipient, Target, TargetParameter
+from .models import (
+    Artifact,
+    Campaign,
+    ParameterChoice,
+    Recipient,
+    Target,
+    TargetParameter,
+)
 
 
 def register(app: Flask) -> None:
@@ -66,6 +73,15 @@ def _serialize_artifact(a: Artifact) -> dict:
     }
 
 
+def _serialize_choice(c: ParameterChoice) -> dict:
+    return {
+        "id": c.id,
+        "value": c.value,
+        "label": c.label,
+        "sort_order": c.sort_order,
+    }
+
+
 def _serialize_parameter(p: TargetParameter) -> dict:
     return {
         "id": p.id,
@@ -73,7 +89,9 @@ def _serialize_parameter(p: TargetParameter) -> dict:
         "label": p.label,
         "help_text": p.help_text,
         "required": p.required,
+        "kind": p.kind,
         "sort_order": p.sort_order,
+        "choices": [_serialize_choice(c) for c in p.choices],
     }
 
 
@@ -146,7 +164,7 @@ def _try_preserve_id(obj, requested_id, model) -> None:
         obj.id = requested_id
 
 
-_ID_TABLES = (Campaign, Target, Recipient, Artifact, TargetParameter)
+_ID_TABLES = (Campaign, Target, Recipient, Artifact, TargetParameter, ParameterChoice)
 
 
 def _resync_postgres_sequences() -> None:
@@ -222,10 +240,21 @@ def _import_campaign(data: dict, *, replace: bool) -> str:
                 label=pdata.get("label", ""),
                 help_text=pdata.get("help_text", ""),
                 required=pdata.get("required", True),
+                kind=pdata.get("kind", TargetParameter.KIND_TEXT),
                 sort_order=pdata.get("sort_order", 0),
             )
             _try_preserve_id(parameter, pdata.get("id"), TargetParameter)
             db.session.add(parameter)
+            db.session.flush()
+            for cdata in pdata.get("choices", []):
+                choice = ParameterChoice(
+                    parameter_id=parameter.id,
+                    value=cdata.get("value", ""),
+                    label=cdata.get("label", ""),
+                    sort_order=cdata.get("sort_order", 0),
+                )
+                _try_preserve_id(choice, cdata.get("id"), ParameterChoice)
+                db.session.add(choice)
 
         for rdata in tdata.get("recipients", []):
             recipient = Recipient(target_id=target.id)
