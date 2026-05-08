@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Responses · {{ target.name }} · {{ campaign.name }}{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.campaign_edit', campaign_id=campaign.id) }}">&larr; {{ campaign.name }}</a></p>
+
+<h1>Responses · {{ target.name }}</h1>
+<p class="muted">
+  {{ respondents|length }} response{{ '' if respondents|length == 1 else 's' }} total.
+  Rows where <em>Stored</em> is <strong>no</strong> have personal info redacted —
+  only city / state / postal code remain.
+</p>
+
+{% if not respondents %}
+  <p class="muted">No responses yet.</p>
+{% else %}
+<div class="respondents-scroll">
+  <table class="respondents-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>When (UTC)</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Org</th>
+        <th>Address 1</th>
+        <th>Address 2</th>
+        <th>City</th>
+        <th>ST</th>
+        <th>ZIP</th>
+        {% for p in target.parameters %}
+          <th title="{{ p.key }}">{{ p.label or p.key }}</th>
+        {% endfor %}
+        <th title="Email-copy consent">Copy</th>
+        <th title="Storage consent">Stored</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in respondents %}
+        <tr {% if not r.store_contact_consent %}class="redacted"{% endif %}>
+          <td class="num">{{ r.id }}</td>
+          <td class="nowrap">{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>{{ r.name }}</td>
+          <td>{{ r.email }}</td>
+          <td>{{ r.organization }}</td>
+          <td>{{ r.street1 }}</td>
+          <td>{{ r.street2 }}</td>
+          <td>{{ r.city }}</td>
+          <td>{{ r.state }}</td>
+          <td>{{ r.postal_code }}</td>
+          {% for p in target.parameters %}
+            <td>{{ param_values.get((r.id, p.id), '') }}</td>
+          {% endfor %}
+          <td class="bool">{% if r.email_copy_consent %}yes{% else %}no{% endif %}</td>
+          <td class="bool">{% if r.store_contact_consent %}yes{% else %}no{% endif %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

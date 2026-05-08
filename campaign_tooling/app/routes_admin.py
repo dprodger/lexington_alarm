@@ -29,6 +29,8 @@ from .models import (
     CampaignResource,
     ParameterChoice,
     Recipient,
+    Respondent,
+    RespondentParameter,
     Target,
     TargetParameter,
 )
@@ -179,7 +181,21 @@ def campaign_edit(campaign_id: int):
         db.session.commit()
         flash("Saved.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=campaign.id))
-    return render_template("admin/campaign_form.html", campaign=campaign)
+    target_ids = [t.id for t in campaign.targets]
+    respondent_counts: dict[int, int] = {}
+    if target_ids:
+        respondent_counts = dict(
+            db.session.execute(
+                db.select(Respondent.target_id, db.func.count(Respondent.id))
+                .where(Respondent.target_id.in_(target_ids))
+                .group_by(Respondent.target_id)
+            ).all()
+        )
+    return render_template(
+        "admin/campaign_form.html",
+        campaign=campaign,
+        respondent_counts=respondent_counts,
+    )
 
 
 @bp.route("/campaigns/<int:campaign_id>/delete", methods=["POST"])
@@ -249,6 +265,34 @@ def target_delete(target_id: int):
     db.session.commit()
     flash("Target deleted.", "success")
     return redirect(url_for("admin.campaign_edit", campaign_id=campaign_id))
+
+
+@bp.route("/targets/<int:target_id>/respondents")
+@_require_admin
+def target_respondents(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+    respondents = db.session.scalars(
+        db.select(Respondent)
+        .where(Respondent.target_id == target_id)
+        .order_by(Respondent.created_at.desc(), Respondent.id.desc())
+    ).all()
+    # (respondent_id, parameter_id) -> value, for O(1) lookup while
+    # rendering one column per TargetParameter.
+    param_values: dict[tuple[int, int], str] = {
+        (rp.respondent_id, rp.parameter_id): rp.value
+        for rp in db.session.scalars(
+            db.select(RespondentParameter).where(
+                RespondentParameter.target_id == target_id
+            )
+        ).all()
+    }
+    return render_template(
+        "admin/target_respondents.html",
+        campaign=target.campaign,
+        target=target,
+        respondents=respondents,
+        param_values=param_values,
+    )
 
 
 # --- Recipients -----------------------------------------------------------

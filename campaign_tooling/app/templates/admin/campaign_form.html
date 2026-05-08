@@ -89,7 +89,11 @@
           </div>
           <div class="muted">
             {{ t.recipients|length }} recipient{{ '' if t.recipients|length == 1 else 's' }} ·
-            {{ t.artifacts|length }} artifact{{ '' if t.artifacts|length == 1 else 's' }}
+            {{ t.artifacts|length }} artifact{{ '' if t.artifacts|length == 1 else 's' }} ·
+            {% set count = respondent_counts.get(t.id, 0) %}
+            <a href="{{ url_for('admin.target_respondents', target_id=t.id) }}">
+              {{ count }} response{{ '' if count == 1 else 's' }}
+            </a>
           </div>
         </li>
       {% endfor %}
