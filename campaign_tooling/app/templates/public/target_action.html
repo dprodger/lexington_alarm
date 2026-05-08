@@ -109,57 +109,62 @@
     </label>
     <details class="consent-demo">
       <summary>See an example of what redaction looks like</summary>
-      <div class="consent-demo-bodies">
-        <div>
-          <h4>As entered</h4>
-          <dl class="details-readonly">
-            <dt>Name</dt>
-            <dd data-demo-field="name" data-demo-fallback="Jane Doe">Jane Doe</dd>
-            <dt>Email</dt>
-            <dd data-demo-field="email" data-demo-fallback="jane.doe@example.com">jane.doe@example.com</dd>
-            <dt>Organization</dt>
-            <dd data-demo-field="organization" data-demo-fallback="Lexington Citizens for Safer Skies">Lexington Citizens for Safer Skies</dd>
-            <dt>Address 1</dt>
-            <dd data-demo-field="street1" data-demo-fallback="42 Oak Street">42 Oak Street</dd>
-            <dt>Address 2</dt>
-            <dd data-demo-field="street2" data-demo-fallback="Apt 3B">Apt 3B</dd>
-            <dt>City</dt>
-            <dd data-demo-field="city" data-demo-fallback="Lexington">Lexington</dd>
-            <dt>State</dt>
-            <dd data-demo-field="state" data-demo-fallback="MA">MA</dd>
-            <dt>Postal code</dt>
-            <dd data-demo-field="postal_code" data-demo-fallback="02420">02420</dd>
-            {% for p in target.parameters %}
-              {% set label = p.label or p.key %}
-              {% set fallback = '(your ' ~ label|lower ~ ')' %}
-              <dt>{{ label }}</dt>
-              <dd data-demo-field="p_{{ p.key }}" data-demo-fallback="{{ fallback }}">{{ parameter_values.get(p.key) or fallback }}</dd>
-            {% endfor %}
-          </dl>
-        </div>
-        <div>
-          <h4>Redacted</h4>
-          <dl class="details-readonly">
-            <dt>Name</dt><dd>--REDACTED--</dd>
-            <dt>Email</dt><dd>--REDACTED--</dd>
-            <dt>Organization</dt><dd>--REDACTED--</dd>
-            <dt>Address 1</dt><dd>--REDACTED--</dd>
-            <dt>Address 2</dt><dd>--REDACTED--</dd>
-            <dt>City</dt>
-            <dd data-demo-field="city" data-demo-fallback="Lexington">Lexington</dd>
-            <dt>State</dt>
-            <dd data-demo-field="state" data-demo-fallback="MA">MA</dd>
-            <dt>Postal code</dt>
-            <dd data-demo-field="postal_code" data-demo-fallback="02420">02420</dd>
-            {% for p in target.parameters %}
-              {% set label = p.label or p.key %}
-              {% set fallback = '(your ' ~ label|lower ~ ')' %}
-              <dt>{{ label }}</dt>
-              <dd data-demo-field="p_{{ p.key }}" data-demo-fallback="{{ fallback }}">{{ parameter_values.get(p.key) or fallback }}</dd>
-            {% endfor %}
-          </dl>
-        </div>
-      </div>
+      <table class="consent-demo-table">
+        <thead>
+          <tr><th></th><th>As entered</th><th>Redacted</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Name</th>
+            <td data-demo-field="name" data-demo-fallback="Jane Doe">Jane Doe</td>
+            <td>--REDACTED--</td>
+          </tr>
+          <tr>
+            <th>Email</th>
+            <td data-demo-field="email" data-demo-fallback="jane.doe@example.com">jane.doe@example.com</td>
+            <td>--REDACTED--</td>
+          </tr>
+          <tr>
+            <th>Organization</th>
+            <td data-demo-field="organization" data-demo-fallback="Lexington Citizens for Safer Skies">Lexington Citizens for Safer Skies</td>
+            <td>--REDACTED--</td>
+          </tr>
+          <tr>
+            <th>Address 1</th>
+            <td data-demo-field="street1" data-demo-fallback="42 Oak Street">42 Oak Street</td>
+            <td>--REDACTED--</td>
+          </tr>
+          <tr>
+            <th>Address 2</th>
+            <td data-demo-field="street2" data-demo-fallback="Apt 3B">Apt 3B</td>
+            <td>--REDACTED--</td>
+          </tr>
+          <tr>
+            <th>City</th>
+            <td data-demo-field="city" data-demo-fallback="Lexington">Lexington</td>
+            <td data-demo-field="city" data-demo-fallback="Lexington">Lexington</td>
+          </tr>
+          <tr>
+            <th>State</th>
+            <td data-demo-field="state" data-demo-fallback="MA">MA</td>
+            <td data-demo-field="state" data-demo-fallback="MA">MA</td>
+          </tr>
+          <tr>
+            <th>Postal code</th>
+            <td data-demo-field="postal_code" data-demo-fallback="02420">02420</td>
+            <td data-demo-field="postal_code" data-demo-fallback="02420">02420</td>
+          </tr>
+          {% for p in target.parameters %}
+            {% set label = p.label or p.key %}
+            {% set fallback = '(your ' ~ label|lower ~ ')' %}
+            <tr>
+              <th>{{ label }}</th>
+              <td data-demo-field="p_{{ p.key }}" data-demo-fallback="{{ fallback }}">{{ parameter_values.get(p.key) or fallback }}</td>
+              <td data-demo-field="p_{{ p.key }}" data-demo-fallback="{{ fallback }}">{{ parameter_values.get(p.key) or fallback }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </details>
   </div>
 

@@ -195,21 +195,30 @@ details[open] > summary > .edit-hint { display: none; }
 .consent-block { margin-top: 1rem; }
 .consent-demo { margin-top: 0.5rem; margin-left: 1.5rem; font-size: 0.9rem; }
 .consent-demo > summary { color: var(--accent); }
-.consent-demo-bodies {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+.consent-demo-table {
+  width: 100%;
+  border-collapse: collapse;
   margin-top: 0.5rem;
+  font-size: 0.95rem;
 }
-.consent-demo-bodies h4 {
-  margin: 0 0 0.25rem;
+.consent-demo-table th,
+.consent-demo-table td {
+  text-align: left;
+  padding: 0.2rem 0.5rem;
+  vertical-align: top;
+  font-weight: 400;
+}
+.consent-demo-table thead th {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
+  border-bottom: 1px solid var(--border);
 }
-@media (max-width: 600px) {
-  .consent-demo-bodies { grid-template-columns: 1fr; }
+.consent-demo-table tbody th {
+  color: var(--muted);
+  width: 1%;
+  white-space: nowrap;
 }
 
 .target-list {
