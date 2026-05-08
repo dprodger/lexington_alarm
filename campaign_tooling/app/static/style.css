@@ -174,8 +174,43 @@ button.danger { background: var(--error); }
 }
 .details-readonly dt { color: var(--muted); }
 .details-readonly dd { margin: 0; }
-details[open] .details-readonly,
-details[open] .edit-hint { display: none; }
+details[open] > summary > .details-readonly,
+details[open] > summary > .edit-hint { display: none; }
+
+/* Inline consent rows (checkbox + wrapping label text). The label is the
+   click target and wraps the input + the explanatory copy. */
+.consent-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-weight: 400;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.consent-row input[type="checkbox"] {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.consent-block { margin-top: 1rem; }
+.consent-demo { margin-top: 0.5rem; margin-left: 1.5rem; font-size: 0.9rem; }
+.consent-demo > summary { color: var(--accent); }
+.consent-demo-bodies {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.consent-demo-bodies h4 {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+@media (max-width: 600px) {
+  .consent-demo-bodies { grid-template-columns: 1fr; }
+}
 
 .target-list {
   list-style: none;

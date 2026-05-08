@@ -23,6 +23,12 @@
             <dt>{{ p.label or p.key }}</dt><dd>{{ parameter_values[p.key] }}</dd>
           {% endif %}
         {% endfor %}
+        {% if not consents.email_copy %}
+          <dt>Email copy</dt><dd>Will not be sent</dd>
+        {% endif %}
+        {% if not consents.store_contact %}
+          <dt>Storage</dt><dd>Personal info redacted (City/State/ZIP retained)</dd>
+        {% endif %}
       </dl>
     {% endif %}
   </summary>
@@ -34,6 +40,13 @@
 
     <label for="f_email">Your email *</label>
     <input id="f_email" type="email" name="email" value="{{ writer.email }}" required>
+
+    <label class="skip-label consent-row" for="f_email_copy">
+      <input id="f_email_copy" type="checkbox" name="email_copy" value="1"
+             {% if consents.email_copy %}checked{% endif %}>
+      By providing your email, we will email you a summary of your action.
+      If you uncheck, we will not forward you a copy.
+    </label>
 
     <label for="f_organization">Organization</label>
     <div>
@@ -55,6 +68,47 @@
 
     <label for="f_postal_code">Postal code</label>
     <input id="f_postal_code" type="text" name="postal_code" value="{{ writer.postal_code }}">
+  </div>
+
+  <div class="consent-block">
+    <label class="consent-row" for="f_store_contact">
+      <input id="f_store_contact" type="checkbox" name="store_contact" value="1"
+             {% if consents.store_contact %}checked{% endif %}>
+      We will store your contact information and add to our database.
+      If you uncheck this, we will store your response with personal information
+      redacted, although we will store your City, State and ZIP.
+    </label>
+    <details class="consent-demo">
+      <summary>See an example of what redaction looks like</summary>
+      <div class="consent-demo-bodies">
+        <div>
+          <h4>As entered</h4>
+          <dl class="details-readonly">
+            <dt>Name</dt><dd>Jane Doe</dd>
+            <dt>Email</dt><dd>jane.doe@example.com</dd>
+            <dt>Organization</dt><dd>Lexington Citizens for Safer Skies</dd>
+            <dt>Address 1</dt><dd>42 Oak Street</dd>
+            <dt>Address 2</dt><dd>Apt 3B</dd>
+            <dt>City</dt><dd>Lexington</dd>
+            <dt>State</dt><dd>MA</dd>
+            <dt>Postal code</dt><dd>02420</dd>
+          </dl>
+        </div>
+        <div>
+          <h4>Redacted</h4>
+          <dl class="details-readonly">
+            <dt>Name</dt><dd>--REDACTED--</dd>
+            <dt>Email</dt><dd>--REDACTED--</dd>
+            <dt>Organization</dt><dd>--REDACTED--</dd>
+            <dt>Address 1</dt><dd>--REDACTED--</dd>
+            <dt>Address 2</dt><dd>--REDACTED--</dd>
+            <dt>City</dt><dd>Lexington</dd>
+            <dt>State</dt><dd>MA</dd>
+            <dt>Postal code</dt><dd>02420</dd>
+          </dl>
+        </div>
+      </div>
+    </details>
   </div>
 
   {% if target.parameters %}

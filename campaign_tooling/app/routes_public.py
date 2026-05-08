@@ -85,6 +85,25 @@ def _parameters_query(parameters: dict) -> dict:
     return {f"p_{k}": v for k, v in parameters.items() if v}
 
 
+# Consent flags both default to True (checked); we only persist explicit "no"
+# choices in the URL so the canonical share link stays clean.
+def _consents_from_args() -> dict:
+    a = request.args
+    return {
+        "email_copy": a.get("email_copy", "1") != "0",
+        "store_contact": a.get("store_contact", "1") != "0",
+    }
+
+
+def _consents_query(consents: dict) -> dict:
+    out = {}
+    if not consents.get("email_copy", True):
+        out["email_copy"] = "0"
+    if not consents.get("store_contact", True):
+        out["store_contact"] = "0"
+    return out
+
+
 def _missing_required(target: Target, parameters: dict) -> list:
     return [p for p in target.parameters if p.required and not parameters.get(p.key)]
 
@@ -146,7 +165,16 @@ def target_action(slug: str, target_id: int):
             p.key: request.form.get(f"p_{p.key}", "").strip()
             for p in target.parameters
         }
-        merged = {**_writer_query(writer), **_parameters_query(submitted)}
+        # Unchecked checkboxes are absent from the form; presence == checked.
+        consents = {
+            "email_copy": "email_copy" in request.form,
+            "store_contact": "store_contact" in request.form,
+        }
+        merged = {
+            **_writer_query(writer),
+            **_parameters_query(submitted),
+            **_consents_query(consents),
+        }
         return redirect(
             url_for("public.target_action", slug=slug, target_id=target_id)
             + ("?" + urlencode(merged) if merged else "")
@@ -154,6 +182,7 @@ def target_action(slug: str, target_id: int):
 
     writer = _writer_from_args()
     parameters = _parameters_from_args(target)
+    consents = _consents_from_args()
 
     # No writer info yet → just show the form. Skip the artifact-rendering pass.
     if not writer.name:
@@ -166,6 +195,7 @@ def target_action(slug: str, target_id: int):
             full_query=_writer_query(writer),
             artifact_views=[],
             parameter_values=parameters,
+            consents=consents,
             ready=False,
         )
 
@@ -250,6 +280,7 @@ def target_action(slug: str, target_id: int):
         full_query={**_writer_query(writer), **_parameters_query(parameters)},
         artifact_views=artifact_views,
         parameter_values=parameters,
+        consents=consents,
         ready=True,
     )
 
