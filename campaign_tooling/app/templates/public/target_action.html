@@ -1,10 +1,6 @@
 {% extends "base_public.html" %}
 {% block title %}{{ target.name }} · {{ campaign.name }} · Lexington Alarm{% endblock %}
 {% block content %}
-<p>
-  <a href="{{ url_for('public.campaign', slug=campaign.slug) }}{% if writer_query %}?{{ writer_query|urlencode }}{% endif %}">&larr; Back to campaign</a>
-</p>
-
 <h1>{{ target.name }}</h1>
 <p class="muted">Part of <em>{{ campaign.name }}</em>{% if writer.name %} · sending as <strong>{{ writer.name }}</strong>{% endif %}</p>
 {% if target.description %}<p>{{ target.description }}</p>{% endif %}

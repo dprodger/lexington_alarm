@@ -1,68 +1,56 @@
-{% extends "base_public.html" %}
-{% block title %}{{ campaign.name }} · Lexington Alarm{% endblock %}
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }}{% endblock %}
 {% block content %}
 <p><a href="{{ url_for('public.index') }}">&larr; All campaigns</a></p>
 <h1>{{ campaign.name }}</h1>
-{% if campaign.subhead %}
-  <p class="la-subhead">{{ campaign.subhead }}</p>
-{% endif %}
-{% if campaign.description %}
-  <p class="muted">{{ campaign.description }}</p>
-{% endif %}
+<p class="muted">
+  Internal preview — link directly to the target pages from your
+  public-facing site.
+</p>
 
+{% if campaign.subhead %}<p><strong>{{ campaign.subhead }}</strong></p>{% endif %}
+{% if campaign.description %}<p>{{ campaign.description }}</p>{% endif %}
 {% if campaign.body_md %}
-  <div class="la-highlight-box">
-    <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ campaign.body_md }}</pre>
-  </div>
+  <pre style="white-space: pre-wrap; font-family: inherit; margin: 0 0 1.5rem;">{{ campaign.body_md }}</pre>
 {% endif %}
 
-{% if campaign.action_header or campaign.action_blurb or campaign.targets %}
-  <section class="la-take-action">
-    <p class="la-take-action-label">Take action</p>
-    {% if campaign.action_header %}
-      <h2 class="la-take-action-header">{{ campaign.action_header }}</h2>
-    {% endif %}
-    {% if campaign.action_blurb %}
-      <p class="la-take-action-blurb">{{ campaign.action_blurb }}</p>
-    {% endif %}
-    {% if not campaign.targets %}
-      <p class="muted">No targets configured yet.</p>
-    {% endif %}
-  </section>
+{% if campaign.action_header or campaign.action_blurb %}
+  <h2>Take action</h2>
+  {% if campaign.action_header %}<p><strong>{{ campaign.action_header }}</strong></p>{% endif %}
+  {% if campaign.action_blurb %}<p>{{ campaign.action_blurb }}</p>{% endif %}
 {% endif %}
 
-{% for t in campaign.targets %}
-  <div class="la-highlight-box">
-    <h3 style="margin-top: 0;">{{ t.name }}</h3>
-    {% if t.description %}<p>{{ t.description }}</p>{% endif %}
-    <p class="muted">
-      {{ t.recipients|length }} recipient{{ '' if t.recipients|length == 1 else 's' }} ·
-      {{ t.artifacts|length }} action{{ '' if t.artifacts|length == 1 else 's' }} available
-    </p>
-    <p>
-      <a class="la-button"
-         href="{{ url_for('public.target_action', slug=campaign.slug, target_id=t.id) }}{% if writer_query %}?{{ writer_query|urlencode }}{% endif %}">
-        Take action &rarr;
-      </a>
-    </p>
-  </div>
-{% endfor %}
+<h2>Targets</h2>
+{% if not campaign.targets %}
+  <p class="muted">No targets configured.</p>
+{% else %}
+  <ul>
+    {% for t in campaign.targets %}
+      <li>
+        <a href="{{ url_for('public.target_action', slug=campaign.slug, target_id=t.id) }}{% if writer_query %}?{{ writer_query|urlencode }}{% endif %}">{{ t.name }}</a>
+        {% if t.description %}<span class="muted">— {{ t.description }}</span>{% endif %}
+        <div class="muted" style="font-size: 0.9em;">
+          {{ t.recipients|length }} recipient{{ '' if t.recipients|length == 1 else 's' }} ·
+          {{ t.artifacts|length }} action{{ '' if t.artifacts|length == 1 else 's' }}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
 
 {% if campaign.resources %}
-  <section class="la-resources">
-    <h2>Resources</h2>
-    <ul class="la-resource-list">
-      {% for r in campaign.resources %}
-        <li class="la-resource">
-          <span class="la-resource-category">{{ r.category_label }}</span>
-          {% if r.url %}
-            <a class="la-resource-name" href="{{ r.url }}" target="_blank" rel="noopener">{{ r.name }} &rarr;</a>
-          {% else %}
-            <span class="la-resource-name">{{ r.name }}</span>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  </section>
+  <h2>Resources</h2>
+  <ul>
+    {% for r in campaign.resources %}
+      <li>
+        <span class="muted">{{ r.category_label }}:</span>
+        {% if r.url %}
+          <a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.name }}</a>
+        {% else %}
+          {{ r.name }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
 {% endif %}
 {% endblock %}
