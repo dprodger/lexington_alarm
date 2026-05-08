@@ -31,7 +31,7 @@ from urllib.parse import quote, urlencode
 from flask import Blueprint, Response, abort, redirect, render_template, request, url_for
 
 from .extensions import db
-from .models import Artifact, Campaign, Target
+from .models import Artifact, Campaign, Respondent, RespondentParameter, Target
 from .pdf import render_letters_pdf
 from .substitution import Writer, markers_to_html, render, render_with_highlights
 
@@ -115,6 +115,51 @@ def _load_campaign_or_404(slug: str) -> Campaign:
     return campaign
 
 
+def _save_respondent(
+    campaign: Campaign,
+    target: Target,
+    writer: Writer,
+    submitted: dict,
+    consents: dict,
+) -> None:
+    """Persist one Respondent + its non-empty parameter rows. When the
+    writer has unchecked store_contact, the PII fields are blanked at
+    write time; city / state / postal_code are always retained.
+    """
+    redact = not consents["store_contact"]
+    respondent = Respondent(
+        campaign_id=campaign.id,
+        target_id=target.id,
+        name="" if redact else writer.name,
+        email="" if redact else writer.email,
+        organization="" if redact else writer.organization,
+        street1="" if redact else writer.street1,
+        street2="" if redact else writer.street2,
+        city=writer.city,
+        state=writer.state,
+        postal_code=writer.postal_code,
+        email_copy_consent=consents["email_copy"],
+        store_contact_consent=consents["store_contact"],
+    )
+    db.session.add(respondent)
+    db.session.flush()  # populates respondent.id for the FK below
+
+    for p in target.parameters:
+        v = submitted.get(p.key, "").strip()
+        if not v:
+            continue
+        db.session.add(
+            RespondentParameter(
+                respondent_id=respondent.id,
+                campaign_id=campaign.id,
+                target_id=target.id,
+                parameter_id=p.id,
+                value=v[: RespondentParameter.VALUE_MAX_LEN],
+            )
+        )
+    db.session.commit()
+
+
 @bp.route("/")
 def index():
     campaigns = db.session.scalars(
@@ -170,6 +215,7 @@ def target_action(slug: str, target_id: int):
             "email_copy": "email_copy" in request.form,
             "store_contact": "store_contact" in request.form,
         }
+        _save_respondent(campaign, target, writer, submitted, consents)
         merged = {
             **_writer_query(writer),
             **_parameters_query(submitted),

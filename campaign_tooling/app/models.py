@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     DateTime,
     ForeignKey,
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -255,3 +257,73 @@ class CampaignResource(db.Model):
     @property
     def category_label(self) -> str:
         return self.CATEGORY_LABELS.get(self.category, self.category)
+
+
+class Respondent(db.Model):
+    """One row per "Continue" submission on a target page. When
+    ``store_contact_consent`` is False, the PII fields (name, email,
+    organization, street1, street2) are persisted blank — only city,
+    state, postal_code and the consent flags are retained.
+    """
+
+    __tablename__ = "respondents"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    )
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("targets.id", ondelete="CASCADE"), nullable=False
+    )
+
+    name: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    email: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    organization: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    street1: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    street2: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    city: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    state: Mapped[str] = mapped_column(String(40), nullable=False, default="")
+    postal_code: Mapped[str] = mapped_column(String(20), nullable=False, default="")
+
+    email_copy_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    store_contact_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+    parameters: Mapped[list["RespondentParameter"]] = relationship(
+        back_populates="respondent",
+        cascade="all, delete-orphan",
+    )
+
+
+class RespondentParameter(db.Model):
+    """One row per non-empty parameter answered on a respondent submission.
+    ``campaign_id`` and ``target_id`` duplicate the parent ``Respondent`` so
+    per-campaign rollups can avoid the join. ``value`` is truncated to 100
+    characters at write time.
+    """
+
+    __tablename__ = "respondents_parameters"
+
+    VALUE_MAX_LEN = 100
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    respondent_id: Mapped[int] = mapped_column(
+        ForeignKey("respondents.id", ondelete="CASCADE"), nullable=False
+    )
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    )
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("targets.id", ondelete="CASCADE"), nullable=False
+    )
+    parameter_id: Mapped[int] = mapped_column(
+        ForeignKey("target_parameters.id", ondelete="CASCADE"), nullable=False
+    )
+    value: Mapped[str] = mapped_column(String(VALUE_MAX_LEN), nullable=False, default="")
+
+    respondent: Mapped["Respondent"] = relationship(back_populates="parameters")
+
+    __table_args__ = (
+        UniqueConstraint("respondent_id", "parameter_id", name="respondents_parameters_respondent_id_parameter_id_key"),
+    )
