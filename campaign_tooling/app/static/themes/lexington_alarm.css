@@ -1,6 +1,10 @@
 /* Lexington Alarm theme — red / blue / cream palette mirroring
-   lexingtonalarm.org. Loaded by base_public.html when campaign.theme
-   is "lexington_alarm" (the default for new campaigns). */
+   lexingtonalarm.org. Default theme for new campaigns.
+
+   Most of the look comes from token overrides below; the only
+   rule-level overrides are LA's signature button (Libre Baskerville
+   bold, thicker border, red↔blue cross-color hover on the secondary)
+   and the regular-weight headings the parent site uses. */
 
 body.theme-lexington_alarm {
   --theme-fg: #1a1a1a;
@@ -9,41 +13,51 @@ body.theme-lexington_alarm {
   --theme-bg-card: #ffffff;
   --theme-border: #ddd;
 
-  --theme-primary: #c3202e;       /* la-red */
-  --theme-primary-dark: #a11a26;  /* la-red-dark */
-  --theme-secondary: #044f9d;     /* la-blue */
-  --theme-accent: var(--theme-primary);
+  --theme-primary: #c3202e;       /* LA red */
+  --theme-primary-dark: #a11a26;
+  --theme-secondary: #044f9d;     /* LA blue */
+  --theme-secondary-dark: #03306a;
   --theme-on-primary: #ffffff;
   --theme-on-secondary: #ffffff;
 
   --theme-font-body: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --theme-font-heading: "Libre Baskerville", Georgia, "Times New Roman", serif;
 
-  /* The signature LA highlight box — thick blue all around, thicker red
-     on the left edge. The card background stays white. */
-  --theme-highlight-bg: #ffffff;
+  /* Highlight box — thick blue border with a thicker red left edge. */
   --theme-highlight-border: 8px solid var(--theme-secondary);
   --theme-highlight-border-left: 16px solid var(--theme-primary);
   --theme-highlight-radius: 0;
 
-  /* Page titles: red, uppercase, letter-spaced — the lexingtonalarm.org
-     section-title look. */
+  /* Page titles: red, uppercase, letter-spaced. */
   --theme-page-title-color: var(--theme-primary);
   --theme-page-title-transform: uppercase;
   --theme-page-title-letter-spacing: 0.04em;
 
-  --theme-header-bg: transparent;
-  --theme-header-fg: var(--theme-fg);
   --theme-footer-bg: var(--theme-secondary);
   --theme-footer-fg: #ffffff;
+
+  /* Buttons: heading-font, bold, thicker border. */
+  --theme-button-font: var(--theme-font-heading);
+  --theme-button-weight: 700;
+  --theme-button-border-width: 2px;
 }
 
-/* Headings on LA-themed public pages render at regular weight (400) —
-   Libre Baskerville at regular gives the more refined classical-serif
-   feel that the parent site uses. */
+/* LA renders headings at regular weight (Libre Baskerville at 400 has
+   the refined classical-serif feel the parent site uses). */
 body.theme-lexington_alarm h1,
 body.theme-lexington_alarm h2,
 body.theme-lexington_alarm h3,
 body.theme-lexington_alarm h4 {
   font-weight: 400;
+}
+
+/* Secondary button: red↔blue cross-color flip on hover (LA's signature
+   interaction, distinct from the default secondary→secondary-dark
+   darken). Override the rule rather than a token because it's a
+   color-class change, not a value tweak. */
+body.theme-lexington_alarm .public-button-secondary:hover,
+body.theme-lexington_alarm .public-button-secondary:focus {
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
+  color: var(--theme-on-primary);
 }

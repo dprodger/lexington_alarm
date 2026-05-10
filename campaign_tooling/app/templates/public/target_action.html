@@ -5,7 +5,7 @@
 <p class="muted">Part of <em>{{ campaign.name }}</em>{% if writer.name %} · sending as <strong>{{ writer.name }}</strong>{% endif %}</p>
 {% if target.description %}<p>{{ target.description }}</p>{% endif %}
 
-<details class="la-highlight-box" {% if not ready %}open{% endif %}>
+<details class="public-highlight-box" {% if not ready %}open{% endif %}>
   <summary>
     <strong>Your details</strong>
     {% if ready %}<span class="muted edit-hint">— click to edit</span>{% endif %}
@@ -169,7 +169,7 @@
   </div>
 
   <p>
-    <button type="submit" class="la-button">
+    <button type="submit" class="public-button">
       {% if ready %}Update{% else %}Continue &rarr;{% endif %}
     </button>
   </p>
@@ -271,7 +271,7 @@
 </script>
 
 {% for view in artifact_views %}
-  <div class="la-highlight-box artifact-card">
+  <div class="public-highlight-box artifact-card">
     <h2 style="margin-top: 0;">
       {{ view.artifact.name }}
       <span class="kind-badge kind-{{ view.artifact.kind }}">{{ view.artifact.kind }}</span>
@@ -293,11 +293,11 @@
 
     {% if view.artifact.kind == 'email' %}
       <p>
-        <button type="button" class="la-button" onclick="sendAllEmails(this)">
+        <button type="button" class="public-button" onclick="sendAllEmails(this)">
           Send all
           ({{ view.per_recipient|length }} email{{ '' if view.per_recipient|length == 1 else 's' }})
         </button>
-        <button type="button" class="la-button la-button-secondary" onclick="copySampleBody(this)">
+        <button type="button" class="public-button public-button-secondary" onclick="copySampleBody(this)">
           Copy sample body
         </button>
       </p>
@@ -327,7 +327,7 @@
       </div>
     {% else %}
       <p>
-        <a class="la-button" target="_blank"
+        <a class="public-button" target="_blank"
            href="{{ url_for('public.letters_pdf',
                             slug=campaign.slug,
                             target_id=target.id,
@@ -335,7 +335,7 @@
           Download all as PDF
           ({{ view.per_recipient|length }} letter{{ '' if view.per_recipient|length == 1 else 's' }}) &rarr;
         </a>
-        <a class="la-button la-button-secondary" target="_blank"
+        <a class="public-button public-button-secondary" target="_blank"
            href="{{ url_for('public.print_letters',
                             slug=campaign.slug,
                             target_id=target.id,

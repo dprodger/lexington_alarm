@@ -12,6 +12,7 @@
   --theme-primary: #c3202e;
   --theme-primary-dark: #a11a26;
   --theme-secondary: #044f9d;
+  --theme-secondary-dark: #03306a;
   --theme-accent: var(--theme-primary);
   --theme-on-primary: #ffffff;
   --theme-on-secondary: #ffffff;
@@ -37,6 +38,13 @@
   --theme-header-fg: var(--theme-fg);
   --theme-footer-bg: var(--theme-secondary);
   --theme-footer-fg: var(--theme-on-secondary);
+
+  /* Button look — themes can override font/weight/border without
+     overriding the whole .public-button rule. */
+  --theme-button-font: var(--theme-font-body);
+  --theme-button-weight: 500;
+  --theme-button-border-width: 1px;
+  --theme-button-radius: 4px;
 
   /* Spacing scale (used by theme-aware components) */
   --space-xs: 0.25rem;
@@ -465,40 +473,63 @@ body.public h4 {
   font-family: var(--theme-font-heading);
 }
 
-.la-section {
+.public-section {
   max-width: 1100px;
   margin: 0 auto;
   padding: var(--space-lg) var(--space-md);
 }
 
-/* Public header / footer containers. Theme CSS fills these in with
-   background, padding, and (via ::before) any text or imagery. The
-   default base_public.html still ships an LA banner <img> inside, so
-   the lexington_alarm theme uses that directly; other themes hide
-   the img and draw their own header. */
-.la-header {
+/* Public header / footer containers. Markup comes from
+   base_public.html driven by app/themes.py: a banner-image header
+   renders <img>, a text header renders eyebrow + brand. Themes set
+   background/color via tokens and only override layout when they
+   want something distinctive. */
+.public-header {
   background: var(--theme-header-bg);
   color: var(--theme-header-fg);
-  line-height: 0;
 }
-.la-header img {
+.public-header a { color: inherit; text-decoration: none; }
+
+/* Banner-image header — kept tight (line-height: 0) so the SVG banner
+   touches the page edges without an inherited line-box gap. */
+.public-header-banner { display: block; line-height: 0; }
+.public-header-banner img {
   display: block;
   width: 100%;
   height: auto;
 }
-.la-header a { color: inherit; text-decoration: none; }
 
-.la-footer {
+/* Text header — themes set padding + font sizes; this baseline just
+   stacks the eyebrow above the brand. */
+.public-header-text {
+  display: block;
+  padding: var(--space-md) var(--space-lg);
+}
+.public-header-eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-xs);
+}
+.public-header-brand {
+  display: block;
+  font-family: var(--theme-font-heading);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.public-footer {
   background: var(--theme-footer-bg);
   color: var(--theme-footer-fg);
   margin-top: var(--space-xxl);
   padding: var(--space-lg) var(--space-md);
   text-align: center;
 }
-.la-footer a { color: inherit; }
+.public-footer a { color: inherit; }
 
 /* Page title hero on public list / campaign overview pages. */
-.la-page-title {
+.public-page-title {
   font-family: var(--theme-font-heading);
   color: var(--theme-page-title-color);
   font-size: clamp(2rem, 5vw, 3.5rem);
@@ -508,7 +539,7 @@ body.public h4 {
   text-align: center;
   margin: var(--space-xl) 0 var(--space-md);
 }
-.la-page-intro {
+.public-page-intro {
   text-align: center;
   max-width: 720px;
   margin: 0 auto var(--space-xl);
@@ -517,7 +548,7 @@ body.public h4 {
 
 /* Campaign titles inside highlight boxes — themes can override
    color/transform via the page-title vars. */
-.la-highlight-box h2 {
+.public-highlight-box h2 {
   font-family: var(--theme-font-heading);
   color: var(--theme-page-title-color);
   font-weight: 400;
@@ -527,14 +558,14 @@ body.public h4 {
   margin-top: 0;
   margin-bottom: var(--space-md);
 }
-.la-highlight-box h2 a {
+.public-highlight-box h2 a {
   color: inherit;
   text-decoration: none;
 }
-.la-highlight-box h2 a:hover { text-decoration: underline; }
+.public-highlight-box h2 a:hover { text-decoration: underline; }
 
 /* Campaign subhead — sentence-case heavier serif between title and blurb. */
-.la-subhead {
+.public-subhead {
   font-family: var(--theme-font-heading);
   font-weight: 700;
   font-size: 1.15rem;
@@ -544,10 +575,10 @@ body.public h4 {
 }
 
 /* "Take action" section above the target cards on a campaign page. */
-.la-take-action {
+.public-take-action {
   margin: var(--space-xl) 0 var(--space-md);
 }
-.la-take-action-label {
+.public-take-action-label {
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -555,35 +586,35 @@ body.public h4 {
   color: var(--theme-fg-muted);
   margin: 0 0 var(--space-sm);
 }
-.la-take-action-header {
+.public-take-action-header {
   font-family: var(--theme-font-heading);
   font-weight: 700;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   color: var(--theme-fg);
   margin: 0 0 var(--space-md);
 }
-.la-take-action-blurb {
+.public-take-action-blurb {
   font-size: 1.05rem;
   margin: 0;
 }
 
 /* Resources section on a campaign page. */
-.la-resources {
+.public-resources {
   margin-top: var(--space-xl);
 }
-.la-resource-list {
+.public-resource-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.la-resource {
+.public-resource {
   padding: var(--space-sm) 0;
   border-top: 1px solid var(--theme-border);
 }
-.la-resource:last-child {
+.public-resource:last-child {
   border-bottom: 1px solid var(--theme-border);
 }
-.la-resource-category {
+.public-resource-category {
   display: block;
   font-size: 0.75rem;
   font-weight: 700;
@@ -592,7 +623,7 @@ body.public h4 {
   color: var(--theme-fg-muted);
   margin-bottom: var(--space-xs);
 }
-.la-resource-name {
+.public-resource-name {
   font-weight: 500;
 }
 
@@ -600,7 +631,7 @@ body.public h4 {
    the writer details disclosure, and the artifact previews. The border
    treatment varies by theme (LA uses thick blue + red-left; Signature
    uses a thin gold left-edge), so we expose it via theme variables. */
-.la-highlight-box {
+.public-highlight-box {
   background: var(--theme-highlight-bg);
   border: var(--theme-highlight-border);
   border-left: var(--theme-highlight-border-left);
@@ -608,40 +639,44 @@ body.public h4 {
   padding: var(--space-lg);
   margin: var(--space-md) 0;
 }
-.la-highlight-box h2,
-.la-highlight-box h3 { margin-top: 0; }
+.public-highlight-box h2,
+.public-highlight-box h3 { margin-top: 0; }
 
 /* Brand button — primary fills with the theme primary color; secondary
-   fills with the theme secondary. Themes can override font/border/etc. */
-.la-button {
+   fills with the theme secondary. Font/weight/border thickness/radius
+   come from --theme-button-* tokens so themes can adjust shape without
+   re-declaring the whole rule. Hover darkens by default; themes that
+   want a cross-color hover (e.g. LA red↔blue flip) override
+   .public-button(:hover) directly. */
+.public-button {
   display: inline-block;
   padding: var(--space-sm) var(--space-lg);
   background: var(--theme-primary);
   color: var(--theme-on-primary);
-  font-family: var(--theme-font-heading);
+  font-family: var(--theme-button-font);
   font-size: 1rem;
-  font-weight: 700;
-  border: 2px solid var(--theme-primary);
+  font-weight: var(--theme-button-weight);
+  border: var(--theme-button-border-width) solid var(--theme-primary);
+  border-radius: var(--theme-button-radius);
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
-  border-radius: 4px;
 }
-.la-button:hover,
-.la-button:focus {
+.public-button:hover,
+.public-button:focus {
   background: var(--theme-primary-dark);
   border-color: var(--theme-primary-dark);
   color: var(--theme-on-primary);
 }
-.la-button-secondary {
+.public-button-secondary {
   background: var(--theme-secondary);
   color: var(--theme-on-secondary);
   border-color: var(--theme-secondary);
 }
-.la-button-secondary:hover,
-.la-button-secondary:focus {
-  background: var(--theme-primary);
-  border-color: var(--theme-primary);
-  color: var(--theme-on-primary);
+.public-button-secondary:hover,
+.public-button-secondary:focus {
+  background: var(--theme-secondary-dark);
+  border-color: var(--theme-secondary-dark);
+  color: var(--theme-on-secondary);
 }

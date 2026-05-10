@@ -34,8 +34,20 @@ from .extensions import db
 from .models import Artifact, Campaign, Respondent, RespondentParameter, Target
 from .pdf import render_letters_pdf
 from .substitution import Writer, markers_to_html, render, render_with_highlights
+from .themes import theme_config
 
 bp = Blueprint("public", __name__, template_folder="templates")
+
+
+@bp.app_context_processor
+def _inject_theme_config() -> dict:
+    """Make ``theme_for(campaign)`` callable from public templates so
+    base_public.html can pick the right header/footer content for the
+    campaign in scope without each route plumbing it through manually.
+    """
+    return {"theme_for": lambda campaign: theme_config(
+        campaign.theme if campaign and campaign.theme else Campaign.THEME_DEFAULT
+    )}
 
 
 def _writer_from_args() -> Writer:

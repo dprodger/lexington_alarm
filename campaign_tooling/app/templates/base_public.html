@@ -2,8 +2,11 @@
 
 {# Theme controls the public-page palette, fonts, and header/footer.
    Defaults to lexington_alarm so a freshly-created campaign keeps the
-   current LA look without admin intervention. #}
+   current LA look without admin intervention. The header/footer
+   *content* (image URL, brand text, footer text) comes from
+   app/themes.py; styling comes from static/themes/<slug>.css. #}
 {% set theme = (campaign.theme if campaign and campaign.theme else 'lexington_alarm') %}
+{% set theme_cfg = theme_for(campaign) %}
 
 {% block body_class %}public theme-{{ theme }}{% endblock %}
 
@@ -16,18 +19,28 @@
 {% endblock %}
 
 {% block header %}
-  <header class="la-header">
-    {# Themes can hide this <a> via CSS (display:none) and draw their
-       own header content with a ::before pseudo-element on .la-header. #}
-    <a href="https://lexingtonalarm.org/" class="la-header-banner">
-      <img src="https://lexingtonalarm.org/wp-content/uploads/2025/09/LexAlarmBanner8.svg"
-           alt="Lexington Alarm">
-    </a>
+  <header class="public-header">
+    {% set h = theme_cfg.header %}
+    {% if h.kind == 'banner_image' %}
+      <a href="{{ h.link }}" class="public-header-banner">
+        <img src="{{ h.url }}" alt="{{ h.alt }}">
+      </a>
+    {% elif h.kind == 'text' %}
+      <a href="{{ h.link }}" class="public-header-text">
+        {% if h.eyebrow %}<span class="public-header-eyebrow">{{ h.eyebrow }}</span>{% endif %}
+        <span class="public-header-brand">{{ h.brand }}</span>
+      </a>
+    {% endif %}
   </header>
 {% endblock %}
 
 {% block footer %}
-  <footer class="la-footer">
-    <a class="la-footer-link" href="https://lexingtonalarm.org/">lexingtonalarm.org</a>
+  <footer class="public-footer">
+    {% set f = theme_cfg.footer %}
+    {% if f.link %}
+      <a class="public-footer-link" href="{{ f.link }}">{{ f.text }}</a>
+    {% else %}
+      <span class="public-footer-link">{{ f.text }}</span>
+    {% endif %}
   </footer>
 {% endblock %}
