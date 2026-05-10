@@ -1,17 +1,25 @@
 {% extends "base.html" %}
 
-{% block body_class %}public{% endblock %}
+{# Theme controls the public-page palette, fonts, and header/footer.
+   Defaults to lexington_alarm so a freshly-created campaign keeps the
+   current LA look without admin intervention. #}
+{% set theme = (campaign.theme if campaign and campaign.theme else 'lexington_alarm') %}
+
+{% block body_class %}public theme-{{ theme }}{% endblock %}
 
 {% block head_extra %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='themes/' ~ theme ~ '.css') }}">
 {% endblock %}
 
 {% block header %}
   <header class="la-header">
-    <a href="https://lexingtonalarm.org/">
+    {# Themes can hide this <a> via CSS (display:none) and draw their
+       own header content with a ::before pseudo-element on .la-header. #}
+    <a href="https://lexingtonalarm.org/" class="la-header-banner">
       <img src="https://lexingtonalarm.org/wp-content/uploads/2025/09/LexAlarmBanner8.svg"
            alt="Lexington Alarm">
     </a>
@@ -20,6 +28,6 @@
 
 {% block footer %}
   <footer class="la-footer">
-    <a href="https://lexingtonalarm.org/">lexingtonalarm.org</a>
+    <a class="la-footer-link" href="https://lexingtonalarm.org/">lexingtonalarm.org</a>
   </footer>
 {% endblock %}

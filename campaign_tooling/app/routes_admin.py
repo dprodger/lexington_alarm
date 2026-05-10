@@ -125,6 +125,7 @@ def _apply_campaign_form(c: Campaign, form) -> None:
     c.action_header = form.get("action_header", "").strip()
     c.action_blurb = form.get("action_blurb", "").strip()
     c.active = "active" in form
+    c.theme = form.get("theme", Campaign.THEME_DEFAULT).strip() or Campaign.THEME_DEFAULT
 
 
 def _next_sort_order(rows) -> int:
@@ -161,7 +162,7 @@ def campaign_new():
         db.session.commit()
         flash("Campaign created.", "success")
         return redirect(url_for("admin.campaign_edit", campaign_id=c.id))
-    return render_template("admin/campaign_form.html", campaign=None)
+    return render_template("admin/campaign_form.html", campaign=None, themes=Campaign.THEMES)
 
 
 @bp.route("/campaigns/reorder", methods=["POST"])
@@ -195,6 +196,7 @@ def campaign_edit(campaign_id: int):
         "admin/campaign_form.html",
         campaign=campaign,
         respondent_counts=respondent_counts,
+        themes=Campaign.THEMES,
     )
 
 

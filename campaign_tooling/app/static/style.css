@@ -1,25 +1,73 @@
 :root {
-  /* Lexington Alarm brand palette — mirrors lexingtonalarm.org variables
-     so this app can sit visually adjacent to the main site. */
-  --la-red: #c3202e;
-  --la-red-dark: #a11a26;
-  --la-blue: #044f9d;
+  /* Theme tokens — neutral defaults, overridden per-campaign by themes/<slug>.css.
+     The shared chrome (form layout, highlight box, action buttons, header,
+     footer) reads these. To brand a campaign, set theme=<slug> on the
+     campaign and have themes/<slug>.css override the values you care about. */
+
+  --theme-fg: #1a1a1a;
+  --theme-fg-muted: #666;
+  --theme-bg-page: #fafafa;
+  --theme-bg-card: #ffffff;
+  --theme-border: #ddd;
+  --theme-primary: #c3202e;
+  --theme-primary-dark: #a11a26;
+  --theme-secondary: #044f9d;
+  --theme-accent: var(--theme-primary);
+  --theme-on-primary: #ffffff;
+  --theme-on-secondary: #ffffff;
+  --theme-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --theme-font-heading: Georgia, "Times New Roman", serif;
+
+  /* Highlight box — themes can override the border treatment. The
+     baseline is a single-color thin border; LA replaces it with the
+     blue/red striped look, Signature replaces it with a gold left-edge. */
+  --theme-highlight-bg: var(--theme-bg-card);
+  --theme-highlight-border: 1px solid var(--theme-border);
+  --theme-highlight-border-left: 4px solid var(--theme-primary);
+  --theme-highlight-radius: 4px;
+
+  /* Page title (the H1 / section heading shown above campaign content) */
+  --theme-page-title-color: var(--theme-fg);
+  --theme-page-title-transform: none;
+  --theme-page-title-letter-spacing: normal;
+
+  /* Header / footer chrome — themes set bg + colors. Header height is
+     auto by default; LA uses the banner SVG so we let it set its own. */
+  --theme-header-bg: transparent;
+  --theme-header-fg: var(--theme-fg);
+  --theme-footer-bg: var(--theme-secondary);
+  --theme-footer-fg: var(--theme-on-secondary);
+
+  /* Spacing scale (used by theme-aware components) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-xxl: 3rem;
+
+  /* Backwards-compat aliases — the old `--la-*` and short names still
+     resolve to theme tokens so admin templates and a few stragglers keep
+     working without a rename pass. */
+  --la-red: var(--theme-primary);
+  --la-red-dark: var(--theme-primary-dark);
+  --la-blue: var(--theme-secondary);
   --la-white: #ffffff;
   --la-black: #000000;
-  --la-font-body: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --la-font-heading: "Libre Baskerville", Georgia, "Times New Roman", serif;
-  --la-spacing-xs: 0.25rem;
-  --la-spacing-sm: 0.5rem;
-  --la-spacing-md: 1rem;
-  --la-spacing-lg: 1.5rem;
-  --la-spacing-xl: 2rem;
-  --la-spacing-xxl: 3rem;
+  --la-font-body: var(--theme-font-body);
+  --la-font-heading: var(--theme-font-heading);
+  --la-spacing-xs: var(--space-xs);
+  --la-spacing-sm: var(--space-sm);
+  --la-spacing-md: var(--space-md);
+  --la-spacing-lg: var(--space-lg);
+  --la-spacing-xl: var(--space-xl);
+  --la-spacing-xxl: var(--space-xxl);
 
-  --fg: #1a1a1a;
-  --muted: #666;
-  --bg: #fafafa;
-  --accent: var(--la-red);
-  --border: #ddd;
+  --fg: var(--theme-fg);
+  --muted: var(--theme-fg-muted);
+  --bg: var(--theme-bg-page);
+  --accent: var(--theme-accent);
+  --border: var(--theme-border);
   --error: #b00020;
   --success: #1e7c35;
 }
@@ -28,21 +76,9 @@
 
 body {
   margin: 0;
-  font: 16px/1.5 var(--la-font-body);
-  color: var(--fg);
-  background: var(--bg);
-}
-
-/* Public-facing pages get the brand fonts on headings; admin keeps body font
-   on headings (no override) since it's an internal tool.
-   Regular weight (400) — lexingtonalarm.org renders headings at regular,
-   not bold, which gives the more refined classical serif feel. */
-body.public h1,
-body.public h2,
-body.public h3,
-body.public h4 {
-  font-family: var(--la-font-heading);
-  font-weight: 400;
+  font: 16px/1.5 var(--theme-font-body);
+  color: var(--theme-fg);
+  background: var(--theme-bg-page);
 }
 
 main {
@@ -411,66 +447,85 @@ details > summary { cursor: pointer; padding: 0.25rem 0; }
 }
 
 /* ============================================================
-   Lexington Alarm branding — applied to public pages via
-   body.public and the la-* utility classes.
+   Public-page chrome — the shared scaffolding that every themed
+   campaign page sits on top of. Theme-specific colors, fonts, and
+   header/footer treatments live in themes/<slug>.css and override
+   the variables declared at :root above.
    ============================================================ */
 
-body.public { background: var(--la-white); }
+body.public {
+  background: var(--theme-bg-page);
+  color: var(--theme-fg);
+  font-family: var(--theme-font-body);
+}
+body.public h1,
+body.public h2,
+body.public h3,
+body.public h4 {
+  font-family: var(--theme-font-heading);
+}
 
 .la-section {
   max-width: 1100px;
   margin: 0 auto;
-  padding: var(--la-spacing-lg) var(--la-spacing-md);
+  padding: var(--space-lg) var(--space-md);
 }
 
-/* Branded header: the SVG banner already contains its own red/blue/red
-   stripes, so we just stretch it edge-to-edge as a single block. */
-.la-header { line-height: 0; }
+/* Public header / footer containers. Theme CSS fills these in with
+   background, padding, and (via ::before) any text or imagery. The
+   default base_public.html still ships an LA banner <img> inside, so
+   the lexington_alarm theme uses that directly; other themes hide
+   the img and draw their own header. */
+.la-header {
+  background: var(--theme-header-bg);
+  color: var(--theme-header-fg);
+  line-height: 0;
+}
 .la-header img {
   display: block;
   width: 100%;
   height: auto;
 }
+.la-header a { color: inherit; text-decoration: none; }
 
-/* Branded footer: minimal — just a link back to the parent site. */
 .la-footer {
-  background: var(--la-blue);
-  color: var(--la-white);
-  margin-top: var(--la-spacing-xxl);
-  padding: var(--la-spacing-lg) var(--la-spacing-md);
+  background: var(--theme-footer-bg);
+  color: var(--theme-footer-fg);
+  margin-top: var(--space-xxl);
+  padding: var(--space-lg) var(--space-md);
   text-align: center;
 }
-.la-footer a { color: var(--la-white); }
+.la-footer a { color: inherit; }
 
-/* CURRENT CAMPAIGNS hero on the public list page. */
+/* Page title hero on public list / campaign overview pages. */
 .la-page-title {
-  font-family: var(--la-font-heading);
-  color: var(--la-red);
+  font-family: var(--theme-font-heading);
+  color: var(--theme-page-title-color);
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  text-transform: var(--theme-page-title-transform);
+  letter-spacing: var(--theme-page-title-letter-spacing);
   text-align: center;
-  margin: var(--la-spacing-xl) 0 var(--la-spacing-md);
+  margin: var(--space-xl) 0 var(--space-md);
 }
 .la-page-intro {
   text-align: center;
   max-width: 720px;
-  margin: 0 auto var(--la-spacing-xl);
+  margin: 0 auto var(--space-xl);
   font-size: 1.05rem;
 }
 
-/* Campaign titles inside highlight boxes — same serif as the page title,
-   smaller, red, no underline (overrides default link styling). */
+/* Campaign titles inside highlight boxes — themes can override
+   color/transform via the page-title vars. */
 .la-highlight-box h2 {
-  font-family: var(--la-font-heading);
-  color: var(--la-red);
+  font-family: var(--theme-font-heading);
+  color: var(--theme-page-title-color);
   font-weight: 400;
   font-size: clamp(1.4rem, 2.8vw, 2rem);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  text-transform: var(--theme-page-title-transform);
+  letter-spacing: var(--theme-page-title-letter-spacing);
   margin-top: 0;
-  margin-bottom: var(--la-spacing-md);
+  margin-bottom: var(--space-md);
 }
 .la-highlight-box h2 a {
   color: inherit;
@@ -478,46 +533,43 @@ body.public { background: var(--la-white); }
 }
 .la-highlight-box h2 a:hover { text-decoration: underline; }
 
-/* Campaign subhead — sentence-case bolder serif sitting between the title
-   and the blurb. Mirrors lexingtonalarm.org campaign-card layout. */
+/* Campaign subhead — sentence-case heavier serif between title and blurb. */
 .la-subhead {
-  font-family: var(--la-font-heading);
+  font-family: var(--theme-font-heading);
   font-weight: 700;
   font-size: 1.15rem;
-  color: var(--fg);
+  color: var(--theme-fg);
   margin-top: 0;
-  margin-bottom: var(--la-spacing-md);
+  margin-bottom: var(--space-md);
 }
 
-/* "Take action" section above the target cards on a campaign page.
-   Small letter-spaced overline, large heading, and a blurb. */
+/* "Take action" section above the target cards on a campaign page. */
 .la-take-action {
-  margin: var(--la-spacing-xl) 0 var(--la-spacing-md);
+  margin: var(--space-xl) 0 var(--space-md);
 }
 .la-take-action-label {
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--muted, #666);
-  margin: 0 0 var(--la-spacing-sm);
+  color: var(--theme-fg-muted);
+  margin: 0 0 var(--space-sm);
 }
 .la-take-action-header {
-  font-family: var(--la-font-heading);
+  font-family: var(--theme-font-heading);
   font-weight: 700;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
-  color: var(--fg);
-  margin: 0 0 var(--la-spacing-md);
+  color: var(--theme-fg);
+  margin: 0 0 var(--space-md);
 }
 .la-take-action-blurb {
   font-size: 1.05rem;
   margin: 0;
 }
 
-/* Resources section on a campaign page — small all-caps category overline
-   followed by the link. */
+/* Resources section on a campaign page. */
 .la-resources {
-  margin-top: var(--la-spacing-xl);
+  margin-top: var(--space-xl);
 }
 .la-resource-list {
   list-style: none;
@@ -525,11 +577,11 @@ body.public { background: var(--la-white); }
   margin: 0;
 }
 .la-resource {
-  padding: var(--la-spacing-sm) 0;
-  border-top: 1px solid var(--border);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--theme-border);
 }
 .la-resource:last-child {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--theme-border);
 }
 .la-resource-category {
   display: block;
@@ -537,35 +589,39 @@ body.public { background: var(--la-white); }
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: var(--la-spacing-xs);
+  color: var(--theme-fg-muted);
+  margin-bottom: var(--space-xs);
 }
 .la-resource-name {
   font-weight: 500;
 }
 
-/* Highlight box used for campaign cards — distinctive red-left strip
-   matches lexingtonalarm.org's .la-highlight-box. */
+/* Highlight box — visual "card" used for campaign cards, target panels,
+   the writer details disclosure, and the artifact previews. The border
+   treatment varies by theme (LA uses thick blue + red-left; Signature
+   uses a thin gold left-edge), so we expose it via theme variables. */
 .la-highlight-box {
-  background: var(--la-white);
-  border: 8px solid var(--la-blue);
-  border-left: 16px solid var(--la-red);
-  padding: var(--la-spacing-lg);
-  margin: var(--la-spacing-md) 0;
+  background: var(--theme-highlight-bg);
+  border: var(--theme-highlight-border);
+  border-left: var(--theme-highlight-border-left);
+  border-radius: var(--theme-highlight-radius);
+  padding: var(--space-lg);
+  margin: var(--space-md) 0;
 }
 .la-highlight-box h2,
 .la-highlight-box h3 { margin-top: 0; }
 
-/* Brand button — red/white with the heading font for emphasis. */
+/* Brand button — primary fills with the theme primary color; secondary
+   fills with the theme secondary. Themes can override font/border/etc. */
 .la-button {
   display: inline-block;
-  padding: var(--la-spacing-sm) var(--la-spacing-lg);
-  background: var(--la-red);
-  color: var(--la-white);
-  font-family: var(--la-font-heading);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  font-family: var(--theme-font-heading);
   font-size: 1rem;
   font-weight: 700;
-  border: 2px solid var(--la-red);
+  border: 2px solid var(--theme-primary);
   text-align: center;
   text-decoration: none;
   cursor: pointer;
@@ -574,24 +630,18 @@ body.public { background: var(--la-white); }
 }
 .la-button:hover,
 .la-button:focus {
-  background: var(--la-red-dark);
-  border-color: var(--la-red-dark);
-  color: var(--la-white);
+  background: var(--theme-primary-dark);
+  border-color: var(--theme-primary-dark);
+  color: var(--theme-on-primary);
 }
 .la-button-secondary {
-  background: var(--la-blue);
-  border-color: var(--la-blue);
+  background: var(--theme-secondary);
+  color: var(--theme-on-secondary);
+  border-color: var(--theme-secondary);
 }
 .la-button-secondary:hover,
 .la-button-secondary:focus {
-  background: var(--la-red);
-  border-color: var(--la-red);
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
+  color: var(--theme-on-primary);
 }
-
-/* Color helpers, matching lexingtonalarm.org. */
-.la-text-red   { color: var(--la-red); }
-.la-text-blue  { color: var(--la-blue); }
-.la-text-white { color: var(--la-white); }
-.la-bg-red     { background-color: var(--la-red); }
-.la-bg-blue    { background-color: var(--la-blue); }
-.la-bg-white   { background-color: var(--la-white); }

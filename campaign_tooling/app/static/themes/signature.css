@@ -1,0 +1,119 @@
+/* Signature Aviation theme — dark teal / gold / cream palette from the
+   knowledge.lexingtonalarm.org/mockup/signature.html design.
+   Loaded by base_public.html when campaign.theme is "signature". */
+
+body.theme-signature {
+  --theme-fg: #2A2A2A;
+  --theme-fg-muted: #6B6B68;
+  --theme-bg-page: #FAF7F2;     /* warm cream */
+  --theme-bg-card: #FFFFFF;
+  --theme-border: #D4CDB8;      /* warm tan border */
+
+  --theme-primary: #C99B3D;       /* gold */
+  --theme-primary-dark: #B68829;  /* gold-dark on hover */
+  --theme-secondary: #1E4D4A;     /* dark teal */
+  --theme-accent: var(--theme-primary);
+  /* Gold tile + dark text reads better than gold + white. */
+  --theme-on-primary: #2A1E04;
+  --theme-on-secondary: #FAF7F2;
+
+  --theme-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --theme-font-heading: Georgia, "Times New Roman", serif;
+
+  /* Highlight box — gold left-rule on white, the "ask callout" pattern
+     from the mockup. No outer border, gentle right-side rounding. */
+  --theme-highlight-bg: #FFFFFF;
+  --theme-highlight-border: 1px solid var(--theme-border);
+  --theme-highlight-border-left: 4px solid var(--theme-primary);
+  --theme-highlight-radius: 0 8px 8px 0;
+
+  /* Page titles: dark teal, sentence case (no transform), tight tracking. */
+  --theme-page-title-color: var(--theme-secondary);
+  --theme-page-title-transform: none;
+  --theme-page-title-letter-spacing: -0.005em;
+
+  /* Header / footer chrome: dark teal background. The header text is
+     drawn via ::before so we don't need bespoke markup per theme. */
+  --theme-header-bg: #1E4D4A;
+  --theme-header-fg: #FAF7F2;
+  --theme-footer-bg: #1E4D4A;
+  --theme-footer-fg: #C9DDDB;
+}
+
+/* Hide the shared LA banner image — Signature draws its own header. */
+body.theme-signature .la-header img { display: none; }
+body.theme-signature .la-header .la-header-banner {
+  display: block;
+  padding: 20px 32px;
+  text-decoration: none;
+}
+body.theme-signature .la-header .la-header-banner::before {
+  content: "Stop Servicing ICE";
+  display: block;
+  font-family: var(--theme-font-heading);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--theme-header-fg);
+  line-height: 1;
+}
+body.theme-signature .la-header .la-header-banner::after {
+  content: "A national letter campaign";
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #C99B3D;          /* gold accent eyebrow */
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Footer — replace the lexingtonalarm.org link text with a coalition
+   tagline. Real link still navigates, just relabeled visually. */
+body.theme-signature .la-footer {
+  text-align: center;
+  padding: 40px 32px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+body.theme-signature .la-footer .la-footer-link {
+  font-size: 0;          /* hide original anchor text */
+  text-decoration: none;
+}
+body.theme-signature .la-footer .la-footer-link::before {
+  content: "A coalition campaign of state workers, retirees, union members, and concerned residents.";
+  display: block;
+  font-size: 14px;
+  color: var(--theme-footer-fg);
+}
+
+/* Signature buttons read as a softer pill — gold fill, dark text,
+   sans-serif (the heading font for this theme is Georgia, but the
+   mockup button uses sans). Keeps the .la-button class semantics. */
+body.theme-signature .la-button {
+  font-family: var(--theme-font-body);
+  font-weight: 500;
+  border-radius: 6px;
+  border-width: 1px;
+}
+
+/* Secondary button on Signature: outlined teal-on-cream rather than
+   inverting to primary on hover. */
+body.theme-signature .la-button-secondary {
+  background: transparent;
+  color: var(--theme-secondary);
+  border: 1px solid var(--theme-secondary);
+}
+body.theme-signature .la-button-secondary:hover,
+body.theme-signature .la-button-secondary:focus {
+  background: var(--theme-secondary);
+  color: var(--theme-on-secondary);
+  border-color: var(--theme-secondary);
+}
+
+/* The "campaign-specific information" subhead inside the writer form —
+   nudge it toward the mockup's eyebrow look. */
+body.theme-signature .la-take-action-label {
+  color: var(--theme-fg-muted);
+}

@@ -31,6 +31,14 @@
   <label>Action blurb (paragraph shown under the action header)
     <textarea name="action_blurb" rows="3">{{ campaign.action_blurb if campaign else '' }}</textarea>
   </label>
+  <label>Theme (controls the public-page colors, fonts, and header look)
+    {% set current_theme = campaign.theme if campaign else themes[0][0] %}
+    <select name="theme">
+      {% for value, label in themes %}
+        <option value="{{ value }}" {% if value == current_theme %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
   <label class="inline">
     <input type="checkbox" name="active" {% if not campaign or campaign.active %}checked{% endif %}>
     Active (visible to public)
@@ -58,6 +66,7 @@
       {% if campaign.subhead %}<dt>Subhead</dt><dd>{{ campaign.subhead }}</dd>{% endif %}
       {% if campaign.description %}<dt>Description</dt><dd>{{ campaign.description }}</dd>{% endif %}
       <dt>Active</dt><dd>{% if campaign.active %}yes{% else %}no{% endif %}</dd>
+      <dt>Theme</dt><dd><code>{{ campaign.theme }}</code></dd>
       {% if campaign.body_md %}<dt>Body</dt><dd><pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ campaign.body_md }}</pre></dd>{% endif %}
       {% if campaign.action_header %}<dt>Action header</dt><dd>{{ campaign.action_header }}</dd>{% endif %}
       {% if campaign.action_blurb %}<dt>Action blurb</dt><dd>{{ campaign.action_blurb }}</dd>{% endif %}

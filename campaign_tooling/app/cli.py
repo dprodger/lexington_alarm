@@ -131,6 +131,7 @@ def _serialize_campaign(c: Campaign) -> dict:
             "action_blurb": c.action_blurb,
             "active": c.active,
             "sort_order": c.sort_order,
+            "theme": c.theme,
         },
         "targets": [_serialize_target(t) for t in c.targets],
         "resources": [_serialize_resource(r) for r in c.resources],
@@ -227,6 +228,7 @@ def _import_campaign(data: dict, *, replace: bool) -> str:
         action_blurb=cdata.get("action_blurb", ""),
         active=cdata.get("active", True),
         sort_order=cdata.get("sort_order", 0),
+        theme=cdata.get("theme", Campaign.THEME_DEFAULT),
     )
     _try_preserve_id(campaign, cdata.get("id"), Campaign)
     db.session.add(campaign)

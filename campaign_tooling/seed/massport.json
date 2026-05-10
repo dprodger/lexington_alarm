@@ -7,7 +7,8 @@
     "description": "Blurb",
     "body_md": "longer blurb",
     "active": true,
-    "sort_order": 0
+    "sort_order": 0,
+    "theme": "lexington_alarm"
   },
   "targets": [
     {
