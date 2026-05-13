@@ -91,6 +91,9 @@
   <label>Description (shown to writers — explain who this audience is)
     <textarea name="description" rows="3">{{ target.description }}</textarea>
   </label>
+  <label>Source URL (where the writer came from — used as the "back" link on the thank-you page)
+    <input type="url" name="source_url" value="{{ target.source_url }}" placeholder="https://example.org/take-action">
+  </label>
   <p>
     <button type="submit">Save</button>
     <button type="submit" formaction="{{ url_for('admin.target_delete', target_id=target.id) }}"

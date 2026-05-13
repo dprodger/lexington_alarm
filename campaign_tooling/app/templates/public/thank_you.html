@@ -1,0 +1,26 @@
+{% extends "base_public.html" %}
+{% block title %}Thank you · {{ target.name }} · {{ campaign.name }}{% endblock %}
+{% block content %}
+<div class="public-highlight-box">
+  <h2>Thank you!</h2>
+  <p>
+    Your message to <strong>{{ target.name }}</strong> matters. Decision-makers
+    track the volume and substance of constituent contact — every personalized
+    letter raises the cost of inaction.
+  </p>
+  {% if target.source_url %}
+    <p style="margin-top: 1.5rem;">
+      <a class="public-button" href="{{ target.source_url }}">
+        &larr; Back to the campaign
+      </a>
+    </p>
+  {% else %}
+    <p style="margin-top: 1.5rem;">
+      <a class="public-button"
+         href="{{ url_for('public.campaign', slug=campaign.slug) }}">
+        &larr; Back to {{ campaign.name }}
+      </a>
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -72,6 +72,7 @@ class Target(db.Model):
 
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    source_url: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     campaign: Mapped["Campaign"] = relationship(back_populates="targets")

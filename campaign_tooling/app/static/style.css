@@ -130,7 +130,7 @@ a { color: var(--accent); }
 
 label { display: block; margin-top: 0.75rem; font-weight: 600; }
 input[type="text"], input[type="email"], input[type="password"],
-textarea, select {
+input[type="url"], textarea, select {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--border);
@@ -244,6 +244,7 @@ details[open] > summary > .edit-hint { display: none; }
   border-collapse: collapse;
   margin-top: 0.5rem;
   font-size: 0.95rem;
+  table-layout: fixed;
 }
 .consent-demo-table th,
 .consent-demo-table td {
@@ -251,7 +252,10 @@ details[open] > summary > .edit-hint { display: none; }
   padding: 0.2rem 0.5rem;
   vertical-align: top;
   font-weight: 400;
+  word-break: break-word;
 }
+.consent-demo-table th:first-child,
+.consent-demo-table td:first-child { width: 14rem; }
 .consent-demo-table thead th {
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -261,8 +265,6 @@ details[open] > summary > .edit-hint { display: none; }
 }
 .consent-demo-table tbody th {
   color: var(--muted);
-  width: 1%;
-  white-space: nowrap;
 }
 
 .target-list {
@@ -403,6 +405,20 @@ mark {
   padding: 1.5rem;
   border: 1px solid var(--border);
   border-radius: 4px;
+}
+
+.public-highlight-box.artifact-card > h2 {
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+}
+
+.artifact-subject {
+  font-size: 1.15rem;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.artifact-preview-body {
+  font-size: 0.9rem;
+  padding: 1.25rem;
 }
 
 details > summary { cursor: pointer; padding: 0.25rem 0; }

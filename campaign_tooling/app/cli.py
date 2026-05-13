@@ -101,6 +101,7 @@ def _serialize_target(t: Target) -> dict:
         "id": t.id,
         "name": t.name,
         "description": t.description,
+        "source_url": t.source_url,
         "sort_order": t.sort_order,
         "parameters": [_serialize_parameter(p) for p in t.parameters],
         "recipients": [_serialize_recipient(r) for r in t.recipients],
@@ -245,6 +246,7 @@ def _import_campaign(data: dict, *, replace: bool) -> str:
             campaign_id=campaign.id,
             name=tdata["name"],
             description=tdata.get("description", ""),
+            source_url=tdata.get("source_url", ""),
             sort_order=tdata.get("sort_order", 0),
         )
         _try_preserve_id(target, tdata.get("id"), Target)

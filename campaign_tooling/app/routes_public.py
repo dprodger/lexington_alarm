@@ -343,6 +343,19 @@ def target_action(slug: str, target_id: int):
     )
 
 
+@bp.route("/c/<slug>/t/<int:target_id>/done")
+def target_done(slug: str, target_id: int):
+    campaign = _load_campaign_or_404(slug)
+    target = db.session.get(Target, target_id) or abort(404)
+    if target.campaign_id != campaign.id:
+        abort(404)
+    return render_template(
+        "public/thank_you.html",
+        campaign=campaign,
+        target=target,
+    )
+
+
 @bp.route("/c/<slug>/t/<int:target_id>/print/<int:artifact_id>")
 def print_letters(slug: str, target_id: int, artifact_id: int):
     campaign = _load_campaign_or_404(slug)

@@ -27,7 +27,7 @@
           <dt>Email copy</dt><dd>Will not be sent</dd>
         {% endif %}
         {% if not consents.store_contact %}
-          <dt>Storage</dt><dd>Personal info redacted (City/State/ZIP retained)</dd>
+          <dt>Storage</dt><dd>Personal info not stored (City/State/ZIP retained)</dd>
         {% endif %}
       </dl>
     {% endif %}
@@ -103,41 +103,41 @@
     <label class="consent-row" for="f_store_contact">
       <input id="f_store_contact" type="checkbox" name="store_contact" value="1"
              {% if consents.store_contact %}checked{% endif %}>
-      We will store your contact information and add to our database.
-      If you uncheck this, we will store your response with personal information
-      redacted, although we will store your City, State and ZIP.
+      We store your contact information and add it to our database.
+      If you uncheck this, we will remove your personal information,
+      though we will still store city, state, and zipcode.
     </label>
     <details class="consent-demo">
-      <summary>See an example of what redaction looks like</summary>
+      <summary>See an example of what this looks like</summary>
       <table class="consent-demo-table">
         <thead>
-          <tr><th></th><th>As entered</th><th>Redacted</th></tr>
+          <tr><th></th><th>As entered</th><th>Not stored</th></tr>
         </thead>
         <tbody>
           <tr>
             <th>Name</th>
             <td data-demo-field="name" data-demo-fallback="Jane Doe">Jane Doe</td>
-            <td>--REDACTED--</td>
+            <td>--NOT STORED--</td>
           </tr>
           <tr>
             <th>Email</th>
             <td data-demo-field="email" data-demo-fallback="jane.doe@example.com">jane.doe@example.com</td>
-            <td>--REDACTED--</td>
+            <td>--NOT STORED--</td>
           </tr>
           <tr>
             <th>Organization</th>
             <td data-demo-field="organization" data-demo-fallback="Lexington Citizens for Safer Skies">Lexington Citizens for Safer Skies</td>
-            <td>--REDACTED--</td>
+            <td>--NOT STORED--</td>
           </tr>
           <tr>
             <th>Address 1</th>
             <td data-demo-field="street1" data-demo-fallback="42 Oak Street">42 Oak Street</td>
-            <td>--REDACTED--</td>
+            <td>--NOT STORED--</td>
           </tr>
           <tr>
             <th>Address 2</th>
             <td data-demo-field="street2" data-demo-fallback="Apt 3B">Apt 3B</td>
-            <td>--REDACTED--</td>
+            <td>--NOT STORED--</td>
           </tr>
           <tr>
             <th>City</th>
@@ -286,9 +286,9 @@
     </p>
 
     {% if view.artifact.kind == 'email' and view.sample_subject_html %}
-      <p class="muted">Subject: {{ view.sample_subject_html|safe }}</p>
+      <p class="artifact-subject"><strong>Subject:</strong> {{ view.sample_subject_html|safe }}</p>
     {% endif %}
-    <pre class="letter">{{ view.sample_body_html|safe }}</pre>
+    <pre class="letter artifact-preview-body">{{ view.sample_body_html|safe }}</pre>
     <textarea hidden class="plaintext-body">{{ view.per_recipient[0].body }}</textarea>
 
     {% if view.artifact.kind == 'email' %}
@@ -346,5 +346,14 @@
     {% endif %}
   </div>
 {% endfor %}
+
+{% if ready and artifact_views %}
+  <p style="margin-top: 2rem;">
+    <a class="public-button"
+       href="{{ url_for('public.target_done', slug=campaign.slug, target_id=target.id) }}">
+      I'm done &rarr;
+    </a>
+  </p>
+{% endif %}
 {% endif %}
 {% endblock %}

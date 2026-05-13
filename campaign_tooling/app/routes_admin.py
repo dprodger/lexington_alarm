@@ -219,6 +219,7 @@ def _apply_target_form(target: Target, form) -> None:
     """
     target.name = form.get("name", "").strip()
     target.description = form.get("description", "").strip()
+    target.source_url = form.get("source_url", "").strip()
 
 
 @bp.route("/campaigns/<int:campaign_id>/targets/new", methods=["POST"])
