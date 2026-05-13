@@ -2,7 +2,7 @@
 {% block title %}{{ target.name }} · {{ campaign.name }} · Lexington Alarm{% endblock %}
 {% block content %}
 <h1>{{ target.name }}</h1>
-<p class="muted">Part of <em>{{ campaign.name }}</em>{% if writer.name %} · sending as <strong>{{ writer.name }}</strong>{% endif %}</p>
+<p class="muted"><em>{{ campaign.name }}</em>{% if writer.name %} · sending as <strong>{{ writer.name }}</strong>{% endif %}</p>
 {% if target.description %}<p>{{ target.description }}</p>{% endif %}
 
 <details class="public-highlight-box" {% if not ready %}open{% endif %}>
