@@ -30,6 +30,7 @@ from .models import (
     ParameterChoice,
     Recipient,
     Respondent,
+    RespondentAction,
     RespondentParameter,
     Target,
     TargetParameter,
@@ -289,12 +290,20 @@ def target_respondents(target_id: int):
             )
         ).all()
     }
+    action_counts: dict[int, int] = dict(
+        db.session.execute(
+            db.select(RespondentAction.respondent_id, db.func.count(RespondentAction.id))
+            .where(RespondentAction.target_id == target_id)
+            .group_by(RespondentAction.respondent_id)
+        ).all()
+    )
     return render_template(
         "admin/target_respondents.html",
         campaign=target.campaign,
         target=target,
         respondents=respondents,
         param_values=param_values,
+        action_counts=action_counts,
     )
 
 

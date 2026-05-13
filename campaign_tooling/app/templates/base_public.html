@@ -21,12 +21,16 @@
 {% block header %}
   <header class="public-header">
     {% set h = theme_cfg.header %}
+    {# When viewing a target page that has a source_url set, the header
+       link returns the writer to wherever they came from on the host
+       site rather than to the campaign list. #}
+    {% set header_link = (target.source_url if target is defined and target and target.source_url else h.link) %}
     {% if h.kind == 'banner_image' %}
-      <a href="{{ h.link }}" class="public-header-banner">
+      <a href="{{ header_link }}" class="public-header-banner">
         <img src="{{ h.url }}" alt="{{ h.alt }}">
       </a>
     {% elif h.kind == 'text' %}
-      <a href="{{ h.link }}" class="public-header-text">
+      <a href="{{ header_link }}" class="public-header-text">
         {% if h.eyebrow %}<span class="public-header-eyebrow">{{ h.eyebrow }}</span>{% endif %}
         <span class="public-header-brand">{{ h.brand }}</span>
       </a>

@@ -304,6 +304,34 @@ class Respondent(db.Model):
     )
 
 
+class RespondentAction(db.Model):
+    """One row per action the respondent took — clicking Send All / an
+    individual mailto link, downloading a per-target PDF, or opening
+    the printable view. ``campaign_id`` and ``target_id`` are denormalized
+    off ``respondents`` so per-campaign rollups can avoid the join.
+    """
+
+    __tablename__ = "respondents_actions"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    respondent_id: Mapped[int] = mapped_column(
+        ForeignKey("respondents.id", ondelete="CASCADE"), nullable=False
+    )
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    )
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("targets.id", ondelete="CASCADE"), nullable=False
+    )
+    artifact_id: Mapped[int] = mapped_column(
+        ForeignKey("artifacts.id", ondelete="CASCADE"), nullable=False
+    )
+    recipient_id: Mapped[int] = mapped_column(
+        ForeignKey("recipients.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class RespondentParameter(db.Model):
     """One row per non-empty parameter answered on a respondent submission.
     ``campaign_id`` and ``target_id`` duplicate the parent ``Respondent`` so

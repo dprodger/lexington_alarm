@@ -31,7 +31,14 @@ from urllib.parse import quote, urlencode
 from flask import Blueprint, Response, abort, redirect, render_template, request, url_for
 
 from .extensions import db
-from .models import Artifact, Campaign, Respondent, RespondentParameter, Target
+from .models import (
+    Artifact,
+    Campaign,
+    Respondent,
+    RespondentAction,
+    RespondentParameter,
+    Target,
+)
 from .pdf import render_letters_pdf
 from .substitution import Writer, markers_to_html, render, render_with_highlights
 from .themes import theme_config
@@ -133,10 +140,12 @@ def _save_respondent(
     writer: Writer,
     submitted: dict,
     consents: dict,
-) -> None:
-    """Persist one Respondent + its non-empty parameter rows. When the
-    writer has unchecked store_contact, the PII fields are blanked at
-    write time; city / state / postal_code are always retained.
+) -> int:
+    """Persist one Respondent + its non-empty parameter rows. Returns the
+    new respondent id so the caller can set it as an identifying cookie.
+
+    When the writer has unchecked store_contact, the PII fields are
+    blanked at write time; city / state / postal_code are always retained.
     """
     redact = not consents["store_contact"]
     respondent = Respondent(
@@ -167,6 +176,43 @@ def _save_respondent(
                 target_id=target.id,
                 parameter_id=p.id,
                 value=v[: RespondentParameter.VALUE_MAX_LEN],
+            )
+        )
+    db.session.commit()
+    return respondent.id
+
+
+_RESPONDENT_COOKIE = "respondent_id"
+
+
+def _respondent_id_from_cookie() -> int | None:
+    raw = request.cookies.get(_RESPONDENT_COOKIE, "")
+    if not raw.isdigit():
+        return None
+    return int(raw)
+
+
+def _log_actions(
+    respondent_id: int,
+    campaign: Campaign,
+    target: Target,
+    artifact: Artifact,
+    recipient_ids: list[int],
+) -> None:
+    """Insert one action row per (artifact, recipient) pair. Caller is
+    responsible for resolving recipient_ids to ones that actually belong
+    to ``target`` — we trust the caller and don't re-check here.
+    """
+    if not recipient_ids:
+        return
+    for rid in recipient_ids:
+        db.session.add(
+            RespondentAction(
+                respondent_id=respondent_id,
+                campaign_id=campaign.id,
+                target_id=target.id,
+                artifact_id=artifact.id,
+                recipient_id=rid,
             )
         )
     db.session.commit()
@@ -227,16 +273,28 @@ def target_action(slug: str, target_id: int):
             "email_copy": "email_copy" in request.form,
             "store_contact": "store_contact" in request.form,
         }
-        _save_respondent(campaign, target, writer, submitted, consents)
+        respondent_id = _save_respondent(campaign, target, writer, submitted, consents)
         merged = {
             **_writer_query(writer),
             **_parameters_query(submitted),
             **_consents_query(consents),
         }
-        return redirect(
+        response = redirect(
             url_for("public.target_action", slug=slug, target_id=target_id)
             + ("?" + urlencode(merged) if merged else "")
         )
+        # Cookie is scoped to this target's path so each (slug, target)
+        # pair gets its own respondent identity. 30 days is enough to
+        # capture any "I'll send these tomorrow" follow-up.
+        response.set_cookie(
+            _RESPONDENT_COOKIE,
+            str(respondent_id),
+            max_age=30 * 24 * 60 * 60,
+            path=url_for("public.target_action", slug=slug, target_id=target_id),
+            httponly=True,
+            samesite="Lax",
+        )
+        return response
 
     writer = _writer_from_args()
     parameters = _parameters_from_args(target)
@@ -343,6 +401,41 @@ def target_action(slug: str, target_id: int):
     )
 
 
+@bp.route("/c/<slug>/t/<int:target_id>/track", methods=["POST"])
+def track_action(slug: str, target_id: int):
+    """Beacon endpoint for client-side mailto clicks. Body: JSON with
+    ``artifact_id`` and ``recipient_ids`` (list). Silently no-ops if the
+    respondent cookie is missing or the IDs don't belong to this target —
+    we don't want a bad payload to break the user's send flow.
+    """
+    campaign = _load_campaign_or_404(slug)
+    target = db.session.get(Target, target_id) or abort(404)
+    if target.campaign_id != campaign.id:
+        abort(404)
+
+    respondent_id = _respondent_id_from_cookie()
+    if respondent_id is None:
+        return ("", 204)
+
+    payload = request.get_json(silent=True) or {}
+    artifact_id = payload.get("artifact_id")
+    raw_recipient_ids = payload.get("recipient_ids") or []
+    if not isinstance(artifact_id, int) or not isinstance(raw_recipient_ids, list):
+        return ("", 204)
+
+    artifact = db.session.get(Artifact, artifact_id)
+    if artifact is None or artifact.target_id != target.id:
+        return ("", 204)
+
+    valid_recipient_ids = {r.id for r in target.recipients}
+    recipient_ids = [
+        rid for rid in raw_recipient_ids
+        if isinstance(rid, int) and rid in valid_recipient_ids
+    ]
+    _log_actions(respondent_id, campaign, target, artifact, recipient_ids)
+    return ("", 204)
+
+
 @bp.route("/c/<slug>/t/<int:target_id>/done")
 def target_done(slug: str, target_id: int):
     campaign = _load_campaign_or_404(slug)
@@ -395,6 +488,16 @@ def print_letters(slug: str, target_id: int, artifact_id: int):
         )
         letters.append({"recipient": recipient, "body": body, "body_html": body_html})
 
+    respondent_id = _respondent_id_from_cookie()
+    if respondent_id is not None:
+        _log_actions(
+            respondent_id,
+            campaign,
+            target,
+            artifact,
+            [letter["recipient"].id for letter in letters],
+        )
+
     return render_template(
         "public/print_letters.html",
         campaign=campaign,
@@ -423,6 +526,7 @@ def letters_pdf(slug: str, target_id: int, artifact_id: int):
         )
 
     bodies = []
+    eligible_recipient_ids: list[int] = []
     for recipient in target.recipients:
         if artifact.kind == Artifact.KIND_LETTER and not recipient.has_address:
             continue
@@ -435,9 +539,14 @@ def letters_pdf(slug: str, target_id: int, artifact_id: int):
                 parameters=parameters,
             )
         )
+        eligible_recipient_ids.append(recipient.id)
 
     if not bodies:
         abort(404)
+
+    respondent_id = _respondent_id_from_cookie()
+    if respondent_id is not None:
+        _log_actions(respondent_id, campaign, target, artifact, eligible_recipient_ids)
 
     pdf_bytes = render_letters_pdf(
         bodies,

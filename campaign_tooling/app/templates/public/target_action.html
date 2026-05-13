@@ -249,6 +249,33 @@
 {% endif %}
 
 <script>
+  var TRACK_URL = "{{ url_for('public.track_action', slug=campaign.slug, target_id=target.id) }}";
+
+  // Fire-and-forget beacon. Uses sendBeacon so it survives the mailto:
+  // handoff (which can suspend in-flight fetches in some browsers).
+  function trackAction(artifactId, recipientIds) {
+    if (!artifactId || !recipientIds || !recipientIds.length) return;
+    var body = JSON.stringify({artifact_id: artifactId, recipient_ids: recipientIds});
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(TRACK_URL, new Blob([body], {type: "application/json"}));
+    } else {
+      fetch(TRACK_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: body,
+        keepalive: true,
+      });
+    }
+  }
+
+  function trackOneFromLink(link) {
+    var card = link.closest(".artifact-card");
+    if (!card) return;
+    var artifactId = parseInt(card.dataset.artifactId, 10);
+    var recipientId = parseInt(link.dataset.recipientId, 10);
+    if (!isNaN(artifactId) && !isNaN(recipientId)) trackAction(artifactId, [recipientId]);
+  }
+
   function copySampleBody(button) {
     var ta = button.closest(".artifact-card").querySelector(".plaintext-body");
     if (!ta) return;
@@ -260,8 +287,14 @@
 
   function sendAllEmails(button) {
     var card = button.closest(".artifact-card");
-    var links = card.querySelectorAll("a.mailto-link");
+    // The hidden anchor set is the canonical bulk-click source — kept outside
+    // the <details> so it's always present in the DOM.
+    var links = card.querySelectorAll(".mailto-link-bulk");
     if (!links.length) return;
+    var artifactId = parseInt(card.dataset.artifactId, 10);
+    var recipientIds = [];
+    try { recipientIds = JSON.parse(card.dataset.recipientIds || "[]"); } catch (e) {}
+    trackAction(artifactId, recipientIds);
     // Click each mailto: link inside the same user-gesture event handler so
     // browsers treat them as user-initiated. The OS's mailto handler picks
     // them up; the page itself doesn't navigate.
@@ -271,7 +304,9 @@
 </script>
 
 {% for view in artifact_views %}
-  <div class="public-highlight-box artifact-card">
+  <div class="public-highlight-box artifact-card"
+       data-artifact-id="{{ view.artifact.id }}"
+       data-recipient-ids="{{ view.per_recipient|map(attribute='recipient.id')|list|tojson }}">
     <h2 style="margin-top: 0;">
       {{ view.artifact.name }}
       <span class="kind-badge kind-{{ view.artifact.kind }}">{{ view.artifact.kind }}</span>
@@ -311,7 +346,9 @@
         <ul class="recipient-link-list">
           {% for entry in view.per_recipient %}
             <li>
-              <a class="mailto-link" href="{{ entry.mailto }}">
+              <a class="mailto-link" href="{{ entry.mailto }}"
+                 data-recipient-id="{{ entry.recipient.id }}"
+                 onclick="trackOneFromLink(this);">
                 {{ entry.recipient.formal_name }} &lt;{{ entry.recipient.email }}&gt; &rarr;
               </a>
             </li>
@@ -319,10 +356,12 @@
         </ul>
       </details>
       {# Hidden mailto: anchors used by sendAllEmails(). Kept outside the
-         <details> so the bulk handler always finds them. #}
+         <details> so the bulk handler always finds them. Marked with a
+         distinct class so the bulk click only hits this set, not the
+         visible per-recipient links inside the <details>. #}
       <div hidden>
         {% for entry in view.per_recipient %}
-          <a class="mailto-link" href="{{ entry.mailto }}"></a>
+          <a class="mailto-link-bulk" href="{{ entry.mailto }}"></a>
         {% endfor %}
       </div>
     {% else %}

@@ -32,6 +32,7 @@
         {% endfor %}
         <th title="Email-copy consent">Copy</th>
         <th title="Storage consent">Stored</th>
+        <th title="Number of recorded send/download actions for this respondent">Completed Action</th>
       </tr>
     </thead>
     <tbody>
@@ -52,6 +53,7 @@
           {% endfor %}
           <td class="bool">{% if r.email_copy_consent %}yes{% else %}no{% endif %}</td>
           <td class="bool">{% if r.store_contact_consent %}yes{% else %}no{% endif %}</td>
+          <td class="num">{{ action_counts.get(r.id, 0) }}</td>
         </tr>
       {% endfor %}
     </tbody>
