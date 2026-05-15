@@ -8,6 +8,7 @@ TODO before this goes anywhere near production.
 from __future__ import annotations
 
 import re
+from datetime import date, datetime, timedelta
 from functools import wraps
 
 from flask import (
@@ -304,6 +305,91 @@ def target_respondents(target_id: int):
         respondents=respondents,
         param_values=param_values,
         action_counts=action_counts,
+    )
+
+
+def _weekly_buckets(timestamps: list[datetime]) -> list[tuple[date, int]]:
+    """Bucket respondent `created_at` values into ISO weeks (Mon-Sun, UTC).
+
+    Returns ``[(week_start_date, count), ...]`` oldest first, with empty
+    weeks filled in between the first and last so the chart shows a
+    continuous timeline. Bucketing is done in Python rather than SQL so
+    the same code works against SQLite (dev) and Postgres (prod).
+    """
+    if not timestamps:
+        return []
+
+    def week_start(dt: datetime) -> date:
+        d = dt.date()
+        return d - timedelta(days=d.weekday())  # Monday
+
+    counts: dict[date, int] = {}
+    for ts in timestamps:
+        ws = week_start(ts)
+        counts[ws] = counts.get(ws, 0) + 1
+
+    first = week_start(timestamps[0])
+    last = week_start(timestamps[-1])
+    out: list[tuple[date, int]] = []
+    cur = first
+    while cur <= last:
+        out.append((cur, counts.get(cur, 0)))
+        cur += timedelta(days=7)
+    return out
+
+
+@bp.route("/targets/<int:target_id>/report")
+@_require_admin
+def target_report(target_id: int):
+    target = db.session.get(Target, target_id) or abort(404)
+
+    total = db.session.scalar(
+        db.select(db.func.count(Respondent.id))
+        .where(Respondent.target_id == target_id)
+    ) or 0
+
+    unique_emails = db.session.scalar(
+        db.select(db.func.count(db.distinct(Respondent.email)))
+        .where(Respondent.target_id == target_id)
+        .where(Respondent.email != "")
+    ) or 0
+
+    anonymous = db.session.scalar(
+        db.select(db.func.count(Respondent.id))
+        .where(Respondent.target_id == target_id)
+        .where(Respondent.email == "")
+    ) or 0
+
+    created_ats = db.session.scalars(
+        db.select(Respondent.created_at)
+        .where(Respondent.target_id == target_id)
+        .order_by(Respondent.created_at.asc())
+    ).all()
+    weekly = _weekly_buckets(list(created_ats))
+
+    # Per-recipient distinct-respondent counts. A "Send All" click produces
+    # one RespondentAction per (recipient × artifact); collapsing to
+    # distinct respondents gives a cleaner "how many people wrote to this
+    # recipient" number that doesn't inflate with artifact count.
+    rows = db.session.execute(
+        db.select(
+            RespondentAction.recipient_id,
+            db.func.count(db.distinct(RespondentAction.respondent_id)),
+        )
+        .where(RespondentAction.target_id == target_id)
+        .group_by(RespondentAction.recipient_id)
+    ).all()
+    by_recipient: dict[int, int] = {rid: cnt for rid, cnt in rows}
+
+    return render_template(
+        "admin/target_report.html",
+        campaign=target.campaign,
+        target=target,
+        total=total,
+        unique_emails=unique_emails,
+        anonymous=anonymous,
+        weekly=weekly,
+        by_recipient=by_recipient,
     )
 
 

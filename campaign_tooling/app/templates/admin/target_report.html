@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Report · {{ target.name }} · {{ campaign.name }}{% endblock %}
+{% block content %}
+
+<p>
+  <a href="{{ url_for('admin.target_edit', target_id=target.id) }}">&larr; {{ target.name }}</a>
+</p>
+
+<h1>Report <span class="muted">— {{ target.name }}</span></h1>
+
+<p>
+  <a href="{{ url_for('admin.target_respondents', target_id=target.id) }}" class="button secondary">View raw responses &rarr;</a>
+</p>
+
+<div class="card">
+  <dl class="report-stats">
+    <dt>Total responses</dt>
+    <dd>{{ total }}</dd>
+    <dt>Unique by email</dt>
+    <dd>
+      {{ unique_emails }}
+      <span class="muted">+ {{ anonymous }} anonymous (no email stored)</span>
+    </dd>
+  </dl>
+</div>
+
+<h2>Responses by week <span class="muted">— UTC, weeks start Mondays</span></h2>
+{% if not weekly %}
+  <p class="muted">No responses yet.</p>
+{% else %}
+  {% set max_count = weekly|map(attribute=1)|max %}
+  <div class="weekly-chart">
+    {% for week_start, count in weekly %}
+      <div class="weekly-label">Week of {{ week_start.strftime('%b ') }}{{ week_start.day }}, {{ week_start.year }}</div>
+      <div class="weekly-bar-track">
+        {% if count %}
+          <div class="weekly-bar-fill" style="width: {{ (count / max_count * 100)|round(1) }}%"></div>
+        {% endif %}
+      </div>
+      <div class="weekly-count">{{ count }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<h2>Responses by recipient <span class="muted">— distinct respondents who sent to each</span></h2>
+{% if not target.recipients %}
+  <p class="muted">No recipients defined for this target.</p>
+{% else %}
+  <table class="recipient-counts">
+    <thead>
+      <tr>
+        <th>Recipient</th>
+        <th class="num">Respondents</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in target.recipients %}
+        <tr>
+          <td>{{ r.formal_name }}</td>
+          <td class="num">{{ by_recipient.get(r.id, 0) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{% endblock %}
