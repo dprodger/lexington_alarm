@@ -126,9 +126,9 @@
 {% endfor %}
 </div>
 
-<details class="card">
-  <summary><strong>+ Add recipient</strong></summary>
-  <form method="post" action="{{ url_for('admin.recipient_new', target_id=target.id) }}">
+<details class="disclosure-button">
+  <summary>+ Add recipient</summary>
+  <form method="post" action="{{ url_for('admin.recipient_new', target_id=target.id) }}" class="card">
     {{ render_recipient_fields(None) }}
     <p><button type="submit">Add recipient</button></p>
   </form>
@@ -193,9 +193,9 @@
 {% endfor %}
 </div>
 
-<details class="card">
-  <summary><strong>+ Add parameter</strong></summary>
-  <form method="post" action="{{ url_for('admin.parameter_new', target_id=target.id) }}">
+<details class="disclosure-button">
+  <summary>+ Add parameter</summary>
+  <form method="post" action="{{ url_for('admin.parameter_new', target_id=target.id) }}" class="card">
     {{ render_parameter_fields(None) }}
     <p><button type="submit">Add parameter</button></p>
   </form>
@@ -237,9 +237,9 @@
 {% endfor %}
 </div>
 
-<details class="card">
-  <summary><strong>+ Add artifact</strong></summary>
-  <form method="post" action="{{ url_for('admin.artifact_new', target_id=target.id) }}">
+<details class="disclosure-button">
+  <summary>+ Add artifact</summary>
+  <form method="post" action="{{ url_for('admin.artifact_new', target_id=target.id) }}" class="card">
     <p>
       <button type="submit"
               class="link-button"
