@@ -22,6 +22,13 @@ def create_app(config_class: type = Config) -> Flask:
     def _not_found(_err):
         return render_template("not_found.html"), 404
 
+    # Health check for the platform (Render). Lives outside the public
+    # blueprint so it bypasses any route-level locking; returns a plain
+    # 200 so the probe is cheap and doesn't touch the DB.
+    @app.route("/healthz")
+    def _healthz():
+        return ("ok", 200, {"Content-Type": "text/plain"})
+
     with app.app_context():
         from . import models  # noqa: F401  ensure models are imported
         db.create_all()

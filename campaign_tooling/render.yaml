@@ -22,7 +22,7 @@ services:
     region: oregon  # change if you want a different Render region
     branch: main
     autoDeploy: true
-    healthCheckPath: /
+    healthCheckPath: /healthz
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 60 wsgi:app
     envVars:
