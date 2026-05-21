@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 
 from config import Config
 from .extensions import db
@@ -17,6 +17,10 @@ def create_app(config_class: type = Config) -> Flask:
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
     cli.register(app)
+
+    @app.errorhandler(404)
+    def _not_found(_err):
+        return render_template("not_found.html"), 404
 
     with app.app_context():
         from . import models  # noqa: F401  ensure models are imported

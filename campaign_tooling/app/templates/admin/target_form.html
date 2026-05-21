@@ -82,31 +82,50 @@
   <a href="{{ url_for('admin.campaign_edit', campaign_id=target.campaign_id) }}">&larr; {{ target.campaign.name }}</a>
 </p>
 
-<h1>Edit target <span class="muted">— in “{{ target.campaign.name }}”</span></h1>
+<div class="section-header">
+  <h1>{{ target.name }} <span class="muted" style="font-size: 0.6em; font-weight: 400;">— in “{{ target.campaign.name }}”</span></h1>
+  <div class="header-actions">
+    <a href="{{ url_for('admin.target_report', target_id=target.id) }}" class="button">View report &rarr;</a>
+    <a href="{{ url_for('public.target_action', slug=target.campaign.slug, target_id=target.id) }}"
+       target="_blank" rel="noopener" class="button">Open writer view &nearr;</a>
+  </div>
+</div>
 
-<p>
-  <a href="{{ url_for('admin.target_report', target_id=target.id) }}" class="button secondary">View report &rarr;</a>
-</p>
+<details class="card" style="margin-top: 1.5rem;">
+  <summary>
+    <strong>Target details</strong>
+    <span class="muted edit-hint">— click to edit</span>
+    <dl class="details-readonly">
+      <dt>Name</dt><dd>{{ target.name }}</dd>
+      {% if target.description %}<dt>Description</dt><dd>{{ target.description }}</dd>{% endif %}
+      {% if target.source_url %}<dt>Source URL</dt><dd><a href="{{ target.source_url }}" target="_blank" rel="noopener">{{ target.source_url }}</a></dd>{% endif %}
+    </dl>
+  </summary>
+  <form method="post" style="margin-top: 1rem;">
+    <label>Name (e.g., "Massport Board", "Governor")
+      <input type="text" name="name" value="{{ target.name }}" required>
+    </label>
+    <label>Description (shown to writers — explain who this audience is)
+      <textarea name="description" rows="3">{{ target.description }}</textarea>
+    </label>
+    <label>Source URL (where the writer came from — used as the "back" link on the thank-you page)
+      <input type="url" name="source_url" value="{{ target.source_url }}" placeholder="https://example.org/take-action">
+    </label>
+    <p>
+      <button type="submit">Save</button>
+      <button type="submit" formaction="{{ url_for('admin.target_delete', target_id=target.id) }}"
+              class="danger"
+              onclick="return confirm('Delete this target and all its recipients and artifacts?')">Delete target</button>
+    </p>
+  </form>
+</details>
 
-<form method="post" class="card">
-  <label>Name (e.g., "Massport Board", "Governor")
-    <input type="text" name="name" value="{{ target.name }}" required>
-  </label>
-  <label>Description (shown to writers — explain who this audience is)
-    <textarea name="description" rows="3">{{ target.description }}</textarea>
-  </label>
-  <label>Source URL (where the writer came from — used as the "back" link on the thank-you page)
-    <input type="url" name="source_url" value="{{ target.source_url }}" placeholder="https://example.org/take-action">
-  </label>
-  <p>
-    <button type="submit">Save</button>
-    <button type="submit" formaction="{{ url_for('admin.target_delete', target_id=target.id) }}"
-            class="danger"
-            onclick="return confirm('Delete this target and all its recipients and artifacts?')">Delete target</button>
-  </p>
-</form>
-
-<h2>Recipients <span class="muted">— the people in this audience</span></h2>
+<div class="section-header">
+  <h2>Recipients <span class="muted">— the people in this audience</span></h2>
+  <form method="post" action="{{ url_for('admin.recipient_new', target_id=target.id) }}">
+    <button type="submit">+ Add recipient</button>
+  </form>
+</div>
 <p class="muted">Every recipient receives the same artifacts (with their own contact info substituted in). Add an email and/or address depending on whether they should receive emails, postal letters, or both.</p>
 
 <div data-reorder-list data-reorder-url="{{ url_for('admin.recipients_reorder', target_id=target.id) }}">
@@ -130,15 +149,12 @@
 {% endfor %}
 </div>
 
-<details class="disclosure-button">
-  <summary>+ Add recipient</summary>
-  <form method="post" action="{{ url_for('admin.recipient_new', target_id=target.id) }}" class="card">
-    {{ render_recipient_fields(None) }}
-    <p><button type="submit">Add recipient</button></p>
+<div class="section-header">
+  <h2>Parameters <span class="muted">— writer-supplied values for this target's letters</span></h2>
+  <form method="post" action="{{ url_for('admin.parameter_new', target_id=target.id) }}">
+    <button type="submit">+ Add parameter</button>
   </form>
-</details>
-
-<h2>Parameters <span class="muted">— writer-supplied values for this target's letters</span></h2>
+</div>
 <p class="muted">
   Define free-form strings the writer must fill in before generating a letter
   (e.g. <code>job_title</code>, <code>employer</code>). Reference them in any
@@ -197,15 +213,12 @@
 {% endfor %}
 </div>
 
-<details class="disclosure-button">
-  <summary>+ Add parameter</summary>
-  <form method="post" action="{{ url_for('admin.parameter_new', target_id=target.id) }}" class="card">
-    {{ render_parameter_fields(None) }}
-    <p><button type="submit">Add parameter</button></p>
+<div class="section-header">
+  <h2>Artifacts <span class="muted">— letter templates for this target</span></h2>
+  <form method="post" action="{{ url_for('admin.artifact_new', target_id=target.id) }}">
+    <button type="submit">+ Add artifact</button>
   </form>
-</details>
-
-<h2>Artifacts <span class="muted">— letter templates for this target</span></h2>
+</div>
 <p class="muted">
   Type <code>{% raw %}{{ {% endraw %}</code> in any subject or body field to pop up a list of
   available placeholders (<code>writer</code>, <code>recipient</code>,
@@ -241,19 +254,6 @@
 {% endfor %}
 </div>
 
-<details class="disclosure-button">
-  <summary>+ Add artifact</summary>
-  <form method="post" action="{{ url_for('admin.artifact_new', target_id=target.id) }}" class="card">
-    <p>
-      <button type="submit"
-              class="link-button"
-              formaction="{{ url_for('admin.artifact_preview') }}"
-              formtarget="_blank">Preview with test data &nearr;</button>
-    </p>
-    {{ render_artifact_fields(None) }}
-    <p><button type="submit">Add artifact</button></p>
-  </form>
-</details>
 
 {% if placeholder_schema %}
 <script>

@@ -218,28 +218,18 @@ def _log_actions(
     db.session.commit()
 
 
+# The campaign index and per-campaign overview are intentionally not
+# reachable from the web — writers are linked directly to a target action
+# page from external hosts. Returning 404 here hides the internal surface
+# without breaking the URL space.
 @bp.route("/")
 def index():
-    campaigns = db.session.scalars(
-        db.select(Campaign)
-        .where(Campaign.active.is_(True))
-        .order_by(Campaign.sort_order, Campaign.name)
-    ).all()
-    return render_template("public/index.html", campaigns=campaigns)
+    abort(404)
 
 
 @bp.route("/c/<slug>")
 def campaign(slug: str):
-    campaign = _load_campaign_or_404(slug)
-    if not campaign.active:
-        return render_template("public/inactive.html", campaign=campaign), 410
-    writer = _writer_from_args()
-    return render_template(
-        "public/campaign.html",
-        campaign=campaign,
-        writer=writer,
-        writer_query=_writer_query(writer),
-    )
+    abort(404)
 
 
 @bp.route("/c/<slug>/t/<int:target_id>", methods=["GET", "POST"])

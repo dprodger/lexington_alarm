@@ -2,6 +2,8 @@
 {% block title %}Preview · {{ name }}{% endblock %}
 {% block content %}
 
+<p class="no-print"><button onclick="window.close()" class="secondary">Close</button></p>
+
 <h1>Preview: {{ name }}</h1>
 <p class="muted">
   Rendered with test data. Substituted values are
@@ -30,6 +32,4 @@
   <pre class="letter">{{ body_html|safe }}</pre>
 
 {% endif %}
-
-<p class="no-print"><button onclick="window.close()" class="secondary">Close</button></p>
 {% endblock %}

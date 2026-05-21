@@ -100,7 +100,7 @@ def login():
 @bp.route("/logout", methods=["POST"])
 def logout():
     session.pop("is_admin", None)
-    return redirect(url_for("public.index"))
+    return redirect(url_for("admin.login"))
 
 
 @bp.route("/")
@@ -118,14 +118,14 @@ def index():
 def _apply_campaign_form(c: Campaign, form) -> None:
     """Update editable fields from the form. ``sort_order`` is not edited
     via the form; it's managed by the drag-and-drop reorder route below.
+
+    ``description``, ``body_md``, ``action_header``, ``action_blurb`` are
+    intentionally not touched — they're hidden from the admin UI but the
+    DB columns are preserved so existing values aren't lost on save.
     """
     c.slug = form["slug"].strip()
     c.name = form["name"].strip()
     c.subhead = form.get("subhead", "").strip()
-    c.description = form.get("description", "").strip()
-    c.body_md = form.get("body_md", "")
-    c.action_header = form.get("action_header", "").strip()
-    c.action_blurb = form.get("action_blurb", "").strip()
     c.active = "active" in form
     c.theme = form.get("theme", Campaign.THEME_DEFAULT).strip() or Campaign.THEME_DEFAULT
 
@@ -420,9 +420,11 @@ def recipient_new(target_id: int):
     target = db.session.get(Target, target_id) or abort(404)
     recipient = Recipient(
         target_id=target.id,
-        formal_name=request.form.get("formal_name", "").strip(),
+        formal_name=request.form.get("formal_name", "").strip() or "New recipient",
     )
     _apply_recipient_form(recipient, request.form)
+    if not recipient.formal_name:
+        recipient.formal_name = "New recipient"
     recipient.sort_order = _next_sort_order(target.recipients)
     db.session.add(recipient)
     db.session.commit()
@@ -494,10 +496,23 @@ def _apply_parameter_form(parameter: TargetParameter, form) -> str | None:
 def parameter_new(target_id: int):
     target = db.session.get(Target, target_id) or abort(404)
     parameter = TargetParameter(target_id=target.id)
-    error = _apply_parameter_form(parameter, request.form)
-    if error:
-        flash(error, "error")
-        return redirect(url_for("admin.target_edit", target_id=target.id))
+    # If the POST includes a key, treat it as a full create. Otherwise
+    # auto-generate a unique stub so the inline + Add button on the
+    # target page works with no fields.
+    if request.form.get("key", "").strip():
+        error = _apply_parameter_form(parameter, request.form)
+        if error:
+            flash(error, "error")
+            return redirect(url_for("admin.target_edit", target_id=target.id))
+    else:
+        existing_keys = {p.key for p in target.parameters}
+        n = 1
+        while f"parameter_{n}" in existing_keys:
+            n += 1
+        parameter.key = f"parameter_{n}"
+        parameter.label = "New parameter"
+        parameter.kind = TargetParameter.KIND_TEXT
+        parameter.required = True
     parameter.sort_order = _next_sort_order(target.parameters)
     db.session.add(parameter)
     db.session.commit()
