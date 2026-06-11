@@ -173,41 +173,8 @@
       {% if ready %}Update{% else %}Continue &rarr;{% endif %}
     </button>
   </p>
-
-  {# DEV-ONLY test helper. Delete this block (and the matching script below) before launch. #}
-  <p class="muted" style="border-top: 1px dashed #ccc; padding-top: 0.75rem;">
-    <a href="#" id="dev-fill-test">Fill test data (dev only)</a>
-  </p>
 </form>
 </details>
-
-{# DEV-ONLY: remove with the link above #}
-<script>
-  document.getElementById("dev-fill-test")?.addEventListener("click", function (e) {
-    e.preventDefault();
-    const fields = {
-      name: "Test Writer",
-      email: "test@example.com",
-      organization: "",
-      street1: "123 Main Street",
-      street2: "",
-      city: "Hartford",
-      state: "CT",
-      postal_code: "06106",
-    };
-    for (const [name, value] of Object.entries(fields)) {
-      const el = document.querySelector(`input[name="${name}"]`);
-      if (el) {
-        el.value = value;
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-      }
-    }
-    document.querySelectorAll('input[name^="p_"]').forEach(function (el) {
-      el.value = "test_" + el.name.slice(2);
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-  });
-</script>
 
 <script>
   // Mirror live form values into the redaction demo. Each <dd> with
