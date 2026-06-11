@@ -3,6 +3,8 @@
 .env
 .env.local
 !.env.example
+# Ship the production template too — placeholders only, no real secrets.
+!deploy/.env.production.example
 
 # Local databases and Flask instance folder
 *.db

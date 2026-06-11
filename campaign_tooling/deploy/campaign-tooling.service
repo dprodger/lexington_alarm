@@ -1,0 +1,38 @@
+[Unit]
+# systemd unit for the campaign_tooling Flask app, served by gunicorn.
+# Install to /etc/systemd/system/campaign-tooling.service (see deploy/README.md).
+Description=campaign_tooling Flask app (gunicorn)
+After=network.target
+
+[Service]
+Type=simple
+User=campaign
+Group=campaign
+
+# The app lives in the campaign_tooling/ subdirectory of the lexington_alarm
+# clone. gunicorn is run from here so that python-dotenv (called in config.py)
+# finds the .env file in this directory — same mechanism as local dev.
+WorkingDirectory=/opt/campaign-tooling/lexington_alarm/campaign_tooling
+
+# --workers 1 is deliberate: db.create_all() runs in the app factory at startup
+# and is not race-safe across processes on a fresh schema. Raise it only after
+# table creation moves to a release-step migration (see render.yaml comments).
+ExecStart=/opt/campaign-tooling/lexington_alarm/campaign_tooling/.venv/bin/gunicorn \
+    --bind 127.0.0.1:8000 \
+    --workers 1 \
+    --timeout 60 \
+    --access-logfile - \
+    --error-logfile - \
+    wsgi:app
+
+Restart=on-failure
+RestartSec=5
+
+# Hardening.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
