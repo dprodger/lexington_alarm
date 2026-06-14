@@ -1,0 +1,53 @@
+{% extends "base_public.html" %}
+{% block title %}Example · {{ target.name }} · {{ campaign.name }}{% endblock %}
+{% block content %}
+
+<h1>Example {{ 'letter' if previews|length == 1 else 'letters' }}</h1>
+
+<p>
+  This is just an <strong>example</strong> of what you'll send to
+  <em>{{ target.name }}</em>. The sample names, addresses, and other
+  <mark>highlighted</mark> details are placeholders &mdash; once you fill in
+  the form, your real information will be filled in here automatically.
+</p>
+
+<p class="no-print" style="margin-bottom: 1.5rem;">
+  <button type="button" class="public-button" onclick="dismissPreview()">
+    &larr; Close this example and return to the form
+  </button>
+</p>
+
+{% if not previews %}
+  <p class="muted">There's nothing to preview for this audience yet.</p>
+{% endif %}
+
+{% for p in previews %}
+  <div class="public-highlight-box">
+    <h2 style="margin-top: 0;">
+      {{ p.artifact.name }}
+      <span class="kind-badge kind-{{ p.artifact.kind }}">{{ p.artifact.kind }}</span>
+    </h2>
+    {% if p.subject_html %}
+      <p class="artifact-subject"><strong>Subject:</strong> {{ p.subject_html|safe }}</p>
+    {% endif %}
+    <pre class="letter artifact-preview-body">{{ p.body_html|safe }}</pre>
+  </div>
+{% endfor %}
+
+<p class="no-print" style="margin-top: 1.5rem;">
+  <button type="button" class="public-button" onclick="dismissPreview()">
+    &larr; Close this example and return to the form
+  </button>
+</p>
+
+<script>
+  // Opened as a popup → close, returning focus to the form behind it.
+  // Opened as a plain tab (popup blocked) → step back to the form instead.
+  function dismissPreview() {
+    window.close();
+    window.setTimeout(function () {
+      if (window.history.length > 1) { window.history.back(); }
+    }, 100);
+  }
+</script>
+{% endblock %}

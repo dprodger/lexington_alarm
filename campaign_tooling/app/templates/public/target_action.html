@@ -5,6 +5,26 @@
 <p class="muted"><em>{{ campaign.name }}</em>{% if writer.name %} · sending as <strong>{{ writer.name }}</strong>{% endif %}</p>
 {% if target.description %}<p>{{ target.description }}</p>{% endif %}
 
+<p class="no-print preview-link-row">
+  <a class="preview-link"
+     href="{{ url_for('public.target_preview', slug=campaign.slug, target_id=target.id) }}"
+     target="letterPreview" rel="noopener"
+     onclick="return openLetterPreview(this.href);">
+    Show a preview of the letter &rarr;
+  </a>
+</p>
+<script>
+  // Open the example in a small popup. If the browser blocks it, fall back
+  // to the link's default behavior (a new tab via target="letterPreview").
+  function openLetterPreview(url) {
+    var w = window.open(
+      url, "letterPreview",
+      "popup,width=720,height=820,scrollbars=yes,resizable=yes");
+    if (w) { w.focus(); return false; }
+    return true;
+  }
+</script>
+
 <details class="public-highlight-box" {% if not ready %}open{% endif %}>
   <summary>
     <strong>Your details</strong>

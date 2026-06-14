@@ -40,7 +40,13 @@ from .models import (
     Target,
 )
 from .pdf import render_letters_pdf
-from .substitution import Writer, markers_to_html, render, render_with_highlights
+from .substitution import (
+    Writer,
+    markers_to_html,
+    render,
+    render_for_preview,
+    render_with_highlights,
+)
 from .themes import theme_config
 
 bp = Blueprint("public", __name__, template_folder="templates")
@@ -388,6 +394,47 @@ def target_action(slug: str, target_id: int):
         parameter_values=parameters,
         consents=consents,
         ready=True,
+    )
+
+
+@bp.route("/c/<slug>/t/<int:target_id>/preview")
+def target_preview(slug: str, target_id: int):
+    """Standalone example of this target's letters/emails, rendered with
+    fixed sample data so a writer can see what they'll produce before
+    filling in their own details. Opened in a popup from the action page;
+    the real details get substituted once the writer fills in the form.
+    """
+    campaign = _load_campaign_or_404(slug)
+    target = db.session.get(Target, target_id) or abort(404)
+    if target.campaign_id != campaign.id:
+        abort(404)
+
+    previews = []
+    for artifact in target.artifacts:
+        # Sample data; admin-authored templates so errors are unexpected,
+        # but a single bad artifact shouldn't blank out the whole preview.
+        try:
+            subject_html = (
+                markers_to_html(render_for_preview(artifact.subject))
+                if artifact.subject
+                else ""
+            )
+            body_html = markers_to_html(render_for_preview(artifact.body))
+        except Exception:  # pragma: no cover - defensive
+            continue
+        previews.append(
+            {
+                "artifact": artifact,
+                "subject_html": subject_html,
+                "body_html": body_html,
+            }
+        )
+
+    return render_template(
+        "public/preview.html",
+        campaign=campaign,
+        target=target,
+        previews=previews,
     )
 
 
