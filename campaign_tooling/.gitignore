@@ -1,3 +1,5 @@
+.claude
+
 # Secrets — .env.* is also blocked by the parent repo's .gitignore.
 # We explicitly un-ignore .env.example so the template ships with the repo.
 .env

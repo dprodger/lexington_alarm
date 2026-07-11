@@ -27,7 +27,7 @@
   <ul>
     {% for t in campaign.targets %}
       <li>
-        <a href="{{ url_for('public.target_action', slug=campaign.slug, target_id=t.id) }}{% if writer_query %}?{{ writer_query|urlencode }}{% endif %}">{{ t.name }}</a>
+        <a href="{{ url_for('public.target_action', slug=campaign.slug, target_id=t.id) }}">{{ t.name }}</a>
         {% if t.description %}<span class="muted">— {{ t.description }}</span>{% endif %}
         <div class="muted" style="font-size: 0.9em;">
           {{ t.recipients|length }} recipient{{ '' if t.recipients|length == 1 else 's' }} ·

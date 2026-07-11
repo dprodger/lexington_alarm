@@ -15,12 +15,14 @@ Navigation: campaign overview → target → recipient.
                                           — combined PDF, one page per
                                             recipient
 
-Writer info and parameter values ride in the URL query string (no DB
-persistence) so the flow is shareable, restartable, and stateless. Writer
-info propagates from the target page back to the campaign overview via
-the "back to campaign" link, so a writer can pick a second target without
-re-entering name/email — but parameter values are scoped to a single
-target and don't carry across.
+Writer info, parameter values, and consent flags live in the Flask session
+(a signed cookie), not the URL, so PII never lands in access logs, browser
+history, or the Referer header. Writer identity and consent are global to the
+browser — a writer can pick a second target without re-entering name/email —
+while parameter values are scoped per target. External hosts can still
+deep-link a writer in with ``?name=…&email=…`` prefilled: the target page
+consumes those query args into the session once, then redirects to a clean
+URL (see ``_seed_session_from_args``).
 """
 
 from __future__ import annotations
@@ -28,7 +30,16 @@ from __future__ import annotations
 import re
 from urllib.parse import quote, urlencode
 
-from flask import Blueprint, Response, abort, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    Response,
+    abort,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 from .extensions import db
 from .models import (
@@ -63,70 +74,85 @@ def _inject_theme_config() -> dict:
     )}
 
 
-def _writer_from_args() -> Writer:
-    a = request.args
-    return Writer(
-        name=a.get("name", "").strip(),
-        email=a.get("email", "").strip(),
-        street1=a.get("street1", "").strip(),
-        street2=a.get("street2", "").strip(),
-        city=a.get("city", "").strip(),
-        state=a.get("state", "").strip(),
-        postal_code=a.get("postal_code", "").strip(),
-        organization=a.get("organization", "").strip(),
-    )
+# Writer info, per-target parameter values, and consent flags live in the
+# Flask session (a signed cookie) rather than the URL, so PII never lands in
+# access logs, browser history, or the Referer header. Writer identity and
+# consent are global to the browser; parameter values are scoped per target.
+_WRITER_KEYS = (
+    "name",
+    "email",
+    "street1",
+    "street2",
+    "city",
+    "state",
+    "postal_code",
+    "organization",
+)
 
 
-def _writer_query(writer: Writer) -> dict:
-    return {
-        k: v
-        for k, v in {
-            "name": writer.name,
-            "email": writer.email,
-            "street1": writer.street1,
-            "street2": writer.street2,
-            "city": writer.city,
-            "state": writer.state,
-            "postal_code": writer.postal_code,
-            "organization": writer.organization,
-        }.items()
-        if v
-    }
+def _writer_from_session() -> Writer:
+    w = session.get("writer", {})
+    return Writer(**{k: w.get(k, "") for k in _WRITER_KEYS})
 
 
-def _parameters_from_args(target: Target) -> dict:
-    """Pull this target's parameter values out of the request query string.
+def _parameters_from_session(target: Target) -> dict:
+    """This target's stored parameter values, keyed by parameter key.
 
-    Each parameter is sent as ``p_<key>``; missing ones come back as the
-    empty string so templates render them as blank rather than raising.
+    Missing ones come back as the empty string so templates render them as
+    blank rather than raising.
     """
+    stored = session.get("params", {}).get(str(target.id), {})
+    return {p.key: stored.get(p.key, "") for p in target.parameters}
+
+
+# Consent flags both default to True (checked).
+def _consents_from_session() -> dict:
+    c = session.get("consents", {})
     return {
-        p.key: request.args.get(f"p_{p.key}", "").strip()
-        for p in target.parameters
+        "email_copy": c.get("email_copy", True),
+        "store_contact": c.get("store_contact", True),
     }
 
 
-def _parameters_query(parameters: dict) -> dict:
-    return {f"p_{k}": v for k, v in parameters.items() if v}
-
-
-# Consent flags both default to True (checked); we only persist explicit "no"
-# choices in the URL so the canonical share link stays clean.
-def _consents_from_args() -> dict:
+def _seed_session_from_args(target: Target) -> bool:
+    """Consume any writer / parameter / consent values passed in the query
+    string into the session, once. Returns True if anything was seeded, so
+    the caller can redirect to a clean URL and drop the PII from the address
+    bar. This preserves the inbound hand-off from external hosts that
+    deep-link a writer in with ``?name=…&email=…`` prefilled.
+    """
     a = request.args
-    return {
-        "email_copy": a.get("email_copy", "1") != "0",
-        "store_contact": a.get("store_contact", "1") != "0",
+    seeded = False
+
+    writer_vals = {k: a.get(k, "").strip() for k in _WRITER_KEYS if a.get(k)}
+    if writer_vals:
+        session.setdefault("writer", {}).update(writer_vals)
+        seeded = True
+
+    param_vals = {
+        p.key: a.get(f"p_{p.key}", "").strip()
+        for p in target.parameters
+        if a.get(f"p_{p.key}")
     }
+    if param_vals:
+        session.setdefault("params", {}).setdefault(str(target.id), {}).update(
+            param_vals
+        )
+        seeded = True
 
+    # Only explicit "no" choices ride the query string; a present flag means opt-out.
+    if a.get("email_copy") == "0" or a.get("store_contact") == "0":
+        consents = session.setdefault("consents", {})
+        if a.get("email_copy") == "0":
+            consents["email_copy"] = False
+        if a.get("store_contact") == "0":
+            consents["store_contact"] = False
+        seeded = True
 
-def _consents_query(consents: dict) -> dict:
-    out = {}
-    if not consents.get("email_copy", True):
-        out["email_copy"] = "0"
-    if not consents.get("store_contact", True):
-        out["store_contact"] = "0"
-    return out
+    if seeded:
+        # Flask can't detect in-place mutation of nested session dicts.
+        session.modified = True
+    return seeded
 
 
 def _missing_required(target: Target, parameters: dict) -> list:
@@ -247,8 +273,8 @@ def target_action(slug: str, target_id: int):
     if target.campaign_id != campaign.id:
         abort(404)
 
-    # POST: writer info + this target's parameters. We redirect to GET with
-    # everything in the query string so the page is shareable and restartable.
+    # POST: writer info + this target's parameters. We stash everything in the
+    # session and redirect to a clean GET so no PII rides the URL.
     if request.method == "POST":
         writer = Writer(
             name=request.form.get("name", "").strip(),
@@ -270,14 +296,14 @@ def target_action(slug: str, target_id: int):
             "store_contact": "store_contact" in request.form,
         }
         respondent_id = _save_respondent(campaign, target, writer, submitted, consents)
-        merged = {
-            **_writer_query(writer),
-            **_parameters_query(submitted),
-            **_consents_query(consents),
-        }
+
+        session["writer"] = {k: getattr(writer, k) for k in _WRITER_KEYS}
+        session.setdefault("params", {})[str(target_id)] = submitted
+        session["consents"] = consents
+        session.modified = True
+
         response = redirect(
             url_for("public.target_action", slug=slug, target_id=target_id)
-            + ("?" + urlencode(merged) if merged else "")
         )
         # Cookie is scoped to this target's path so each (slug, target)
         # pair gets its own respondent identity. 30 days is enough to
@@ -292,9 +318,14 @@ def target_action(slug: str, target_id: int):
         )
         return response
 
-    writer = _writer_from_args()
-    parameters = _parameters_from_args(target)
-    consents = _consents_from_args()
+    # GET: consume any inbound prefill from the query string into the session,
+    # then bounce to a clean URL so the PII doesn't stick around in the address bar.
+    if _seed_session_from_args(target):
+        return redirect(url_for("public.target_action", slug=slug, target_id=target_id))
+
+    writer = _writer_from_session()
+    parameters = _parameters_from_session(target)
+    consents = _consents_from_session()
 
     # No writer info yet → just show the form. Skip the artifact-rendering pass.
     if not writer.name:
@@ -303,8 +334,6 @@ def target_action(slug: str, target_id: int):
             campaign=campaign,
             target=target,
             writer=writer,
-            writer_query=_writer_query(writer),
-            full_query=_writer_query(writer),
             artifact_views=[],
             parameter_values=parameters,
             consents=consents,
@@ -388,8 +417,6 @@ def target_action(slug: str, target_id: int):
         campaign=campaign,
         target=target,
         writer=writer,
-        writer_query=_writer_query(writer),
-        full_query={**_writer_query(writer), **_parameters_query(parameters)},
         artifact_views=artifact_views,
         parameter_values=parameters,
         consents=consents,
@@ -495,13 +522,10 @@ def print_letters(slug: str, target_id: int, artifact_id: int):
     artifact = db.session.get(Artifact, artifact_id) or abort(404)
     if target.campaign_id != campaign.id or artifact.target_id != target.id:
         abort(404)
-    writer = _writer_from_args()
-    parameters = _parameters_from_args(target)
+    writer = _writer_from_session()
+    parameters = _parameters_from_session(target)
     if not writer.name or _missing_required(target, parameters):
-        return redirect(
-            url_for("public.target_action", slug=slug, target_id=target_id)
-            + "?" + urlencode({**_writer_query(writer), **_parameters_query(parameters)})
-        )
+        return redirect(url_for("public.target_action", slug=slug, target_id=target_id))
 
     letters = []
     for recipient in target.recipients:
@@ -554,13 +578,10 @@ def letters_pdf(slug: str, target_id: int, artifact_id: int):
     artifact = db.session.get(Artifact, artifact_id) or abort(404)
     if target.campaign_id != campaign.id or artifact.target_id != target.id:
         abort(404)
-    writer = _writer_from_args()
-    parameters = _parameters_from_args(target)
+    writer = _writer_from_session()
+    parameters = _parameters_from_session(target)
     if not writer.name or _missing_required(target, parameters):
-        return redirect(
-            url_for("public.target_action", slug=slug, target_id=target_id)
-            + "?" + urlencode({**_writer_query(writer), **_parameters_query(parameters)})
-        )
+        return redirect(url_for("public.target_action", slug=slug, target_id=target_id))
 
     bodies = []
     eligible_recipient_ids: list[int] = []
