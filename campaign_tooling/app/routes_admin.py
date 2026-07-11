@@ -291,11 +291,29 @@ def target_delete(target_id: int):
 @_require_admin
 def target_respondents(target_id: int):
     target = db.session.get(Target, target_id) or abort(404)
-    respondents = db.session.scalars(
-        db.select(Respondent)
-        .where(Respondent.target_id == target_id)
-        .order_by(Respondent.created_at.desc(), Respondent.id.desc())
+    # Rows relevant to this target = anyone who submitted the form here
+    # (Respondent.target_id, i.e. started a chain here) OR took an action here
+    # (RespondentAction.target_id). The union keeps this correct for a target
+    # reached partway through a chain, where the respondent is attached only to
+    # the chain's head. The "Completed Action" column (0 for submit-only) tells
+    # the two apart.
+    submitted_ids = db.session.scalars(
+        db.select(Respondent.id).where(Respondent.target_id == target_id)
     ).all()
+    acted_ids = db.session.scalars(
+        db.select(db.distinct(RespondentAction.respondent_id))
+        .where(RespondentAction.target_id == target_id)
+    ).all()
+    respondent_ids = set(submitted_ids) | set(acted_ids)
+    respondents = (
+        db.session.scalars(
+            db.select(Respondent)
+            .where(Respondent.id.in_(respondent_ids))
+            .order_by(Respondent.created_at.desc(), Respondent.id.desc())
+        ).all()
+        if respondent_ids
+        else []
+    )
     # (respondent_id, parameter_id) -> value, for O(1) lookup while
     # rendering one column per TargetParameter.
     param_values: dict[tuple[int, int], str] = {
@@ -353,48 +371,91 @@ def _weekly_buckets(timestamps: list[datetime]) -> list[tuple[date, int]]:
     return out
 
 
+def _chain_head(target: Target) -> Target:
+    """Walk ``next_target`` links backward to the start of the chain that
+    contains ``target``. Guards against cycles and stops at the first target
+    nothing else points to.
+    """
+    seen: set[int] = set()
+    node = target
+    while node.id not in seen:
+        seen.add(node.id)
+        pred = db.session.scalar(
+            db.select(Target).where(
+                Target.next_target_id == node.id,
+                Target.campaign_id == node.campaign_id,
+            )
+        )
+        if pred is None:
+            break
+        node = pred
+    return node
+
+
 @bp.route("/targets/<int:target_id>/report")
 @_require_admin
 def target_report(target_id: int):
     target = db.session.get(Target, target_id) or abort(404)
 
-    total = db.session.scalar(
-        db.select(db.func.count(Respondent.id))
-        .where(Respondent.target_id == target_id)
-    ) or 0
-
-    unique_emails = db.session.scalar(
-        db.select(db.func.count(db.distinct(Respondent.email)))
-        .where(Respondent.target_id == target_id)
-        .where(Respondent.email != "")
-    ) or 0
-
-    anonymous = db.session.scalar(
-        db.select(db.func.count(Respondent.id))
-        .where(Respondent.target_id == target_id)
-        .where(Respondent.email == "")
-    ) or 0
-
-    created_ats = db.session.scalars(
-        db.select(Respondent.created_at)
-        .where(Respondent.target_id == target_id)
-        .order_by(Respondent.created_at.asc())
-    ).all()
-    weekly = _weekly_buckets(list(created_ats))
-
-    # Per-recipient distinct-respondent counts. A "Send All" click produces
-    # one RespondentAction per (recipient × artifact); collapsing to
-    # distinct respondents gives a cleaner "how many people wrote to this
-    # recipient" number that doesn't inflate with artifact count.
-    rows = db.session.execute(
+    # Metrics are action-based, keyed on RespondentAction.target_id, so they
+    # read correctly for a target reached partway through a chain: a chained
+    # respondent is attached (Respondent.target_id) only to the chain's head,
+    # but its actions are tagged with whichever target they happened on.
+    action_rows = db.session.execute(
         db.select(
+            RespondentAction.respondent_id,
             RespondentAction.recipient_id,
-            db.func.count(db.distinct(RespondentAction.respondent_id)),
+            RespondentAction.created_at,
         )
         .where(RespondentAction.target_id == target_id)
-        .group_by(RespondentAction.recipient_id)
     ).all()
-    by_recipient: dict[int, int] = {rid: cnt for rid, cnt in rows}
+
+    # One "response" == one respondent who acted on this target; their earliest
+    # action here dates it (a chained respondent's own created_at is when they
+    # started at the head, possibly a different week).
+    first_seen: dict[int, "datetime"] = {}
+    by_recipient_ids: dict[int, set[int]] = {}
+    for respondent_id, recipient_id, created_at in action_rows:
+        prev = first_seen.get(respondent_id)
+        if prev is None or created_at < prev:
+            first_seen[respondent_id] = created_at
+        by_recipient_ids.setdefault(recipient_id, set()).add(respondent_id)
+
+    respondent_ids = list(first_seen)
+    respondents = (
+        db.session.scalars(
+            db.select(Respondent).where(Respondent.id.in_(respondent_ids))
+        ).all()
+        if respondent_ids
+        else []
+    )
+    total = len(respondent_ids)
+    unique_emails = len({r.email for r in respondents if r.email})
+    anonymous = sum(1 for r in respondents if not r.email)
+    weekly = _weekly_buckets(sorted(first_seen.values()))
+    by_recipient: dict[int, int] = {
+        rid: len(ids) for rid, ids in by_recipient_ids.items()
+    }
+
+    # Chain funnel: for a chained target, distinct respondents who acted on each
+    # step, so drop-off along the chain is visible. Built from the chain's head
+    # (found by walking `next_target` links backward) so the full funnel shows
+    # no matter which target in the chain you're viewing.
+    chain = _chain_head(target).chain()
+    funnel: list[tuple[Target, int]] = []
+    if len(chain) > 1:
+        chain_ids = [t.id for t in chain]
+        counts = dict(
+            db.session.execute(
+                db.select(
+                    RespondentAction.target_id,
+                    db.func.count(db.distinct(RespondentAction.respondent_id)),
+                )
+                .where(RespondentAction.target_id.in_(chain_ids))
+                .group_by(RespondentAction.target_id)
+            ).all()
+        )
+        funnel = [(t, counts.get(t.id, 0)) for t in chain]
 
     return render_template(
         "admin/target_report.html",
@@ -405,6 +466,7 @@ def target_report(target_id: int):
         anonymous=anonymous,
         weekly=weekly,
         by_recipient=by_recipient,
+        funnel=funnel,
     )
 
 

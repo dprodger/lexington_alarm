@@ -14,7 +14,7 @@
 
 <div class="card">
   <dl class="report-stats">
-    <dt>Total responses</dt>
+    <dt>People who took action</dt>
     <dd>{{ total }}</dd>
     <dt>Unique by email</dt>
     <dd>
@@ -22,7 +22,34 @@
       <span class="muted">+ {{ anonymous }} anonymous (no email stored)</span>
     </dd>
   </dl>
+  <p class="muted" style="margin: 0.5rem 0 0;">
+    Counts respondents who sent at least one message from this target. In a
+    chain, a respondent is counted on every target they acted on.
+  </p>
 </div>
+
+{% if funnel %}
+  <h2>Chain funnel <span class="muted">— distinct respondents who acted at each step</span></h2>
+  <table class="recipient-counts">
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th class="num">Took action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t, count in funnel %}
+        <tr{% if t.id == target.id %} style="font-weight: 600;"{% endif %}>
+          <td>
+            {{ loop.index }}. {{ t.name }}
+            {% if t.id == target.id %}<span class="muted">— this report</span>{% endif %}
+          </td>
+          <td class="num">{{ count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
 
 <h2>Responses by week <span class="muted">— UTC, weeks start Mondays</span></h2>
 {% if not weekly %}
