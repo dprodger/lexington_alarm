@@ -791,6 +791,16 @@ body.public h4 {
 .public-highlight-box h2,
 .public-highlight-box h3 { margin-top: 0; }
 
+/* Multi-part (chained) action banner: a light callout listing the targets
+   the writer will reach after this one. */
+.chain-intro {
+  background: var(--theme-highlight-bg);
+  border-left: var(--theme-highlight-border-left);
+  border-radius: var(--theme-highlight-radius);
+  padding: var(--space-sm) var(--space-md);
+  margin: var(--space-md) 0;
+}
+
 /* Brand button — primary fills with the theme primary color; secondary
    fills with the theme secondary. Font/weight/border thickness/radius
    come from --theme-button-* tokens so themes can adjust shape without

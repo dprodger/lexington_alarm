@@ -74,10 +74,13 @@ def _inject_theme_config() -> dict:
     )}
 
 
-# Writer info, per-target parameter values, and consent flags live in the
-# Flask session (a signed cookie) rather than the URL, so PII never lands in
-# access logs, browser history, or the Referer header. Writer identity and
-# consent are global to the browser; parameter values are scoped per target.
+# Writer info, parameter answers, consent flags, and the respondent id live in
+# the Flask session (a signed cookie) rather than the URL, so PII never lands in
+# access logs, browser history, or the Referer header. Everything is global to
+# the browser, which is what lets a writer answer once on a chain's head target
+# and carry those answers through every following target. Parameter answers are
+# keyed by parameter key (``session["answers"][<key>]``): a key means the same
+# thing wherever it appears in a chain, so the writer only answers it once.
 _WRITER_KEYS = (
     "name",
     "email",
@@ -96,13 +99,13 @@ def _writer_from_session() -> Writer:
 
 
 def _parameters_from_session(target: Target) -> dict:
-    """This target's stored parameter values, keyed by parameter key.
+    """This target's parameter values, pulled by key from the shared answers.
 
     Missing ones come back as the empty string so templates render them as
     blank rather than raising.
     """
-    stored = session.get("params", {}).get(str(target.id), {})
-    return {p.key: stored.get(p.key, "") for p in target.parameters}
+    answers = session.get("answers", {})
+    return {p.key: answers.get(p.key, "") for p in target.parameters}
 
 
 # Consent flags both default to True (checked).
@@ -129,15 +132,15 @@ def _seed_session_from_args(target: Target) -> bool:
         session.setdefault("writer", {}).update(writer_vals)
         seeded = True
 
+    # Seed answers for every parameter across the chain, so an inbound prefill
+    # can populate a later target's fields too.
     param_vals = {
         p.key: a.get(f"p_{p.key}", "").strip()
-        for p in target.parameters
+        for p in target.chain_parameters()
         if a.get(f"p_{p.key}")
     }
     if param_vals:
-        session.setdefault("params", {}).setdefault(str(target.id), {}).update(
-            param_vals
-        )
+        session.setdefault("answers", {}).update(param_vals)
         seeded = True
 
     # Only explicit "no" choices ride the query string; a present flag means opt-out.
@@ -173,8 +176,13 @@ def _save_respondent(
     submitted: dict,
     consents: dict,
 ) -> int:
-    """Persist one Respondent + its non-empty parameter rows. Returns the
-    new respondent id so the caller can set it as an identifying cookie.
+    """Persist one Respondent + its non-empty parameter rows. Returns the new
+    respondent id; the caller keeps it in the session so every target the
+    writer walks through in the chain logs its actions against this one row.
+
+    ``target`` is the chain's head (where the writer started). Parameter rows
+    are saved for the whole chain, each tagged with its owning target so
+    per-target rollups still work even though the writer answered once.
 
     When the writer has unchecked store_contact, the PII fields are
     blanked at write time; city / state / postal_code are always retained.
@@ -197,31 +205,34 @@ def _save_respondent(
     db.session.add(respondent)
     db.session.flush()  # populates respondent.id for the FK below
 
-    for p in target.parameters:
-        v = submitted.get(p.key, "").strip()
-        if not v:
-            continue
-        db.session.add(
-            RespondentParameter(
-                respondent_id=respondent.id,
-                campaign_id=campaign.id,
-                target_id=target.id,
-                parameter_id=p.id,
-                value=v[: RespondentParameter.VALUE_MAX_LEN],
+    seen_param_ids: set[int] = set()
+    for chain_target in target.chain():
+        for p in chain_target.parameters:
+            if p.id in seen_param_ids:
+                continue
+            seen_param_ids.add(p.id)
+            v = submitted.get(p.key, "").strip()
+            if not v:
+                continue
+            db.session.add(
+                RespondentParameter(
+                    respondent_id=respondent.id,
+                    campaign_id=campaign.id,
+                    target_id=chain_target.id,
+                    parameter_id=p.id,
+                    value=v[: RespondentParameter.VALUE_MAX_LEN],
+                )
             )
-        )
     db.session.commit()
     return respondent.id
 
 
-_RESPONDENT_COOKIE = "respondent_id"
-
-
-def _respondent_id_from_cookie() -> int | None:
-    raw = request.cookies.get(_RESPONDENT_COOKIE, "")
-    if not raw.isdigit():
-        return None
-    return int(raw)
+def _current_respondent_id() -> int | None:
+    """The respondent id for this browser's journey, set on the head target's
+    POST and carried in the session across every target in the chain.
+    """
+    rid = session.get("respondent_id")
+    return rid if isinstance(rid, int) else None
 
 
 def _log_actions(
@@ -273,8 +284,9 @@ def target_action(slug: str, target_id: int):
     if target.campaign_id != campaign.id:
         abort(404)
 
-    # POST: writer info + this target's parameters. We stash everything in the
-    # session and redirect to a clean GET so no PII rides the URL.
+    # POST: writer info + the whole chain's parameters, answered once on the
+    # head target. We stash everything in the session and redirect to a clean
+    # GET so no PII rides the URL.
     if request.method == "POST":
         writer = Writer(
             name=request.form.get("name", "").strip(),
@@ -288,7 +300,7 @@ def target_action(slug: str, target_id: int):
         )
         submitted = {
             p.key: request.form.get(f"p_{p.key}", "").strip()
-            for p in target.parameters
+            for p in target.chain_parameters()
         }
         # Unchecked checkboxes are absent from the form; presence == checked.
         consents = {
@@ -298,25 +310,15 @@ def target_action(slug: str, target_id: int):
         respondent_id = _save_respondent(campaign, target, writer, submitted, consents)
 
         session["writer"] = {k: getattr(writer, k) for k in _WRITER_KEYS}
-        session.setdefault("params", {})[str(target_id)] = submitted
+        session.setdefault("answers", {}).update(submitted)
         session["consents"] = consents
+        session["respondent_id"] = respondent_id
+        # Persist across browser restarts so a writer can come back later in the
+        # chain and still log against the same respondent (see PERMANENT_SESSION_LIFETIME).
+        session.permanent = True
         session.modified = True
 
-        response = redirect(
-            url_for("public.target_action", slug=slug, target_id=target_id)
-        )
-        # Cookie is scoped to this target's path so each (slug, target)
-        # pair gets its own respondent identity. 30 days is enough to
-        # capture any "I'll send these tomorrow" follow-up.
-        response.set_cookie(
-            _RESPONDENT_COOKIE,
-            str(respondent_id),
-            max_age=30 * 24 * 60 * 60,
-            path=url_for("public.target_action", slug=slug, target_id=target_id),
-            httponly=True,
-            samesite="Lax",
-        )
-        return response
+        return redirect(url_for("public.target_action", slug=slug, target_id=target_id))
 
     # GET: consume any inbound prefill from the query string into the session,
     # then bounce to a clean URL so the PII doesn't stick around in the address bar.
@@ -326,6 +328,12 @@ def target_action(slug: str, target_id: int):
     writer = _writer_from_session()
     parameters = _parameters_from_session(target)
     consents = _consents_from_session()
+    # The head form asks for the whole chain's parameters at once; `answers`
+    # holds every value the writer has entered, keyed by parameter key.
+    form_parameters = target.chain_parameters()
+    answers = dict(session.get("answers", {}))
+    chain = target.chain()
+    next_target = target.next_target
 
     # No writer info yet → just show the form. Skip the artifact-rendering pass.
     if not writer.name:
@@ -335,7 +343,10 @@ def target_action(slug: str, target_id: int):
             target=target,
             writer=writer,
             artifact_views=[],
-            parameter_values=parameters,
+            parameter_values=answers,
+            form_parameters=form_parameters,
+            chain=chain,
+            next_target=next_target,
             consents=consents,
             ready=False,
         )
@@ -418,7 +429,10 @@ def target_action(slug: str, target_id: int):
         target=target,
         writer=writer,
         artifact_views=artifact_views,
-        parameter_values=parameters,
+        parameter_values=answers,
+        form_parameters=form_parameters,
+        chain=chain,
+        next_target=next_target,
         consents=consents,
         ready=True,
     )
@@ -477,7 +491,7 @@ def track_action(slug: str, target_id: int):
     if target.campaign_id != campaign.id:
         abort(404)
 
-    respondent_id = _respondent_id_from_cookie()
+    respondent_id = _current_respondent_id()
     if respondent_id is None:
         return ("", 204)
 
@@ -549,7 +563,7 @@ def print_letters(slug: str, target_id: int, artifact_id: int):
         )
         letters.append({"recipient": recipient, "body": body, "body_html": body_html})
 
-    respondent_id = _respondent_id_from_cookie()
+    respondent_id = _current_respondent_id()
     if respondent_id is not None:
         _log_actions(
             respondent_id,
@@ -602,7 +616,7 @@ def letters_pdf(slug: str, target_id: int, artifact_id: int):
     if not bodies:
         abort(404)
 
-    respondent_id = _respondent_id_from_cookie()
+    respondent_id = _current_respondent_id()
     if respondent_id is not None:
         _log_actions(respondent_id, campaign, target, artifact, eligible_recipient_ids)
 

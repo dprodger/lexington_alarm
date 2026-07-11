@@ -5,6 +5,14 @@
 <p class="muted"><em>{{ campaign.name }}</em>{% if writer.name %} · sending as <strong>{{ writer.name }}</strong>{% endif %}</p>
 {% if target.description %}<p>{{ target.description }}</p>{% endif %}
 
+{% if next_target %}
+  <p class="chain-intro">
+    This action has several parts. After this you'll also reach:
+    {% for t in chain[1:] %}<strong>{{ t.name }}</strong>{% if not loop.last %}, {% endif %}{% endfor %}.
+    {% if not ready %}Enter your details once below — we'll carry them through every part.{% endif %}
+  </p>
+{% endif %}
+
 <p class="no-print preview-link-row">
   <a class="preview-link"
      href="{{ url_for('public.target_preview', slug=campaign.slug, target_id=target.id) }}"
@@ -38,7 +46,7 @@
           <dt>Address</dt>
           <dd>{{ writer.street1 }}{% if writer.street2 %}, {{ writer.street2 }}{% endif %}{% if writer.city %}, {{ writer.city }}{% endif %}{% if writer.state %}, {{ writer.state }}{% endif %}{% if writer.postal_code %} {{ writer.postal_code }}{% endif %}</dd>
         {% endif %}
-        {% for p in target.parameters %}
+        {% for p in form_parameters %}
           {% if parameter_values.get(p.key) %}
             <dt>{{ p.label or p.key }}</dt><dd>{{ parameter_values[p.key] }}</dd>
           {% endif %}
@@ -90,11 +98,14 @@
     <input id="f_postal_code" type="text" name="postal_code" value="{{ writer.postal_code }}">
   </div>
 
-  {% if target.parameters %}
+  {% if form_parameters %}
     <h3 style="margin-top: 1.5rem;">Some campaign-specific information</h3>
-    <p class="muted">These appear in the body of every letter to this audience.</p>
+    <p class="muted">
+      These appear in the body of the letters you'll send.
+      {% if next_target %}You only need to enter them once for all {{ chain|length }} parts.{% endif %}
+    </p>
     <div class="form-grid">
-      {% for p in target.parameters %}
+      {% for p in form_parameters %}
         <label for="f_p_{{ p.key }}">{{ p.label or p.key }}{% if p.required %} *{% endif %}</label>
         <div>
           {% if p.kind == 'select' %}
@@ -174,7 +185,7 @@
             <td data-demo-field="postal_code" data-demo-fallback="02420">02420</td>
             <td data-demo-field="postal_code" data-demo-fallback="02420">02420</td>
           </tr>
-          {% for p in target.parameters %}
+          {% for p in form_parameters %}
             {% set label = p.label or p.key %}
             {% set fallback = '(your ' ~ label|lower ~ ')' %}
             <tr>
@@ -375,10 +386,21 @@
 
 {% if ready and artifact_views %}
   <p style="margin-top: 2rem;">
-    <a class="public-button"
-       href="{{ url_for('public.target_done', slug=campaign.slug, target_id=target.id) }}">
-      I'm done &rarr;
-    </a>
+    {% if next_target %}
+      <a class="public-button"
+         href="{{ url_for('public.target_action', slug=campaign.slug, target_id=next_target.id) }}">
+        Next: {{ next_target.name }} &rarr;
+      </a>
+      <a class="public-button public-button-secondary"
+         href="{{ url_for('public.target_done', slug=campaign.slug, target_id=target.id) }}">
+        Stop here
+      </a>
+    {% else %}
+      <a class="public-button"
+         href="{{ url_for('public.target_done', slug=campaign.slug, target_id=target.id) }}">
+        I'm done &rarr;
+      </a>
+    {% endif %}
   </p>
 {% endif %}
 {% endif %}

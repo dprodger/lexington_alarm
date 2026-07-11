@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,3 +20,7 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "1") != "0"
+
+    # A writer's session is marked permanent (see routes_public) so they can
+    # come back later in a chain and still log against the same respondent.
+    PERMANENT_SESSION_LIFETIME = timedelta(days=30)

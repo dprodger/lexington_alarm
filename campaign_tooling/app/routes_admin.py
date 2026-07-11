@@ -92,6 +92,9 @@ def login():
         token = request.form.get("token", "")
         if expected and token == expected:
             session["is_admin"] = True
+            # Keep admin auth a browser-session cookie even if the public flow
+            # marked this browser's session permanent (30-day writer resume).
+            session.permanent = False
             return redirect(request.args.get("next") or url_for("admin.index"))
         flash("Invalid token.", "error")
     return render_template("admin/login.html")
@@ -222,6 +225,18 @@ def _apply_target_form(target: Target, form) -> None:
     target.name = form.get("name", "").strip()
     target.description = form.get("description", "").strip()
     target.source_url = form.get("source_url", "").strip()
+
+    # Chain pointer: only accept another target in the same campaign, never
+    # self (a trivial cycle). Blank clears the link (end of chain).
+    raw_next = form.get("next_target_id", "").strip()
+    next_id = int(raw_next) if raw_next.isdigit() else None
+    if next_id and next_id != target.id:
+        sibling = db.session.get(Target, next_id)
+        target.next_target_id = (
+            next_id if sibling and sibling.campaign_id == target.campaign_id else None
+        )
+    else:
+        target.next_target_id = None
 
 
 @bp.route("/campaigns/<int:campaign_id>/targets/new", methods=["POST"])

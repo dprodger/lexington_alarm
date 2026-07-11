@@ -111,6 +111,14 @@
     <label>Source URL (where the writer came from — used as the "back" link on the thank-you page)
       <input type="url" name="source_url" value="{{ target.source_url }}" placeholder="https://example.org/take-action">
     </label>
+    <label>Next target (optional — after finishing this one, the writer is handed off here)
+      <select name="next_target_id">
+        <option value="">— None (end of chain) —</option>
+        {% for t in target.campaign.targets if t.id != target.id %}
+          <option value="{{ t.id }}" {% if target.next_target_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
     <p>
       <button type="submit">Save</button>
       <button type="submit" formaction="{{ url_for('admin.target_delete', target_id=target.id) }}"

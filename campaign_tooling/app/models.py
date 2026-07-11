@@ -75,7 +75,20 @@ class Target(db.Model):
     source_url: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
+    # Optional "chain" pointer: after finishing this target, the writer is
+    # handed off to next_target. SET NULL so deleting a target a chain points
+    # to simply truncates the chain rather than cascading.
+    next_target_id: Mapped[int | None] = mapped_column(
+        ForeignKey("targets.id", ondelete="SET NULL"), nullable=True
+    )
+
     campaign: Mapped["Campaign"] = relationship(back_populates="targets")
+    next_target: Mapped["Target | None"] = relationship(
+        "Target",
+        remote_side="Target.id",
+        foreign_keys=[next_target_id],
+        post_update=True,
+    )
     recipients: Mapped[list["Recipient"]] = relationship(
         back_populates="target",
         cascade="all, delete-orphan",
@@ -91,6 +104,33 @@ class Target(db.Model):
         cascade="all, delete-orphan",
         order_by="TargetParameter.sort_order",
     )
+
+    def chain(self) -> list["Target"]:
+        """This target followed by each ``next_target``, in order. Stops on a
+        repeat so a mis-configured cycle (A → B → A) can't loop forever.
+        """
+        out: list["Target"] = []
+        seen: set[int] = set()
+        node: "Target | None" = self
+        while node is not None and node.id not in seen:
+            out.append(node)
+            seen.add(node.id)
+            node = node.next_target
+        return out
+
+    def chain_parameters(self) -> list["TargetParameter"]:
+        """Deduped union of parameters across the chain, keyed by ``key``
+        (first definition wins), in chain then sort order. This is the set a
+        writer answers once on the head target's form.
+        """
+        seen: set[str] = set()
+        out: list["TargetParameter"] = []
+        for target in self.chain():
+            for p in target.parameters:
+                if p.key not in seen:
+                    seen.add(p.key)
+                    out.append(p)
+        return out
 
 
 class Recipient(db.Model):
